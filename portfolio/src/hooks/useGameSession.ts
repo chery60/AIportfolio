@@ -164,13 +164,19 @@ export function useGameSession() {
     }
   }, [submitScore]);
 
-  // Reset to idle
+  // Reset to idle — preserves myName so Play Again doesn't ask again
   const resetGame = useCallback(() => {
     isPlayingRef.current = false;
     setSessionState('idle');
     setLastScore(0);
-
+    // NOTE: intentionally NOT clearing myName/myNameRef so Play Again skips name entry
     window.dispatchEvent(new CustomEvent('local-game-state', { detail: { isPlaying: false } }));
+  }, []);
+
+  // Allow user to explicitly clear their name (e.g. "change" button)
+  const clearName = useCallback(() => {
+    myNameRef.current = '';
+    setMyName('');
   }, []);
 
   const isSomeoneElsePlaying = sessionState === 'waiting' && currentPlayer !== null;
@@ -187,6 +193,7 @@ export function useGameSession() {
     startPlaying,
     endGame,
     resetGame,
+    clearName,
     fetchLeaderboard,
   };
 }
