@@ -28,6 +28,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
     startPlaying,
     endGame,
     resetGame,
+    clearName,
   } = useGameSession();
 
   const [nameInput, setNameInput] = useState('');
@@ -35,6 +36,11 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleStartClick = () => {
+    // If we already have a saved name from a previous game, reuse it directly
+    if (myName && myName.length >= 2) {
+      startPlaying(myName);
+      return;
+    }
     const trimmed = nameInput.trim();
     if (!trimmed || trimmed.length < 2) {
       setNameError('Please enter at least 2 characters.');
@@ -53,9 +59,10 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
     endGame(score);
   }, [endGame]);
 
+  // Play Again: reuse existing name — no need to clear it
   const handlePlayAgain = useCallback(() => {
     resetGame();
-    setNameInput('');
+    // Don't clear nameInput — myName is preserved in useGameSession
   }, [resetGame]);
 
   return (
@@ -108,103 +115,117 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
         </div>
       </div>
 
-      {/* ── IDLE STATE — Name entry + leaderboard ── */}
+      {/* ── IDLE STATE — full-width game preview + leaderboard below ── */}
       {(sessionState === 'idle' || sessionState === 'waiting') && (
-        <div className="flex h-[calc(100%-52px)]">
-          {/* Left: Game preview / name entry */}
-          <div className="flex flex-col items-center justify-center gap-5 flex-1 px-8 py-6 border-r border-white/6"
-            style={{ borderRightColor: 'rgba(255,255,255,0.06)' }}
-          >
-            {sessionState === 'waiting' ? (
-              <WaitingRoom
-                currentPlayerName={currentPlayer}
-                playerColor={SESSION_COLOR}
-                onCancel={resetGame}
-              />
-            ) : (
-              <>
-                {/* Game preview illustration */}
-                <div
-                  className="w-full rounded-xl flex items-center justify-center relative overflow-hidden"
-                  style={{
-                    height: 140,
-                    background: '#111216',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                  }}
-                >
-                  {/* Ground line */}
-                  <div
-                    className="absolute bottom-8 left-0 right-0 h-0.5"
-                    style={{ background: data.accentColor, boxShadow: `0 0 8px ${data.accentColor}` }}
-                  />
-                  {/* Preview crewmate */}
-                  <div className="absolute bottom-8 left-12">
-                    <PreviewCrewmate color={SESSION_COLOR} />
+        <div className="flex flex-col h-[calc(100%-52px-180px)]">
+          {sessionState === 'waiting' ? (
+            <WaitingRoom
+              currentPlayerName={currentPlayer}
+              playerColor={SESSION_COLOR}
+              onCancel={resetGame}
+            />
+          ) : (
+            <>
+              {/* Game preview card — full width, grows to fill */}
+              <div
+                className="w-full flex-1 flex flex-col items-center justify-center gap-4 px-8"
+                style={{
+                  background: 'linear-gradient(135deg, #0D0E1A 0%, #111320 100%)',
+                  borderBottom: `1px solid ${data.accentColor}20`,
+                }}
+              >
+                {/* Game title */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl font-black text-white tracking-tight leading-none">
+                    🎮 Crewmate Dash
+                  </span>
+                  <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: data.accentColor }}>
+                    Design Survival Runner
+                  </span>
+                </div>
+                {/* Rules */}
+                <div className="flex items-center justify-center gap-6">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-xl">⎵</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Space / Tap<br/>to Jump</span>
                   </div>
-                  {/* Preview obstacles */}
-                  <div className="absolute bottom-8 right-12">
-                    <ObstaclePreview color="#6366F1" label="Scope Creep" />
+                  <div className="w-px h-10 bg-white/10" />
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-xl">⬆️</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Double<br/>Jump</span>
                   </div>
-                  <div className="absolute bottom-8 right-36">
-                    <ObstaclePreview color="#C74B18" label="Dev Says No" height={50} />
+                  <div className="w-px h-10 bg-white/10" />
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-xl">🚫</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Dodge<br/>Obstacles</span>
                   </div>
-                  {/* Title overlay */}
-                  <div className="absolute top-3 left-0 right-0 text-center">
-                    <span className="text-xs font-bold text-white/30 uppercase tracking-widest">
-                      Dodge the obstacles!
-                    </span>
+                  <div className="w-px h-10 bg-white/10" />
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-xl">★</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Collect<br/>Coins</span>
                   </div>
                 </div>
+              </div>
 
-                {/* Name input */}
-                <div className="w-full flex flex-col gap-2">
-                  <label className="text-xs text-white/40 font-semibold uppercase tracking-wider">
-                    Your Name
-                  </label>
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={nameInput}
-                    onChange={e => { setNameInput(e.target.value); setNameError(''); }}
-                    onKeyDown={e => e.key === 'Enter' && handleStartClick()}
-                    placeholder="Enter your name..."
-                    maxLength={20}
-                    className="w-full bg-white/6 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 outline-none focus:border-white/30 transition-colors"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}
-                    onClick={e => e.stopPropagation()}
-                  />
-                  {nameError && (
-                    <p className="text-red-400 text-xs">{nameError}</p>
-                  )}
-                </div>
+              {/* Bottom controls — compact, centered */}
+              <div className="flex flex-col items-center gap-3 px-8 py-5 w-full"
+                style={{ borderBottom: 'none' }}
+              >
+                {/* Name input — hidden when name is already known */}
+                {!myName ? (
+                  <div className="flex flex-col gap-2 w-full max-w-xs">
+                    <label className="text-xs text-white/40 font-semibold uppercase tracking-wider">
+                      Your Name
+                    </label>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={nameInput}
+                      onChange={e => { setNameInput(e.target.value); setNameError(''); }}
+                      onKeyDown={e => e.key === 'Enter' && handleStartClick()}
+                      placeholder="Enter your name..."
+                      maxLength={20}
+                      className="w-full border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-white/30 transition-colors"
+                      style={{ background: 'rgba(255,255,255,0.05)' }}
+                      onClick={e => e.stopPropagation()}
+                    />
+                    {nameError && (
+                      <p className="text-red-400 text-xs">{nameError}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl w-full max-w-xs"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }}>
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: SESSION_COLOR }} />
+                    <span className="text-white/70 text-sm flex-1">Playing as <span className="font-bold text-white">{myName}</span></span>
+                    <button
+                      onClick={e => { e.stopPropagation(); clearName(); setNameInput(''); }}
+                      className="text-white/30 text-xs hover:text-white/60 transition-colors"
+                    >
+                      change
+                    </button>
+                  </div>
+                )}
 
-                {/* Start button */}
+                {/* Start button — compact */}
                 <button
                   onClick={e => { e.stopPropagation(); handleStartClick(); }}
-                  className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all hover:scale-105 active:scale-95"
+                  className="w-full max-w-xs py-2.5 rounded-xl font-bold text-white text-sm transition-all hover:scale-105 active:scale-95"
                   style={{
                     background: `linear-gradient(135deg, ${data.accentColor}, #F59E0B)`,
                     boxShadow: `0 4px 20px ${data.accentColor}50`,
                   }}
                 >
-                  🚀 Start Game
+                  {myName ? `🚀 Play Again as ${myName}` : '🚀 Start Game'}
                 </button>
 
                 {/* Controls hint */}
                 <p className="text-white/20 text-xs text-center">
                   Press <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-white/40 text-[10px] font-mono">Space</kbd> or tap to jump · Dodge obstacles!
                 </p>
-              </>
-            )}
-          </div>
-
-          {/* Right: Leaderboard */}
-          <div className="w-[280px] flex-shrink-0 px-5 py-5 overflow-y-auto">
-            <Leaderboard
-              scores={leaderboard}
-              isLoading={isLoadingScores}
-            />
-          </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -222,8 +243,8 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
             <span className="text-white/30 text-xs">— playing now</span>
           </div>
 
-          {/* Game canvas */}
-          <div className="flex-1 flex items-center justify-center bg-[#0A0B0F] p-2">
+          {/* Game canvas — full width, no leaderboard column */}
+          <div className="flex-1 flex items-center justify-center bg-[#0A0B0F]">
             <GameEngine
               playerColor={SESSION_COLOR}
               onGameOver={handleGameOver}
@@ -234,11 +255,9 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
 
       {/* ── GAME OVER STATE ── */}
       {sessionState === 'gameover' && (
-        <div className="flex h-[calc(100%-52px)]">
-          {/* Left: Result card */}
-          <div className="flex flex-col items-center justify-center gap-5 flex-1 px-8 py-6 border-r border-white/6"
-            style={{ borderRightColor: 'rgba(255,255,255,0.06)' }}
-          >
+        <div className="flex flex-col h-[calc(100%-52px)] overflow-y-auto">
+          {/* Result card — full width */}
+          <div className="flex flex-col items-center justify-center gap-5 flex-1 px-8 py-6">
             {/* Score display */}
             <div className="flex flex-col items-center gap-1">
               <span className="text-5xl">💀</span>
@@ -255,7 +274,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
 
             {/* Contact CTA */}
             <div
-              className="w-full rounded-xl p-4 flex flex-col gap-3"
+              className="w-full max-w-sm rounded-xl p-4 flex flex-col gap-3"
               style={{
                 background: `linear-gradient(135deg, ${data.accentColor}18, rgba(245,158,11,0.1))`,
                 border: `1px solid ${data.accentColor}30`,
@@ -299,15 +318,18 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
             {/* Play again */}
             <button
               onClick={e => { e.stopPropagation(); handlePlayAgain(); }}
-              className="w-full py-2.5 rounded-xl border border-white/15 text-white/60 text-sm font-semibold hover:bg-white/8 hover:text-white/90 transition-all"
+              className="w-full max-w-xs py-2.5 rounded-xl border border-white/15 text-white/60 text-sm font-semibold hover:bg-white/8 hover:text-white/90 transition-all"
               style={{ background: 'rgba(255,255,255,0.04)' }}
             >
               🔄 Play Again
             </button>
           </div>
 
-          {/* Right: Leaderboard */}
-          <div className="w-[280px] flex-shrink-0 px-5 py-5 overflow-y-auto">
+          {/* Leaderboard — below result, full width */}
+          <div
+            className="px-8 py-5"
+            style={{ borderTop: 'rgba(255,255,255,0.06) 1px solid' }}
+          >
             <Leaderboard
               scores={leaderboard}
               isLoading={isLoadingScores}
@@ -315,6 +337,23 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
               myScore={lastScore}
             />
           </div>
+        </div>
+      )}
+
+      {/* Leaderboard — always visible below idle state */}
+      {(sessionState === 'idle' || sessionState === 'waiting') && (
+        <div
+          className="absolute bottom-0 left-0 right-0 px-8 py-4 overflow-y-auto"
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(10,11,15,0.95)',
+            maxHeight: 180,
+          }}
+        >
+          <Leaderboard
+            scores={leaderboard}
+            isLoading={isLoadingScores}
+          />
         </div>
       )}
 
@@ -329,37 +368,3 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
   );
 }
 
-// Small preview crewmate (static SVG)
-function PreviewCrewmate({ color }: { color: string }) {
-  return (
-    <div style={{ filter: 'drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111)' }}>
-      <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
-        <rect x="0" y="10" width="9" height="16" rx="4" fill={color} />
-        <rect x="8" y="24" width="8" height="10" rx="4" fill={color} />
-        <rect x="18" y="24" width="8" height="10" rx="4" fill={color} />
-        <rect x="8" y="0" width="20" height="26" rx="10" fill={color} />
-        <ellipse cx="22" cy="9" rx="7" ry="5" fill="#92D1DF" />
-        <ellipse cx="22" cy="11" rx="5" ry="3" fill="#527F8B" />
-        <ellipse cx="25" cy="7" rx="3" ry="1.5" fill="white" opacity="0.7" />
-      </svg>
-    </div>
-  );
-}
-
-// Small obstacle preview
-function ObstaclePreview({ color, label, height = 65 }: { color: string; label: string; height?: number }) {
-  return (
-    <div
-      className="flex flex-col items-center justify-center rounded-lg text-center px-2"
-      style={{
-        width: 70,
-        height,
-        background: color,
-        border: '1.5px solid rgba(0,0,0,0.2)',
-      }}
-    >
-      <span className="text-sm">⚠️</span>
-      <span className="text-[9px] text-white font-bold leading-tight mt-1">{label}</span>
-    </div>
-  );
-}
