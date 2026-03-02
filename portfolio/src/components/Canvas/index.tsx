@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { Project } from '../../types';
 import { useCanvas } from '../../hooks/useCanvas';
 import CanvasElementRenderer from './CanvasElement';
@@ -74,11 +74,32 @@ export default function Canvas({
     return () => clearTimeout(t);
   }, [project.id, project.defaultView, setDefaultTransform]);
 
+  const [isPlayingGame, setIsPlayingGame] = useState(false);
+  useEffect(() => {
+    const handleGameState = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setIsPlayingGame(customEvent.detail.isPlaying);
+    };
+    window.addEventListener('local-game-state', handleGameState);
+    return () => window.removeEventListener('local-game-state', handleGameState);
+  }, []);
+
   const handleBackgroundClick = () => {
     onSelectElement(null);
   };
 
   const [mouseGridPos, setMouseGridPos] = useState({ x: 0, y: 0 });
+
+  // Compute element bounding boxes for Character collision avoidance
+  const elementBounds = useMemo(() =>
+    project.canvasElements.map(el => ({
+      x: el.x,
+      y: el.y,
+      width: el.width,
+      height: el.height,
+    })),
+    [project.canvasElements]
+  );
 
   const handleWrapperMouseMove = (e: React.MouseEvent) => {
     handleMouseMove(e);
@@ -159,11 +180,24 @@ export default function Canvas({
         }}
       >
         {/* The walking character (Local instance) */}
-        <Character targetX={mouseGridPos.x} targetY={mouseGridPos.y} color={localColor} />
+        {!isPlayingGame && (
+          <Character
+            targetX={mouseGridPos.x}
+            targetY={mouseGridPos.y}
+            color={localColor}
+            elementBounds={elementBounds}
+          />
+        )}
 
         {/* Remote Characters (Other Visitors) */}
         {Object.entries(remoteCursors).map(([id, cursor]) => (
-          <Character key={id} targetX={cursor.x} targetY={cursor.y} color={cursor.color} />
+          <Character
+            key={id}
+            targetX={cursor.x}
+            targetY={cursor.y}
+            color={cursor.color}
+            elementBounds={elementBounds}
+          />
         ))}
 
         {/* Render all elements */}
@@ -173,6 +207,7 @@ export default function Canvas({
             element={element}
             isSelected={selectedElementId === element.id}
             onSelect={onSelectElement}
+            localColor={localColor}
           />
         ))}
       </div>

@@ -11,7 +11,12 @@ export type CanvasElementType =
   | 'prototype-embed'
   | 'section-label'
   | 'tag-cluster'
-  | 'storyboard';
+  | 'storyboard'
+  | 'video-embed'
+  | 'figma-embed'
+  | 'flow-diagram'
+  | 'data-dimension'
+  | 'game-zone';
 
 export interface CanvasPoint {
   x: number;
@@ -168,6 +173,77 @@ export interface StoryboardElement extends BaseCanvasElement {
   };
 }
 
+export interface VideoEmbedElement extends BaseCanvasElement {
+  type: 'video-embed';
+  data: {
+    title: string;
+    description?: string;
+    videoUrl: string; // YouTube embed URL or direct mp4
+    accentColor: string;
+    aspectRatio?: '16/9' | '4/3' | '1/1';
+  };
+}
+
+export interface FigmaEmbedElement extends BaseCanvasElement {
+  type: 'figma-embed';
+  data: {
+    title: string;
+    description?: string;
+    figmaUrl: string; // Full Figma embed URL
+    accentColor: string;
+  };
+}
+
+export interface FlowDiagramElement extends BaseCanvasElement {
+  type: 'flow-diagram';
+  data: {
+    title: string;
+    subtitle?: string;
+    accentColor: string;
+    nodes: Array<{
+      id: string;
+      label: string;
+      color: string;
+      x: number;
+      y: number;
+      width?: number;
+      height?: number;
+    }>;
+    connections: Array<{
+      from: string;
+      to: string;
+      label?: string;
+      bidirectional?: boolean;
+      color?: string;
+    }>;
+    highlightNodeId?: string;
+  };
+}
+
+export interface DataDimensionElement extends BaseCanvasElement {
+  type: 'data-dimension';
+  data: {
+    dimension: string;
+    title: string;
+    highlight: string;
+    min: string;
+    max: string;
+    typical: string;
+    note?: string;
+    accentColor: string;
+  };
+}
+
+export interface GameZoneElement extends BaseCanvasElement {
+  type: 'game-zone';
+  data: {
+    title: string;
+    accentColor: string;
+    contactEmail?: string;
+    contactLinkedIn?: string;
+  };
+}
+
 export type CanvasElement =
   | CaseStudyCardElement
   | StickyNoteElement
@@ -181,7 +257,12 @@ export type CanvasElement =
   | SectionLabelElement
   | TagClusterElement
   | PrototypeEmbedElement
-  | StoryboardElement;
+  | StoryboardElement
+  | VideoEmbedElement
+  | FigmaEmbedElement
+  | FlowDiagramElement
+  | DataDimensionElement
+  | GameZoneElement;
 
 export interface ProjectAsset {
   id: string;

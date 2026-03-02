@@ -1,16 +1,84 @@
 import { useEffect, useRef, useState } from 'react';
+import { CHARACTER_COLLISION_MARGIN } from '../../constants/canvasSpacing';
+
+export interface ElementBounds {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
 
 interface Props {
     targetX: number;
     targetY: number;
     color: string;
+    elementBounds?: ElementBounds[];
 }
 
-export default function Character({ targetX, targetY, color }: Props) {
+/**
+ * Returns true if point (px, py) is inside the rectangle with a margin buffer.
+ * The margin must stay in sync with CHARACTER_COLLISION_MARGIN from canvasSpacing.ts.
+ * All canvas elements must have at least (CHARACTER_COLLISION_MARGIN * 2 + character_width)px
+ * of horizontal clear space and (CHARACTER_COLLISION_MARGIN * 2 + character_height)px
+ * of vertical clear space between them so the character can always pass through.
+ */
+function isInsideElement(px: number, py: number, el: ElementBounds, margin = CHARACTER_COLLISION_MARGIN): boolean {
+    return (
+        px > el.x - margin &&
+        px < el.x + el.width + margin &&
+        py > el.y - margin &&
+        py < el.y + el.height + margin
+    );
+}
+
+/**
+ * Given a desired target (tx, ty) that may be inside an element,
+ * clamp it to the nearest point on that element's border.
+ */
+function clampToBorder(tx: number, ty: number, el: ElementBounds, margin = CHARACTER_COLLISION_MARGIN): { x: number; y: number } {
+    const minX = el.x - margin;
+    const maxX = el.x + el.width + margin;
+    const minY = el.y - margin;
+    const maxY = el.y + el.height + margin;
+
+    const clampedX = Math.max(minX, Math.min(maxX, tx));
+    const clampedY = Math.max(minY, Math.min(maxY, ty));
+
+    // Find which edge is closest
+    const distLeft = Math.abs(tx - minX);
+    const distRight = Math.abs(tx - maxX);
+    const distTop = Math.abs(ty - minY);
+    const distBottom = Math.abs(ty - maxY);
+    const minDist = Math.min(distLeft, distRight, distTop, distBottom);
+
+    if (minDist === distLeft) return { x: minX, y: clampedY };
+    if (minDist === distRight) return { x: maxX, y: clampedY };
+    if (minDist === distTop) return { x: clampedX, y: minY };
+    return { x: clampedX, y: maxY };
+}
+
+export default function Character({ targetX, targetY, color, elementBounds = [] }: Props) {
+    // Lazy initialize starting position so that if the character mounts while the cursor
+    // is inside an element, it starts at the clamped border instead of getting stuck inside.
+    const [initialPos] = useState(() => {
+        let tx = targetX;
+        let ty = targetY;
+        for (const el of elementBounds) {
+            if (isInsideElement(tx, ty, el)) {
+                const clamped = clampToBorder(tx, ty, el);
+                tx = clamped.x;
+                ty = clamped.y;
+                break;
+            }
+        }
+        return { x: tx, y: ty };
+    });
+
     // Use refs for positions for smooth 60fps mutability without React re-renders
-    const posRef = useRef({ x: targetX, y: targetY });
-    const targetRef = useRef({ x: targetX, y: targetY });
+    const posRef = useRef({ x: initialPos.x, y: initialPos.y });
+    const targetRef = useRef({ x: initialPos.x, y: initialPos.y });
     const requestRef = useRef<number>(0);
+    const boundsRef = useRef<ElementBounds[]>(elementBounds);
 
     // Ref to the DOM element for direct transform updates
     const charRef = useRef<HTMLDivElement>(null);
@@ -22,11 +90,26 @@ export default function Character({ targetX, targetY, color }: Props) {
     const isWalkingRef = useRef(false);
 
     // Speed in pixels per frame
-    const speed = 3;
+    const speed = 3.0;
 
-    // Update target when props change
+    // Update target when props change — clamp to element borders
     useEffect(() => {
-        targetRef.current = { x: targetX, y: targetY };
+        boundsRef.current = elementBounds;
+    }, [elementBounds]);
+
+    useEffect(() => {
+        let tx = targetX;
+        let ty = targetY;
+        // If target is inside any element, clamp to its border
+        for (const el of boundsRef.current) {
+            if (isInsideElement(tx, ty, el)) {
+                const clamped = clampToBorder(tx, ty, el);
+                tx = clamped.x;
+                ty = clamped.y;
+                break;
+            }
+        }
+        targetRef.current = { x: tx, y: ty };
     }, [targetX, targetY]);
 
     // The Game Loop
@@ -36,22 +119,91 @@ export default function Character({ targetX, targetY, color }: Props) {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 5) {
-            if (!isWalkingRef.current) {
-                isWalkingRef.current = true;
-                setIsWalking(true);
+            let vx = (dx / distance) * speed;
+            let vy = (dy / distance) * speed;
+
+            let nextX = posRef.current.x + vx;
+            let nextY = posRef.current.y + vy;
+
+            // Check if sliding needed
+            let hitX = false;
+            let hitY = false;
+
+            // Simple axis test
+            for (const el of boundsRef.current) {
+                if (isInsideElement(nextX, posRef.current.y, el)) hitX = true;
+                if (isInsideElement(posRef.current.x, nextY, el)) hitY = true;
             }
 
-            const vx = (dx / distance) * speed;
-            const vy = (dy / distance) * speed;
+            if (hitX && hitY) {
+                // Diagonal block -> Full stop
+                nextX = posRef.current.x;
+                nextY = posRef.current.y;
+            } else if (hitX) {
+                // Blocked horizontally, slide vertically
+                nextX = posRef.current.x;
 
-            posRef.current.x += vx;
-            posRef.current.y += vy;
+                // Adjust sliding speed: boost it to full 'speed' along the Y axis
+                // to slide along the obstacle
+                const slideSpeed = dy > 0 ? speed : -speed;
+                // Only slide if moving makes sense (distance along y is significant)
+                if (Math.abs(dy) > 2) {
+                    vy = slideSpeed;
+                }
+                nextY = posRef.current.y + vy;
 
-            // Update facing
-            if (vx < -0.5 && !facingLeftRef.current) {
+                // Check corner/edge again with the boosted sliding speed
+                for (const el of boundsRef.current) {
+                    if (isInsideElement(nextX, nextY, el)) {
+                        nextY = posRef.current.y; // Abort slide if it hits another wall (inner corner)
+                    }
+                }
+            } else if (hitY) {
+                // Blocked vertically, slide horizontally
+                nextY = posRef.current.y;
+
+                const slideSpeed = dx > 0 ? speed : -speed;
+                if (Math.abs(dx) > 2) {
+                    vx = slideSpeed;
+                }
+                nextX = posRef.current.x + vx;
+
+                for (const el of boundsRef.current) {
+                    if (isInsideElement(nextX, nextY, el)) {
+                        nextX = posRef.current.x;
+                    }
+                }
+            } else {
+                // Normal corner check for grazing hits
+                for (const el of boundsRef.current) {
+                    if (isInsideElement(nextX, nextY, el)) {
+                        nextX = posRef.current.x;
+                        nextY = posRef.current.y;
+                    }
+                }
+            }
+
+            const actuallyMoved = Math.abs(nextX - posRef.current.x) > 0.1 || Math.abs(nextY - posRef.current.y) > 0.1;
+
+            if (actuallyMoved) {
+                posRef.current.x = nextX;
+                posRef.current.y = nextY;
+                if (!isWalkingRef.current) {
+                    isWalkingRef.current = true;
+                    setIsWalking(true);
+                }
+            } else {
+                if (isWalkingRef.current) {
+                    isWalkingRef.current = false;
+                    setIsWalking(false);
+                }
+            }
+
+            // Update facing based on target direction (dx)
+            if (dx < -0.5 && !facingLeftRef.current) {
                 facingLeftRef.current = true;
                 setFacingLeft(true);
-            } else if (vx > 0.5 && facingLeftRef.current) {
+            } else if (dx > 0.5 && facingLeftRef.current) {
                 facingLeftRef.current = false;
                 setFacingLeft(false);
             }

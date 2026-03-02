@@ -17,50 +17,48 @@ export default function UserFlowStep({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
   const rgb = hexToRgb(data.color);
 
-  const shapeStyle = data.shape === 'circle' ? '50%' : data.shape === 'diamond' ? '8px' : '12px';
-
   return (
     <div
       onClick={onClick}
-      className={`canvas-element-base flex flex-col items-center justify-center text-center ${isSelected ? 'selected' : ''}`}
+      className={`canvas-element-base rounded-2xl p-5 flex flex-col bg-white border border-panel-border shadow-sm overflow-hidden ${isSelected ? 'selected' : ''}`}
       style={{
         width,
         height,
-        background: `rgba(${rgb}, 0.1)`,
-        border: `1.5px solid rgba(${rgb}, 0.5)`,
-        borderRadius: shapeStyle,
-        transform: data.shape === 'diamond' ? 'rotate(45deg)' : undefined,
-        boxShadow: `0 0 20px rgba(${rgb}, 0.1), 0 4px 16px rgba(0,0,0,0.4)`,
       }}
     >
-      <div style={{ transform: data.shape === 'diamond' ? 'rotate(-45deg)' : undefined }}>
+      {/* Step number + label */}
+      <div className="flex items-center gap-2.5 mb-3">
         {data.stepNumber && (
           <div
-            className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mx-auto mb-1"
-            style={{ background: data.color, color: '#000' }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+            style={{
+              background: `rgba(${rgb}, 0.15)`,
+              color: data.color,
+              border: `1px solid rgba(${rgb}, 0.3)`,
+            }}
           >
             {data.stepNumber}
           </div>
         )}
-        <p className="text-xs font-semibold leading-tight" style={{ color: data.color }}>
-          {data.label}
-        </p>
-        {data.description && (
-          <p className="text-xs mt-0.5" style={{ color: '#6B6D8A' }}>
-            {data.description}
-          </p>
-        )}
+        <h4 className="text-sm font-semibold text-text-primary leading-tight">{data.label}</h4>
       </div>
 
-      {/* Arrow connector - right side indicator */}
-      {data.shape !== 'circle' && (
-        <div
-          className="absolute -right-5 top-1/2 -translate-y-1/2 text-xs"
-          style={{ color: `rgba(${rgb}, 0.5)` }}
-        >
-          →
-        </div>
+      {data.description && (
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {data.description}
+        </p>
       )}
+
+      {/* Bottom accent line */}
+      <div
+        className="mt-auto pt-3"
+        style={{ borderTop: `1px solid rgba(${rgb}, 0.12)` }}
+      >
+        <div
+          className="h-0.5 rounded-full"
+          style={{ background: `linear-gradient(90deg, ${data.color}66, transparent)`, width: '60%' }}
+        />
+      </div>
     </div>
   );
 }
