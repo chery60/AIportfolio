@@ -12,7 +12,7 @@ export const PROJECTS: Project[] = [
     gradientFrom: '#C74B18',
     gradientTo: '#F59E0B',
     defaultView: { x: -200, y: -80, scale: 0.72 },
-    canvasSize: { width: 2700, height: 6900 },
+    canvasSize: { width: 2700, height: 8000 },
     files: [
       { id: 'f1', label: 'Figma Master File', type: 'figma' },
       { id: 'f2', label: 'Sitemap', type: 'figma' },
@@ -441,12 +441,14 @@ export const PROJECTS: Project[] = [
       },
 
       // ── GAME ZONE ─────────────────────────────────────────────────────────
+      // sb bottom: y=5855+832=6687 → sl-game y=6687+80=6767
+      // sl h=40 → gz y=6767+40+20=6827
       {
-        id: 'sl-game', type: 'section-label', x: 2500, y: 60, width: 480, height: 40,
+        id: 'sl-game', type: 'section-label', x: 80, y: 6767, width: 480, height: 40,
         data: { title: '🎮 CREWMATE DASH — PLAY & HIRE ME', color: '#C74B18' }
       },
       {
-        id: 'gz-1', type: 'game-zone', x: 2500, y: 115, width: 1160, height: 620,
+        id: 'gz-1', type: 'game-zone', x: 80, y: 6827, width: 1160, height: 680,
         data: {
           title: 'Crewmate Dash',
           accentColor: '#C74B18',
@@ -455,15 +457,15 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint', type: 'sticky-note', x: 2500, y: 760, width: 280, height: 120,
+        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 7527, width: 280, height: 120,
         data: {
-          content: '🕹️ Your Among Us crewmate is the player! Dodge obstacles & get on the leaderboard.',
+          content: '🕹️ Dodge obstacles & get on the leaderboard. Space or tap to jump!',
           color: 'yellow',
           rotation: -1.2,
         }
       },
       {
-        id: 'sn-game-hint2', type: 'sticky-note', x: 2800, y: 775, width: 260, height: 110,
+        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 7542, width: 260, height: 110,
         data: {
           content: '⚠️ Only 1 player at a time — queue up if someone is already playing!',
           color: 'pink',
