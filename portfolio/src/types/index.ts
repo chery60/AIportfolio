@@ -16,7 +16,8 @@ export type CanvasElementType =
   | 'figma-embed'
   | 'flow-diagram'
   | 'data-dimension'
-  | 'game-zone';
+  | 'game-zone'
+  | 'comment-board';
 
 export interface CanvasPoint {
   x: number;
@@ -244,6 +245,13 @@ export interface GameZoneElement extends BaseCanvasElement {
   };
 }
 
+export interface CommentBoardElement extends BaseCanvasElement {
+  type: 'comment-board';
+  data: {
+    title?: string;
+  };
+}
+
 export type CanvasElement =
   | CaseStudyCardElement
   | StickyNoteElement
@@ -262,7 +270,8 @@ export type CanvasElement =
   | FigmaEmbedElement
   | FlowDiagramElement
   | DataDimensionElement
-  | GameZoneElement;
+  | GameZoneElement
+  | CommentBoardElement;
 
 export interface ProjectAsset {
   id: string;

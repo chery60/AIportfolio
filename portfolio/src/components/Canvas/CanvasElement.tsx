@@ -13,16 +13,34 @@ import FigmaEmbed from './elements/FigmaEmbed';
 import FlowDiagram from './elements/FlowDiagram';
 import DataDimension from './elements/DataDimension';
 import GameZone from '../Game/GameZone';
+import CommentBoard from './elements/CommentBoard';
 
 interface Props {
   element: CanvasElement;
   isSelected: boolean;
   onSelect: (id: string) => void;
   localColor?: string;
+  isEditing?: boolean;
 }
 
-export default function CanvasElementRenderer({ element, isSelected, onSelect, localColor }: Props) {
+export default function CanvasElementRenderer({ element, isSelected, onSelect, localColor, isEditing = false }: Props) {
   const onClick = () => onSelect(element.id);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (!isEditing) {
+      e.preventDefault();
+      return;
+    }
+    e.stopPropagation();
+    e.dataTransfer.setData('canvas/element-move', element.id);
+
+    // Calculate exact click offset relative to the element top-left
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    e.dataTransfer.setData('canvas/drag-offset', JSON.stringify({ x: offsetX, y: offsetY }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
 
   const commonProps = { isSelected, onClick };
 
@@ -56,6 +74,8 @@ export default function CanvasElementRenderer({ element, isSelected, onSelect, l
         return <DataDimension element={element} {...commonProps} />;
       case 'game-zone':
         return <GameZone element={element} {...commonProps} localColor={localColor} />;
+      case 'comment-board':
+        return <CommentBoard element={element} {...commonProps} />;
       default:
         return null;
     }
@@ -67,9 +87,16 @@ export default function CanvasElementRenderer({ element, isSelected, onSelect, l
   return (
     <div
       style={{ position: 'absolute', left: element.x, top: element.y, zIndex: element.zIndex ?? 1 }}
-      onClick={e => e.stopPropagation()}
+      onClick={e => { e.stopPropagation(); onClick(); }}
+      draggable={isEditing}
+      onDragStart={handleDragStart}
     >
-      {content}
+      <div style={{ pointerEvents: isEditing ? 'none' : 'auto' }}>
+        {content}
+      </div>
+      {isEditing && isSelected && (
+        <div className="absolute inset-0 border-2 border-accent-purple pointer-events-none z-10 rounded-lg shadow-lg" />
+      )}
     </div>
   );
 }

@@ -11,6 +11,11 @@ interface Props {
   onSelectElement: (id: string | null) => void;
   onTransformChange: (scale: number) => void;
   canvasControlsRef: React.MutableRefObject<CanvasControlsRef>;
+  isEditing?: boolean;
+  isCommentMode?: boolean;
+  onAddElement?: (element: import('../../types').CanvasElement) => void;
+  onUpdateElementPosition?: (id: string, x: number, y: number) => void;
+  onCanvasClick?: (x: number, y: number) => void;
 }
 
 export interface CanvasControlsRef {
@@ -19,6 +24,7 @@ export interface CanvasControlsRef {
   resetZoom: () => void;
   fitToScreen: () => void;
   getScale: () => number;
+  getCenterPos: () => { x: number; y: number };
 }
 
 export default function Canvas({
@@ -27,6 +33,11 @@ export default function Canvas({
   onSelectElement,
   onTransformChange,
   canvasControlsRef,
+  isEditing = false,
+  isCommentMode = false,
+  onAddElement,
+  onUpdateElementPosition,
+  onCanvasClick,
 }: Props) {
   const {
     transform,
@@ -56,8 +67,17 @@ export default function Canvas({
       resetZoom,
       fitToScreen,
       getScale: () => transform.scale,
+      getCenterPos: () => {
+        if (!containerRef.current) return { x: 0, y: 0 };
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+        return {
+          x: (width / 2 - transform.x) / transform.scale,
+          y: (height / 2 - transform.y) / transform.scale
+        };
+      }
     };
-  }, [canvasControlsRef, zoomIn, zoomOut, resetZoom, fitToScreen, transform.scale]);
+  }, [canvasControlsRef, zoomIn, zoomOut, resetZoom, fitToScreen, transform.scale, containerRef, transform.x, transform.y]);
 
   // Notify parent of scale changes
   useEffect(() => {
@@ -84,8 +104,18 @@ export default function Canvas({
     return () => window.removeEventListener('local-game-state', handleGameState);
   }, []);
 
-  const handleBackgroundClick = () => {
+  const handleBackgroundClick = (e: React.MouseEvent) => {
     onSelectElement(null);
+
+    if (onCanvasClick) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+      const gridX = (clientX - transform.x) / transform.scale;
+      const gridY = (clientY - transform.y) / transform.scale;
+      onCanvasClick(gridX, gridY);
+    }
   };
 
   const [mouseGridPos, setMouseGridPos] = useState({ x: 0, y: 0 });
@@ -118,6 +148,78 @@ export default function Canvas({
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (isEditing) e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const moveId = e.dataTransfer.getData('canvas/element-move');
+    if (moveId && onUpdateElementPosition) {
+      const offsetStr = e.dataTransfer.getData('canvas/drag-offset');
+      let offsetX = 0, offsetY = 0;
+      if (offsetStr) {
+        try {
+          const o = JSON.parse(offsetStr);
+          offsetX = o.x; offsetY = o.y;
+        } catch { }
+      }
+
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = e.clientX - rect.left - offsetX;
+      const y = e.clientY - rect.top - offsetY;
+
+      const gridX = (x - transform.x) / transform.scale;
+      const gridY = (y - transform.y) / transform.scale;
+
+      onUpdateElementPosition(moveId, gridX, gridY);
+      return;
+    }
+
+    if (!onAddElement) return;
+
+    const type = e.dataTransfer.getData('canvas/element-type') as import('../../types').CanvasElementType;
+    if (!type) return;
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const gridX = (x - transform.x) / transform.scale;
+    const gridY = (y - transform.y) / transform.scale;
+
+    const id = `el-${Date.now()}`;
+    let newElement: import('../../types').CanvasElement;
+
+    switch (type) {
+      case 'text-block':
+        newElement = { id, type, x: gridX, y: gridY, width: 300, height: 100, data: { content: 'New Text', variant: 'body' } };
+        break;
+      case 'image-frame':
+        newElement = { id, type, x: gridX, y: gridY, width: 400, height: 300, data: { label: 'New Image', imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop', style: 'plain' } };
+        break;
+      case 'sticky-note':
+        newElement = { id, type, x: gridX, y: gridY, width: 220, height: 160, data: { content: 'New Note', color: 'yellow' } };
+        break;
+      case 'quote-block':
+        newElement = { id, type, x: gridX, y: gridY, width: 400, height: 200, data: { quote: 'Insert quote here', author: 'Author Name' } };
+        break;
+      case 'prototype-embed':
+        newElement = { id, type, x: gridX, y: gridY, width: 800, height: 600, data: { title: 'Prototype', description: '', thumbnailColor: '#FF6B9D' } };
+        break;
+      default:
+        // Fallback for unknown types (shouldn't happen with our toolbar but just in case)
+        newElement = { id, type: 'text-block', x: gridX, y: gridY, width: 200, height: 100, data: { content: `Unsupported type: ${type}`, variant: 'body' } } as any;
+    }
+
+    onAddElement(newElement);
+  };
+
   return (
     <div
       ref={containerRef}
@@ -136,6 +238,9 @@ export default function Canvas({
         handleCanvasMouseUp();
       }}
       onClick={handleBackgroundClick}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      style={{ cursor: isCommentMode ? 'crosshair' : 'default' }}
     >
       {/* Project transition overlay */}
       {isTransitioning && (
@@ -208,6 +313,7 @@ export default function Canvas({
             isSelected={selectedElementId === element.id}
             onSelect={onSelectElement}
             localColor={localColor}
+            isEditing={isEditing}
           />
         ))}
       </div>
