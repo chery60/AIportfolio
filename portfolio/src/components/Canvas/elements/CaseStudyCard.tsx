@@ -32,12 +32,6 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
               <h2 className="text-text-primary font-semibold text-lg leading-tight">{data.title}</h2>
               <p className="text-xs mt-0.5" style={{ color: data.accentColor }}>{data.subtitle}</p>
             </div>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
-              style={{ background: `rgba(${hexToRgb(data.accentColor)}, 0.15)`, color: data.accentColor }}
-            >
-              ✦
-            </div>
           </div>
 
           {/* Tags */}

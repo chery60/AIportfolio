@@ -8,6 +8,8 @@ import BottomToolbar from './components/BottomToolbar';
 import Splash from './components/Splash';
 import EditToolbar from './components/EditToolbar';
 import { supabase } from './lib/supabase';
+import { useRealtimeSession } from './hooks/useRealtimeSession';
+import LiveCursors from './components/LiveCursors';
 
 const defaultControls: CanvasControlsRef = {
   zoomIn: () => { },
@@ -27,6 +29,7 @@ export default function App() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isCommentMode, setIsCommentMode] = useState(false);
   const canvasControls = useRef<CanvasControlsRef>(defaultControls);
+  const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession();
 
   const selectedElement = selectedProject.canvasElements.find(
     el => el.id === selectedElementId
@@ -217,9 +220,49 @@ export default function App() {
     setScale(newScale);
   }, []);
 
+  // Recovery: when the browser exits fullscreen (e.g. after expanding a Figma embed
+  // iframe and pressing Escape), force a re-render so panels reappear correctly.
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        // Fullscreen exited — nudge React to re-paint the panels
+        setScale(s => s);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Prevent native browser zoom when pinching over floating panels
+  useEffect(() => {
+    const preventNativeZoom = (e: WheelEvent) => {
+      // Pinch-to-zoom on Mac trackpads fires wheel events with ctrlKey=true
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Needs { passive: false } to allow e.preventDefault()
+    document.addEventListener('wheel', preventNativeZoom, { passive: false });
+    return () => {
+      document.removeEventListener('wheel', preventNativeZoom);
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col w-screen h-screen overflow-hidden bg-surface-1 text-text-primary">
+    <div className="fixed inset-0 flex flex-col bg-surface-1 text-text-primary overflow-hidden">
       {showSplash && <Splash onDone={() => setShowSplash(false)} />}
+
+      <LiveCursors
+        activeViewers={activeViewers}
+        cursors={cursors}
+        localIdentity={localIdentity}
+        broadcastCursor={broadcastCursor}
+      />
 
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden relative">
@@ -257,6 +300,7 @@ export default function App() {
             <RightPanel
               project={selectedProject}
               selectedElement={selectedElement}
+              activeViewers={activeViewers}
             />
           )}
         </div>

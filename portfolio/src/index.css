@@ -19,6 +19,8 @@
     color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    touch-action: none;
+    /* Prevent native pinch-to-zoom on touch devices */
   }
 
   #root {

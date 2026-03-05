@@ -11,8 +11,8 @@ export const PROJECTS: Project[] = [
     accentColor: '#C74B18',
     gradientFrom: '#C74B18',
     gradientTo: '#F59E0B',
-    defaultView: { x: -200, y: -80, scale: 0.72 },
-    canvasSize: { width: 2700, height: 8000 },
+    defaultView: { x: 290, y: 42, scale: 0.72 },
+    canvasSize: { width: 2700, height: 9400 },
     files: [
       { id: 'f1', label: 'Figma Master File', type: 'figma' },
       { id: 'f2', label: 'Sitemap', type: 'figma' },
@@ -28,25 +28,23 @@ export const PROJECTS: Project[] = [
     ],
     canvasElements: [
       // ── ROW 1: OVERVIEW ──────────────────────────────────────────────────
-      // SPACING: section-label at y=60, h=40 → card starts at y=60+40+55=155 (SECTION_LABEL_GAP=55)
-      // SPACING: sticky notes column 2 starts at x=700+240+80=1020 (ELEMENT_GAP_H=80)
-      // SPACING: sticky note rows separated by 80px vertically (ELEMENT_GAP_V=80)
+      // SPACING: section-label at y=60, h=40 → card starts at y=60+40+16=116 (SECTION_LABEL_GAP=16)
       {
         id: 'sl-1', type: 'section-label', x: 80, y: 60, width: 340, height: 40,
         data: { title: 'PROJECT OVERVIEW', color: '#C74B18' }
       },
       {
-        id: 'cs-1', type: 'case-study-card', x: 80, y: 155, width: 560, height: 320,
+        id: 'cs-1', type: 'case-study-card', x: 80, y: 116, width: 560, height: 320,
         data: {
           title: 'Oracle Symphony Kiosk',
           subtitle: 'Product Design · Oracle FBGBU · 2024',
           description: "Oracle's Food & Beverage Global Business Unit needed a guest self-ordering kiosk for QSRs, fast casuals, stadiums & food courts. The kiosk connects the Enterprise Management Console, Point of Sale, and Kitchen Display System to create a seamless end-to-end ordering experience — built from scratch, hardware and software.",
-          tags: ['Kiosk UX', '0→1 Product', 'Enterprise', 'Collaborative'],
+          tags: ['Kiosk UX', '0→1 Product', 'Enterprise', 'Individual'],
           accentColor: '#C74B18',
           metrics: [
             { label: 'Problem Areas', value: '8' },
             { label: 'User Goals', value: '2 types' },
-            { label: 'Contribution', value: 'Collab' },
+            { label: 'Contribution', value: 'Individual' },
           ],
         }
       },
@@ -55,41 +53,41 @@ export const PROJECTS: Project[] = [
         data: { title: 'PROBLEMS SOLVED', color: '#F59E0B' }
       },
       // sn col-1: x=720, width=240 → col-2 x = 720+240+80 = 1040
-      // sn row-1: y=155, height=145 → row-2 y = 155+145+80 = 380 → row-3 y = 380+145+80 = 605
+      // sn row-1: y=116, height=145 → row-2 y = 116+145+80 = 341 → row-3 y = 341+145+80 = 566
       {
-        id: 'sn-1', type: 'sticky-note', x: 720, y: 155, width: 240, height: 145,
+        id: 'sn-1', type: 'sticky-note', x: 720, y: 116, width: 240, height: 145,
         data: { content: '🐌 Staff shortage\nToo few staff to serve high order volumes at peak times.', color: 'yellow', rotation: -1 }
       },
       {
-        id: 'sn-2', type: 'sticky-note', x: 1040, y: 155, width: 240, height: 145,
+        id: 'sn-2', type: 'sticky-note', x: 1040, y: 116, width: 240, height: 145,
         data: { content: '❌ Order errors\nManual entry led to frequent mistakes and re-orders.', color: 'pink', rotation: 1.2 }
       },
       {
-        id: 'sn-3', type: 'sticky-note', x: 720, y: 380, width: 240, height: 145,
+        id: 'sn-3', type: 'sticky-note', x: 720, y: 341, width: 240, height: 145,
         data: { content: '♿ Accessibility\nGuests with disabilities struggled with traditional ordering.', color: 'purple', rotation: 0.5 }
       },
       {
-        id: 'sn-4', type: 'sticky-note', x: 1040, y: 380, width: 240, height: 145,
+        id: 'sn-4', type: 'sticky-note', x: 1040, y: 341, width: 240, height: 145,
         data: { content: '🌐 Language barrier\nForeigners & non-English speakers couldn\'t order efficiently.', color: 'cyan', rotation: -0.8 }
       },
       {
-        id: 'sn-5', type: 'sticky-note', x: 720, y: 605, width: 240, height: 145,
+        id: 'sn-5', type: 'sticky-note', x: 720, y: 566, width: 240, height: 145,
         data: { content: '🤫 Introversion\nSocially anxious guests avoided ordering at busy counters.', color: 'green', rotation: 0.8 }
       },
       {
-        id: 'sn-6', type: 'sticky-note', x: 1040, y: 605, width: 240, height: 145,
+        id: 'sn-6', type: 'sticky-note', x: 1040, y: 566, width: 240, height: 145,
         data: { content: '💳 Payment pain\nMaking payments on receiving orders was slow and error-prone.', color: 'yellow', rotation: -1.2 }
       },
 
       // ── ROW 1b: SYSTEM ARCHITECTURE ──────────────────────────────────────
-      // sn-5/sn-6 bottom: y=605+145=750 → section label y=750+80=830
-      // label h=40 → fd y=830+40+55=925; fd-current right: 80+620=700 → fd-kiosk x=700+80=780
+      // sn-5/sn-6 bottom: y=566+145=711 → section label y=711+80=791
+      // label h=40 → fd y=791+40+16=847
       {
-        id: 'sl-arch', type: 'section-label', x: 80, y: 830, width: 400, height: 40,
+        id: 'sl-arch', type: 'section-label', x: 80, y: 791, width: 400, height: 40,
         data: { title: 'SYSTEM ARCHITECTURE', color: '#1E3A5F' }
       },
       {
-        id: 'fd-current', type: 'flow-diagram', x: 80, y: 925, width: 620, height: 480,
+        id: 'fd-current', type: 'flow-diagram', x: 80, y: 847, width: 620, height: 520,
         data: {
           title: 'Currently — Before Kiosk',
           subtitle: 'EMC connects POS & Kitchen Display System',
@@ -107,7 +105,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'fd-kiosk', type: 'flow-diagram', x: 780, y: 925, width: 620, height: 480,
+        id: 'fd-kiosk', type: 'flow-diagram', x: 780, y: 847, width: 620, height: 520,
         data: {
           title: 'Introducing — Symphony Kiosk',
           subtitle: 'Kiosk added as a new touchpoint in the ecosystem',
@@ -129,42 +127,40 @@ export const PROJECTS: Project[] = [
       },
 
       // ── ROW 2: METRICS ───────────────────────────────────────────────────
-      // fd bottom: y=925+480=1405 → sl-3 y=1405+80=1485
-      // sl h=40 → mc y=1485+40+55=1580
-      // mc width=190, gap=80 → x positions: 80, 350, 620, 890
+      // fd bottom: y=847+520=1367 → sl-3 y=1367+80=1407
+      // sl h=40 → mc y=1447+40+16=1463
       {
-        id: 'sl-3', type: 'section-label', x: 80, y: 1485, width: 340, height: 40,
+        id: 'sl-3', type: 'section-label', x: 80, y: 1447, width: 340, height: 40,
         data: { title: 'IMPACT & OUTCOMES', color: '#10B981' }
       },
       {
-        id: 'mc-1', type: 'metric-card', x: 80, y: 1580, width: 190, height: 120,
+        id: 'mc-1', type: 'metric-card', x: 80, y: 1503, width: 190, height: 120,
         data: { label: 'Staff Required', value: '↓ Less', change: 'Focus on delivery', changePositive: true, accentColor: '#C74B18' }
       },
       {
-        id: 'mc-2', type: 'metric-card', x: 350, y: 1580, width: 190, height: 120,
+        id: 'mc-2', type: 'metric-card', x: 350, y: 1503, width: 190, height: 120,
         data: { label: 'Order Errors', value: '↓ Low', change: 'Self-entry accuracy', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-3', type: 'metric-card', x: 620, y: 1580, width: 190, height: 120,
+        id: 'mc-3', type: 'metric-card', x: 620, y: 1503, width: 190, height: 120,
         data: { label: 'Order Speed', value: 'Fast', change: 'Seamless UX flow', changePositive: true, accentColor: '#10B981' }
       },
       {
-        id: 'mc-4', type: 'metric-card', x: 890, y: 1580, width: 190, height: 120,
+        id: 'mc-4', type: 'metric-card', x: 890, y: 1503, width: 190, height: 120,
         data: { label: 'Payment Options', value: '6+', change: 'Cards, mobile & more', changePositive: true, accentColor: '#6366F1' }
       },
 
       // ── ROW 3: USER GOALS & PERSONAS ─────────────────────────────────────
-      // mc bottom: y=1580+120=1700 → sl-4 y=1700+80=1780
-      // sl h=40 → quotes y=1780+40+55=1875
+      // mc bottom: y=1503+120=1583 → sl-4 y=1623+80=1663
+      // sl h=40 → quotes y=1703+40+16=1719
       // q-1 right: 80+440=520 → q-2 x=520+80=600
-      // quotes bottom: y=1875+210=2085 → sn y=2085+80=2165
-      // sn-7 right: 80+220=300 → sn-8 x=300+80=380
+      // quotes bottom: y=1759+210=1929 → sn y=1969+80=2009
       {
-        id: 'sl-4', type: 'section-label', x: 80, y: 1780, width: 340, height: 40,
+        id: 'sl-4', type: 'section-label', x: 80, y: 1703, width: 340, height: 40,
         data: { title: 'USER GOALS & PERSONAS', color: '#6366F1' }
       },
       {
-        id: 'q-1', type: 'quote-block', x: 80, y: 1875, width: 440, height: 210,
+        id: 'q-1', type: 'quote-block', x: 80, y: 1759, width: 440, height: 210,
         data: {
           quote: '"As a Restaurant guest, I need to order food on kiosk so that I can get my food served quickly."',
           author: 'Megan Diaz',
@@ -173,7 +169,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'q-2', type: 'quote-block', x: 600, y: 1875, width: 460, height: 210,
+        id: 'q-2', type: 'quote-block', x: 600, y: 1759, width: 460, height: 210,
         data: {
           quote: '"As a Restaurant guest, I need to order food on kiosk so that I can get my food served without human interaction."',
           author: 'Luffy',
@@ -182,184 +178,192 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-7', type: 'sticky-note', x: 80, y: 2165, width: 220, height: 120,
+        id: 'sn-7', type: 'sticky-note', x: 80, y: 2049, width: 220, height: 120,
         data: { content: '🏃 Express Mode\nGuests who know what they want — fast, minimal taps.', color: 'yellow', rotation: -0.5 }
       },
       {
-        id: 'sn-8', type: 'sticky-note', x: 380, y: 2165, width: 220, height: 120,
+        id: 'sn-8', type: 'sticky-note', x: 380, y: 2049, width: 220, height: 120,
         data: { content: '🛍 Browsing Mode\nGuests who want to explore options — visual-first layout.', color: 'purple', rotation: 1 }
       },
 
       // ── ROW 4: MY PROCESS ────────────────────────────────────────────────
-      // sn bottom: y=2165+120=2285 → sl-5 y=2285+80=2365
-      // sl h=40 → ps y=2365+40+55=2460
+      // sn bottom: y=2205+120=2285 → sl-5 y=2325+80=2365
+      // sl h=40 → ps y=2405+40+55=2460
       // ps width=210, gap=80 → x: 80, 370, 660, 950, 1240, 1530
       {
-        id: 'sl-5', type: 'section-label', x: 80, y: 2365, width: 340, height: 40,
+        id: 'sl-5', type: 'section-label', x: 80, y: 2249, width: 340, height: 40,
         data: { title: 'MY PROCESS', color: '#F59E0B' }
       },
       {
-        id: 'ps-1', type: 'process-step', x: 80, y: 2460, width: 210, height: 190,
+        id: 'ps-1', type: 'process-step', x: 80, y: 2305, width: 210, height: 190,
         data: { stepNumber: 1, title: 'Problem Discovery', description: 'Identified 8 pain points across QSRs, food courts & stadiums through research & stakeholder interviews.', color: '#C74B18' }
       },
       {
-        id: 'ps-2', type: 'process-step', x: 370, y: 2460, width: 210, height: 190,
+        id: 'ps-2', type: 'process-step', x: 370, y: 2305, width: 210, height: 190,
         data: { stepNumber: 2, title: 'User Goals & Personas', description: 'Defined 2 mental models — Express Mode & Browsing Mode. Created user goal cards for each.', color: '#F59E0B' }
       },
       {
-        id: 'ps-3', type: 'process-step', x: 660, y: 2460, width: 210, height: 190,
+        id: 'ps-3', type: 'process-step', x: 660, y: 2305, width: 210, height: 190,
         data: { stepNumber: 3, title: 'Success Matrix', description: 'Broke ordering journey into Pre-order, Order & Pay, Post-order phases. Identified gaps in each.', color: '#10B981' }
       },
       {
-        id: 'ps-4', type: 'process-step', x: 950, y: 2460, width: 210, height: 190,
+        id: 'ps-4', type: 'process-step', x: 950, y: 2305, width: 210, height: 190,
         data: { stepNumber: 4, title: 'Shape of Data', description: 'Defined UI data constraints: price levels, condiment groups, menu items, payment options & characters.', color: '#6366F1' }
       },
       {
-        id: 'ps-5', type: 'process-step', x: 1240, y: 2460, width: 210, height: 190,
+        id: 'ps-5', type: 'process-step', x: 1240, y: 2305, width: 210, height: 190,
         data: { stepNumber: 5, title: 'Sitemap & Flows', description: 'Built full sitemap covering the entire journey from entering the restaurant to food pickup.', color: '#A855F7' }
       },
       {
-        id: 'ps-6', type: 'process-step', x: 1530, y: 2460, width: 210, height: 190,
+        id: 'ps-6', type: 'process-step', x: 1530, y: 2305, width: 210, height: 190,
         data: { stepNumber: 6, title: 'Prototype & Test', description: 'Built portrait & landscape low-fi designs, tested with users, then moved to high-fidelity prototypes.', color: '#EC4899' }
       },
 
       // ── ROW 5: SUCCESS MATRIX ─────────────────────────────────────────────
-      // ps bottom: y=2460+190=2650 → sl-6 y=2650+80=2730
-      // sl h=40 → ufs y=2730+40+55=2825
+      // ps bottom: y=2500+190=2650 → sl-6 y=2690+80=2730
+      // sl h=40 → ufs y=2770+40+55=2825
       // ufs width=260, gap=80 → x: 80, 420, 760
       {
-        id: 'sl-6', type: 'section-label', x: 80, y: 2730, width: 400, height: 40,
+        id: 'sl-6', type: 'section-label', x: 80, y: 2575, width: 400, height: 40,
         data: { title: 'SUCCESS MATRIX — 3 PHASE JOURNEY', color: '#10B981' }
       },
       {
-        id: 'ufs-1', type: 'user-flow-step', x: 80, y: 2825, width: 260, height: 190,
+        id: 'ufs-1', type: 'user-flow-step', x: 80, y: 2631, width: 260, height: 190,
         data: { label: 'Pre-Order', description: 'Time finding a stand · Wait time placing an order', shape: 'rectangle', color: '#C74B18', stepNumber: 1 }
       },
       {
-        id: 'ufs-2', type: 'user-flow-step', x: 420, y: 2825, width: 260, height: 190,
+        id: 'ufs-2', type: 'user-flow-step', x: 420, y: 2631, width: 260, height: 190,
         data: { label: 'Order & Pay', description: 'Taps required · Completion rate · Accuracy · Payment success', shape: 'rectangle', color: '#F59E0B', stepNumber: 2 }
       },
       {
-        id: 'ufs-3', type: 'user-flow-step', x: 760, y: 2825, width: 260, height: 190,
+        id: 'ufs-3', type: 'user-flow-step', x: 760, y: 2631, width: 260, height: 190,
         data: { label: 'Post-Order', description: 'Wait time for pickup · Clarity of pickup info · Time at venue', shape: 'rectangle', color: '#10B981', stepNumber: 3 }
       },
 
       // ── ROW 5b: USER JOURNEY FLOW ─────────────────────────────────────────
-      // ufs bottom: y=2825+190=3015 → sl-uj y=3015+80=3095
-      // sl h=40 → fd y=3095+40+55=3190
+      // ufs bottom: y=2865+190=3015 → sl-uj y=3055+80=3095
+      // sl h=40 → fd y=3135+40+55=3190
       // fd right: 80+900=980 → sn-pain1 x=980+80=1060
-      // sn-pain1 bottom: y=3190+110=3300 → sn-pain2 y=3300+80=3380
+      // sn-pain1 bottom: y=3230+110=3300 → sn-pain2 y=3340+80=3380
       {
-        id: 'sl-uj', type: 'section-label', x: 80, y: 3095, width: 400, height: 40,
+        id: 'sl-uj', type: 'section-label', x: 80, y: 2901, width: 400, height: 40,
         data: { title: 'USER JOURNEY — KEY INSIGHTS', color: '#6366F1' }
       },
       {
-        id: 'fd-journey', type: 'flow-diagram', x: 80, y: 3190, width: 900, height: 320,
+        id: 'fd-journey', type: 'flow-diagram', x: 80, y: 2957, width: 1200, height: 560,
         data: {
           title: 'User Journeys × Persona — Pain Points Mapped',
-          subtitle: 'Browsing mode (orange) vs Express mode (blue) — dots show pain points at each step',
+          subtitle: 'Browsing mode (green) vs Express mode (pink) — dots show pain points at each step',
           accentColor: '#6366F1',
-          nodes: [
-            { id: 'enter', label: 'Enter', color: '#6366F1', x: 30, y: 100, width: 80, height: 40 },
-            { id: 'locate', label: 'Locate', color: '#6366F1', x: 140, y: 100, width: 80, height: 40 },
-            { id: 'browse', label: 'Browse', color: '#6366F1', x: 250, y: 100, width: 80, height: 40 },
-            { id: 'order', label: 'Order', color: '#C74B18', x: 360, y: 100, width: 80, height: 40 },
-            { id: 'pay', label: 'Pay', color: '#C74B18', x: 470, y: 100, width: 80, height: 40 },
-            { id: 'collect', label: 'Collect', color: '#10B981', x: 580, y: 100, width: 80, height: 40 },
-            { id: 'return', label: 'Return', color: '#10B981', x: 690, y: 100, width: 80, height: 40 },
-            { id: 'express-label', label: '🏃 Express\nMode', color: '#3B82F6', x: 30, y: 190, width: 100, height: 50 },
-            { id: 'browsing-label', label: '🛍 Browsing\nMode', color: '#F97316', x: 30, y: 255, width: 100, height: 50 },
-          ],
-          connections: [
-            { from: 'enter', to: 'locate' },
-            { from: 'locate', to: 'browse' },
-            { from: 'browse', to: 'order' },
-            { from: 'order', to: 'pay' },
-            { from: 'pay', to: 'collect' },
-            { from: 'collect', to: 'return' },
-          ],
+          journeyMap: {
+            phases: [
+              { label: 'pre-order experience', startStep: 0, endStep: 2 },
+              { label: 'order experience', startStep: 3, endStep: 4 },
+              { label: 'post-order experience', startStep: 5, endStep: 6 },
+            ],
+            browsingPath: [
+              { id: 'b-browse', label: 'Browse' },
+              { id: 'b-locate', label: 'Locate' },
+              { id: 'b-decide', label: 'Decide' },
+            ],
+            expressPath: [
+              { id: 'e-decide', label: 'Decide' },
+              { id: 'e-locate', label: 'Locate' },
+            ],
+            sharedSteps: [
+              { id: 's-queue', label: 'Queue' },
+              { id: 's-order', label: 'Order' },
+              { id: 's-pay', label: 'Pay' },
+              { id: 's-collect', label: 'Collect' },
+              { id: 's-return', label: 'Return' },
+            ],
+            painPointsInPerson: ['b-decide', 's-queue', 's-return'],
+            painPointsKiosk: ['b-decide', 's-queue', 's-order', 's-collect', 's-return'],
+          },
+          nodes: [],
+          connections: [],
         }
       },
-      {
-        id: 'sn-pain1', type: 'sticky-note', x: 1060, y: 3190, width: 200, height: 110,
-        data: { content: '🔴 Pain Points\nStaff-ordering: long queues, manual errors, payment delays.', color: 'pink', rotation: -0.5 }
-      },
-      {
-        id: 'sn-pain2', type: 'sticky-note', x: 1060, y: 3380, width: 200, height: 110,
-        data: { content: '🟡 Self-ordering\nKiosk eliminates queue, reduces errors, speeds up payment.', color: 'yellow', rotation: 0.8 }
-      },
-
       // ── ROW 5c: SHAPE OF DATA ─────────────────────────────────────────────
-      // fd bottom: y=3190+320=3510 → sl-sod y=3510+80=3590
-      // sl h=40 → dd row-1 y=3590+40+55=3685
+      // fd bottom: y=3230+560=3750 → sl-sod y=3790+80=3830
+      // sl h=40 → dd row-1 y=3870+40+55=3925
       // dd width=270, gap=80 → x: 80, 430, 780
-      // dd row-1 bottom: y=3685+190=3875 → dd row-2 y=3875+80=3955
+      // dd row-1 bottom: y=3965+190=4115 → dd row-2 y=4155+80=4195
       {
-        id: 'sl-sod', type: 'section-label', x: 80, y: 3590, width: 400, height: 40,
+        id: 'sl-sod', type: 'section-label', x: 80, y: 3597, width: 400, height: 40,
         data: { title: 'SHAPE OF DATA — UI CONSTRAINTS', color: '#A855F7' }
       },
       {
-        id: 'dd-1', type: 'data-dimension', x: 80, y: 3685, width: 270, height: 190,
+        id: 'dd-1', type: 'data-dimension', x: 80, y: 3653, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Price Levels present for a given menu item', highlight: 'Price Levels', min: '1', max: '4', typical: '3', accentColor: '#C74B18' }
       },
       {
-        id: 'dd-2', type: 'data-dimension', x: 430, y: 3685, width: 270, height: 190,
+        id: 'dd-2', type: 'data-dimension', x: 430, y: 3653, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Condiment Groups present for a given menu item', highlight: 'Condiment Groups', min: '0', max: '10', typical: '1–2', accentColor: '#F59E0B' }
       },
       {
-        id: 'dd-3', type: 'data-dimension', x: 780, y: 3685, width: 270, height: 190,
+        id: 'dd-3', type: 'data-dimension', x: 780, y: 3653, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Menu Items present in a Combo meal', highlight: 'Menu Items', min: '2', max: '5', typical: '2–3', accentColor: '#10B981' }
       },
       {
-        id: 'dd-4', type: 'data-dimension', x: 80, y: 3955, width: 270, height: 190,
+        id: 'dd-4', type: 'data-dimension', x: 80, y: 3923, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Categories the menu page can have', highlight: 'Categories', min: '4', max: '9', typical: '4', accentColor: '#6366F1' }
       },
       {
-        id: 'dd-5', type: 'data-dimension', x: 430, y: 3955, width: 270, height: 190,
+        id: 'dd-5', type: 'data-dimension', x: 430, y: 3923, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: '# of payment options available at checkout', highlight: 'payment options', min: '2', max: '6', typical: '4', note: 'Cash, Credit/Debit, Apple/Google Pay, Paypal, Loyalty token', accentColor: '#A855F7' }
       },
       {
-        id: 'dd-6', type: 'data-dimension', x: 780, y: 3955, width: 270, height: 190,
+        id: 'dd-6', type: 'data-dimension', x: 780, y: 3923, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of characters that can be present in a menu item description', highlight: 'characters', min: '0', max: '1024', typical: '128+', accentColor: '#EC4899' }
       },
 
-      // ── ROW 6: FIGMA EMBED ────────────────────────────────────────────────
-      // dd row-2 bottom: y=3955+190=4145 → sl-7 y=4145+80=4225
-      // sl h=40 → fe y=4225+40+55=4320
-      // fe-1 right: 80+880=960 → fe-2 x=960+80=1040
+      // ── ROW 6: FIGMA EMBEDS ───────────────────────────────────────────────
+      // dd row-2 bottom: y=3923+190=4073 → sl-7 y=4113+80=4153
+      // sl h=40 → fe y=4193+40+56=4249
+      // 2 embeds side by side max: width=720 each, gap=80
+      // fe-3 on next row
       {
-        id: 'sl-7', type: 'section-label', x: 80, y: 4225, width: 400, height: 40,
-        data: { title: 'LIVE FIGMA FILE — SITEMAP & TASK FLOWS', color: '#A855F7' }
+        id: 'sl-7', type: 'section-label', x: 80, y: 4193, width: 560, height: 40,
+        data: { title: 'LIVE FIGMA FILES — SITEMAP, VIEW SUMMARY & TASK FLOWS', color: '#A855F7' }
       },
       {
-        id: 'fe-1', type: 'figma-embed', x: 80, y: 4320, width: 880, height: 520,
+        id: 'fe-1', type: 'figma-embed', x: 80, y: 4289, width: 720, height: 540,
         data: {
           title: 'Kiosk · Sitemap',
           description: 'Full sitemap — from entering restaurant to food pickup',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FkioskSitemap',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D2436-101059%26t%3DeZhWgo3YibYXDxqn-4',
           accentColor: '#A855F7',
         }
       },
       {
-        id: 'fe-2', type: 'figma-embed', x: 1040, y: 4320, width: 880, height: 520,
+        id: 'fe-2', type: 'figma-embed', x: 880, y: 4289, width: 720, height: 540,
+        data: {
+          title: 'Kiosk · View Summary',
+          description: 'High-level view summary of the kiosk design',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D65860-7363%26t%3D7aXa5YustdH1dbnO-4',
+          accentColor: '#6366F1',
+        }
+      },
+      {
+        id: 'fe-3', type: 'figma-embed', x: 80, y: 4909, width: 720, height: 540,
         data: {
           title: 'Kiosk · Task Flows',
           description: 'Developer-ready task flows broken into buildable phases',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FkioskTaskFlows',
-          accentColor: '#6366F1',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D5470-288291',
+          accentColor: '#EC4899',
         }
       },
 
       // ── ROW 7: VIDEO EMBEDS ───────────────────────────────────────────────
-      // fe bottom: y=4320+520=4840 → sl-8 y=4840+80=4920
-      // sl h=40 → ve y=4920+40+55=5015
-      // ve-1 right: 80+560=640 → ve-2 x=640+80=720
+      // fe bottom: y=4909+540=5449 → sl-8 y=5449+80=5529
+      // sl h=40 → ve y=5529+40+56=5625
       {
-        id: 'sl-8', type: 'section-label', x: 80, y: 4920, width: 400, height: 40,
+        id: 'sl-8', type: 'section-label', x: 80, y: 5529, width: 400, height: 40,
         data: { title: 'PROTOTYPE PRESENTATION — VIDEO WALKTHROUGHS', color: '#EC4899' }
       },
       {
-        id: 've-1', type: 'video-embed', x: 80, y: 5015, width: 560, height: 380,
+        id: 've-1', type: 'video-embed', x: 80, y: 5625, width: 720, height: 540,
         data: {
           title: 'Kiosk Prototype · Walk-through 1',
           description: 'Full order flow — start to payment. Portrait mode. Redwood Cafe theme.',
@@ -368,7 +372,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 've-2', type: 'video-embed', x: 720, y: 5015, width: 560, height: 380,
+        id: 've-2', type: 'video-embed', x: 880, y: 5625, width: 720, height: 540,
         data: {
           title: 'Kiosk Prototype · Walk-through 2',
           description: 'Bilingual flow with Spanish support. Landscape mode walkthrough.',
@@ -378,14 +382,14 @@ export const PROJECTS: Project[] = [
       },
 
       // ── ROW 8: TAGS ───────────────────────────────────────────────────────
-      // ve bottom: y=5015+380=5395 → sl-9 y=5395+80=5475
-      // sl h=40 → tc y=5475+40+55=5570
+      // ve bottom: y=5625+540=6165 → sl-9 y=6165+80=6245
+      // sl h=40 → tc y=6245+40+56=6341
       {
-        id: 'sl-9', type: 'section-label', x: 80, y: 5475, width: 340, height: 40,
+        id: 'sl-9', type: 'section-label', x: 80, y: 6245, width: 340, height: 40,
         data: { title: 'SKILLS APPLIED', color: '#C74B18' }
       },
       {
-        id: 'tc-1', type: 'tag-cluster', x: 80, y: 5570, width: 820, height: 110,
+        id: 'tc-1', type: 'tag-cluster', x: 80, y: 6341, width: 820, height: 110,
         data: {
           title: 'SKILLS APPLIED',
           tags: [
@@ -402,15 +406,14 @@ export const PROJECTS: Project[] = [
       },
 
       // ── STORYBOARDS ──────────────────────────────────────────────────────
-      // tc bottom: y=5570+110=5680 → sl-10 y=5680+80=5760
-      // sl h=40 → sb y=5760+40+55=5855
-      // sb-problem right: 80+1080=1160 → sb-solution x=1160+80=1240
+      // tc bottom: y=6341+110=6451 → sl-10 y=6451+80=6531
+      // sl h=40 → sb y=6531+40+56=6627
       {
-        id: 'sl-10', type: 'section-label', x: 80, y: 5760, width: 400, height: 40,
+        id: 'sl-10', type: 'section-label', x: 80, y: 6531, width: 400, height: 40,
         data: { title: 'THE PROBLEM & SOLUTION — STORYBOARD', color: '#F59E0B' }
       },
       {
-        id: 'sb-problem', type: 'storyboard', x: 80, y: 5855, width: 1080, height: 832, zIndex: 10,
+        id: 'sb-problem', type: 'storyboard', x: 80, y: 6627, width: 1000, height: 900, zIndex: 10,
         data: {
           boardType: 'problem',
           dialogues: [
@@ -426,7 +429,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sb-solution', type: 'storyboard', x: 1240, y: 5855, width: 1080, height: 832, zIndex: 10,
+        id: 'sb-solution', type: 'storyboard', x: 1160, y: 6627, width: 1000, height: 900, zIndex: 10,
         data: {
           boardType: 'solution',
           dialogues: [
@@ -440,15 +443,65 @@ export const PROJECTS: Project[] = [
         }
       },
 
-      // ── GAME ZONE ─────────────────────────────────────────────────────────
-      // sb bottom: y=5855+832=6687 → sl-game y=6687+80=6767
-      // sl h=40 → gz y=6767+40+20=6827
+      // ── THANK YOU / GAME HOOK ─────────────────────────────────────────────
+      // sb bottom: y=6627+900=7527 → sl-thanks y=7527+100=7627
+      // sl h=40 → card y=7627+40+16=7683, height=300 → ends=7983
+      // sticky notes y=7983+80=8063, h=130 → ends=8193
+      // gap 100 → sl-game y=8193+100=8293
+      // sl h=40 → gz y=8293+40+16=8349, h=680 → ends=9029
+      // hints y=9029+60=9089
       {
-        id: 'sl-game', type: 'section-label', x: 80, y: 6767, width: 480, height: 40,
+        id: 'sl-thanks', type: 'section-label', x: 80, y: 7627, width: 480, height: 40,
+        data: { title: '👋 THAT\'S A WRAP — YOU MADE IT!', color: '#F59E0B' }
+      },
+      {
+        id: 'cs-thanks', type: 'case-study-card', x: 80, y: 7683, width: 1080, height: 300,
+        data: {
+          title: 'You just reviewed the entire Oracle Symphony Kiosk case study.',
+          subtitle: 'Thanks for going through every screen, every decision, every pixel.',
+          description: "You've seen the problem space, the research, the architecture, the process, the prototypes — and just now, the story play out in a restaurant. That's the full picture of how I think and build. If this kind of work excites you, I'd love to chat. But first — you've earned a game. 🎮 Play Crewmate Dash below, get on the leaderboard, and then let's talk.",
+          tags: ['Thanks for reading', 'Let\'s connect', 'Now go play 🕹️'],
+          accentColor: '#F59E0B',
+          metrics: [
+            { label: 'Sections Covered', value: '10+' },
+            { label: 'Time Well Spent', value: '✓' },
+            { label: 'Ready to Chat?', value: 'Yes!' },
+          ],
+        }
+      },
+      {
+        id: 'sn-thanks-1', type: 'sticky-note', x: 80, y: 8063, width: 280, height: 130,
+        data: {
+          content: '🧠 You now know more about this kiosk than most people at the company.',
+          color: 'cyan',
+          rotation: -1,
+        }
+      },
+      {
+        id: 'sn-thanks-2', type: 'sticky-note', x: 400, y: 8048, width: 280, height: 130,
+        data: {
+          content: '🏆 Beat the leaderboard and I\'ll know you were thorough AND competitive.',
+          color: 'green',
+          rotation: 1.2,
+        }
+      },
+      {
+        id: 'sn-thanks-3', type: 'sticky-note', x: 720, y: 8058, width: 280, height: 130,
+        data: {
+          content: '💌 Liked what you saw? Hit "Message Me" on the right panel — let\'s talk!',
+          color: 'purple',
+          rotation: -0.8,
+        }
+      },
+
+      // ── GAME ZONE ─────────────────────────────────────────────────────────
+      // sl-game y=8293, gz y=8349 (well below storyboard bottom at 7527)
+      {
+        id: 'sl-game', type: 'section-label', x: 80, y: 8293, width: 480, height: 40,
         data: { title: '🎮 CREWMATE DASH — PLAY & HIRE ME', color: '#C74B18' }
       },
       {
-        id: 'gz-1', type: 'game-zone', x: 80, y: 6827, width: 1160, height: 680,
+        id: 'gz-1', type: 'game-zone', x: 80, y: 8349, width: 1160, height: 680,
         data: {
           title: 'Crewmate Dash',
           accentColor: '#C74B18',
@@ -457,7 +510,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 7527, width: 280, height: 120,
+        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 9089, width: 280, height: 120,
         data: {
           content: '🕹️ Dodge obstacles & get on the leaderboard. Space or tap to jump!',
           color: 'yellow',
@@ -465,7 +518,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 7542, width: 260, height: 110,
+        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 9104, width: 260, height: 110,
         data: {
           content: '⚠️ Only 1 player at a time — queue up if someone is already playing!',
           color: 'pink',

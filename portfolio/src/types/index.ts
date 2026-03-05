@@ -201,6 +201,14 @@ export interface FlowDiagramElement extends BaseCanvasElement {
     title: string;
     subtitle?: string;
     accentColor: string;
+    journeyMap?: {
+      phases: Array<{ label: string; startStep: number; endStep: number }>;
+      sharedSteps: Array<{ id: string; label: string }>;
+      browsingPath: Array<{ id: string; label: string }>;
+      expressPath: Array<{ id: string; label: string }>;
+      painPointsInPerson: string[];   // step ids with pain points
+      painPointsKiosk: string[];      // step ids with pain points
+    };
     nodes: Array<{
       id: string;
       label: string;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FigmaEmbedElement } from '../../../types';
 
 interface Props {
@@ -18,10 +18,30 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
   const [loaded, setLoaded] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [, forceUpdate] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const rgb = hexToRgb(data.accentColor);
+
+  // When the browser exits fullscreen (user pressed Escape or clicked exit),
+  // force this component to re-render so it reclaims its correct dimensions
+  // and doesn't leave the parent app panels invisible.
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        forceUpdate(n => n + 1);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   return (
     <div
+      ref={containerRef}
       onClick={onClick}
       className={`canvas-element-base rounded-2xl overflow-hidden flex flex-col shadow-xl ${isSelected ? 'selected' : ''}`}
       style={{
@@ -29,6 +49,11 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
         height,
         background: '#1E1E2E',
         border: `1px solid ${isSelected ? data.accentColor : 'rgba(255,255,255,0.07)'}`,
+        // Ensure this element always creates its own stacking context so that
+        // when the browser exits iframe fullscreen, it doesn't swallow parent UI layers.
+        isolation: 'isolate',
+        position: 'relative',
+        zIndex: 1,
       }}
     >
       {/* Title bar — mimics Figma's chrome */}
@@ -65,7 +90,10 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
             }}
             onClick={(e) => {
               e.stopPropagation();
-              setOpened(true);
+              // Extract the original Figma URL from the embed URL and open in new tab
+              const match = data.figmaUrl.match(/url=([^&]+)/);
+              const originalUrl = match ? decodeURIComponent(match[1]) : data.figmaUrl;
+              window.open(originalUrl, '_blank', 'noopener,noreferrer');
             }}
           >
             Open in Figma ↗
@@ -163,9 +191,7 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
               className="absolute inset-0 w-full h-full border-0"
               src={data.figmaUrl}
               title={data.title}
-              allowFullScreen
               onLoad={() => setLoaded(true)}
-              onClick={(e) => e.stopPropagation()}
             />
           </>
         )}
