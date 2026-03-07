@@ -295,7 +295,7 @@ export default function App() {
         {/* Floating Right Panel or Edit Toolbar */}
         <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
           {isEditing && !isPreviewMode ? (
-            <EditToolbar />
+            <EditToolbar projectId={selectedProject.id} />
           ) : (
             <RightPanel
               project={selectedProject}

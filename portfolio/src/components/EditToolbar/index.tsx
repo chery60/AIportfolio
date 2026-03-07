@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Type, Image as ImageIcon, StickyNote, MessageSquareQuote, MonitorPlay, Key, Check } from 'lucide-react';
+import { Type, Image as ImageIcon, StickyNote, MessageSquareQuote, MonitorPlay, Key, Check, Trash2, Loader2, MessageSquareDashed } from 'lucide-react';
 import type { CanvasElementType } from '../../types';
+import { useComments } from '../../hooks/useComments';
 
 const DRAGGABLE_ELEMENTS: { type: CanvasElementType; label: string; icon: React.ElementType; color: string }[] = [
     { type: 'text-block', label: 'Text Block', icon: Type, color: '#3B82F6' },
@@ -10,9 +11,16 @@ const DRAGGABLE_ELEMENTS: { type: CanvasElementType; label: string; icon: React.
     { type: 'prototype-embed', label: 'Prototype', icon: MonitorPlay, color: '#EC4899' },
 ];
 
-export default function EditToolbar() {
+interface EditToolbarProps {
+    projectId: string;
+}
+
+export default function EditToolbar({ projectId }: EditToolbarProps) {
     const [apiKey, setApiKey] = useState('');
     const [showSavedMsg, setShowSavedMsg] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const { comments, loading, error, deleteComment, timeAgo } = useComments(projectId);
 
     const handleDragStart = (e: React.DragEvent, type: CanvasElementType) => {
         e.dataTransfer.setData('canvas/element-type', type);
@@ -26,6 +34,12 @@ export default function EditToolbar() {
             setShowSavedMsg(true);
             setTimeout(() => setShowSavedMsg(false), 2000);
         }
+    };
+
+    const handleDeleteComment = async (id: string) => {
+        setDeletingId(id);
+        await deleteComment(id);
+        setDeletingId(null);
     };
 
     return (
@@ -100,6 +114,76 @@ export default function EditToolbar() {
                             )}
                         </button>
                     </div>
+                </div>
+
+                {/* Comments Management Section */}
+                <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <SectionTitle>MANAGE COMMENTS</SectionTitle>
+                        {comments.length > 0 && (
+                            <span className="text-[9px] font-bold text-text-secondary bg-surface-2 px-1.5 py-0.5 rounded-full">
+                                {comments.length}
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-[10px] text-text-secondary leading-relaxed mb-3">
+                        Review and moderate visitor comments. Delete any you don't want shown.
+                    </p>
+
+                    {error && (
+                        <p className="text-[10px] text-red-500 mb-2">{error}</p>
+                    )}
+
+                    {loading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="w-5 h-5 text-text-secondary animate-spin" />
+                        </div>
+                    ) : comments.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="w-10 h-10 bg-surface-1 rounded-xl flex items-center justify-center mb-3 border border-panel-border">
+                                <MessageSquareDashed className="w-5 h-5 text-text-secondary" />
+                            </div>
+                            <p className="text-xs font-semibold text-text-primary mb-1">No comments yet</p>
+                            <p className="text-[10px] text-text-secondary leading-relaxed max-w-[160px]">
+                                Visitor comments for this project will appear here.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {comments.map(c => (
+                                <div key={c.id} className="bg-surface-1 p-2.5 rounded-lg border border-transparent relative group hover:border-panel-border transition-all">
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <div
+                                                className="w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold text-white flex-shrink-0"
+                                                style={{ backgroundColor: c.color }}
+                                            >
+                                                {c.initials}
+                                            </div>
+                                            <span className="text-xs font-semibold text-text-primary truncate">{c.author}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] text-text-secondary font-medium bg-surface-2 px-1 rounded">
+                                                {timeAgo(c.created_at)}
+                                            </span>
+                                            <button
+                                                onClick={() => handleDeleteComment(c.id)}
+                                                disabled={deletingId === c.id}
+                                                className="p-1 rounded-md hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                                                title="Delete comment"
+                                            >
+                                                {deletingId === c.id
+                                                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                                                    : <Trash2 className="w-3 h-3" />
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-text-secondary leading-relaxed pl-5">{c.content}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

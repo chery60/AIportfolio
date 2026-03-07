@@ -12,9 +12,9 @@ interface Props {
   activeViewers?: ActiveViewer[];
 }
 
-export default function RightPanel({ isEditMode = false, activeViewers = [] }: Props) {
+export default function RightPanel({ project, isEditMode = false, activeViewers = [] }: Props) {
 
-  const { reactions, incrementReaction } = useReactions();
+  const { reactions, incrementReaction } = useReactions(project.id);
   const [contactState, setContactState] = useState<'idle' | 'form' | 'sent'>('idle');
 
   // Comment state
@@ -24,7 +24,7 @@ export default function RightPanel({ isEditMode = false, activeViewers = [] }: P
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const commentsListRef = useRef<HTMLDivElement>(null);
 
-  const { comments, loading, error, addComment, deleteComment, timeAgo } = useComments();
+  const { comments, loading, error, addComment, deleteComment, timeAgo } = useComments(project.id);
 
   const handleReaction = (emoji: string) => {
     incrementReaction(emoji);

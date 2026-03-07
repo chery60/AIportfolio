@@ -7,6 +7,7 @@ export interface PortfolioComment {
   content: string;
   color: string;
   initials: string;
+  project_id: string;
   created_at: string;
 }
 
@@ -39,26 +40,34 @@ function timeAgo(dateStr: string): string {
   return `${days}d`;
 }
 
-export function useComments() {
+export function useComments(projectId: string) {
   const [comments, setComments] = useState<PortfolioComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all comments on mount
+  // Fetch comments whenever projectId changes
   useEffect(() => {
+    setComments([]);
+    setLoading(true);
+    setError(null);
     fetchComments();
-  }, []);
+  }, [projectId]);
 
-  // Subscribe to realtime inserts/deletes
+  // Subscribe to realtime inserts/deletes filtered by project_id
   useEffect(() => {
     const sb = supabase;
     if (!sb) return;
 
     const channel = sb
-      .channel('portfolio_comments_realtime')
+      .channel(`portfolio_comments_realtime_${projectId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'portfolio_comments' },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'portfolio_comments',
+          filter: `project_id=eq.${projectId}`,
+        },
         (payload) => {
           const newComment = payload.new as PortfolioComment;
           setComments(prev => {
@@ -70,7 +79,12 @@ export function useComments() {
       )
       .on(
         'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'portfolio_comments' },
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'portfolio_comments',
+          filter: `project_id=eq.${projectId}`,
+        },
         (payload) => {
           const deleted = payload.old as { id: string };
           setComments(prev => prev.filter(c => c.id !== deleted.id));
@@ -81,7 +95,7 @@ export function useComments() {
     return () => {
       sb.removeChannel(channel);
     };
-  }, []);
+  }, [projectId]);
 
   const fetchComments = useCallback(async () => {
     const sb = supabase;
@@ -96,10 +110,12 @@ export function useComments() {
     const { data, error: fetchError } = await sb
       .from('portfolio_comments')
       .select('*')
+      .eq('project_id', projectId)
       .order('created_at', { ascending: false })
       .limit(100);
 
     if (fetchError) {
+      console.error('[useComments] fetch error:', fetchError);
       setError('Failed to load comments.');
       setLoading(false);
       return;
@@ -107,7 +123,7 @@ export function useComments() {
 
     setComments((data as PortfolioComment[]) ?? []);
     setLoading(false);
-  }, []);
+  }, [projectId]);
 
   const addComment = useCallback(async (author: string, content: string): Promise<boolean> => {
     const trimmedAuthor = author.trim();
@@ -126,6 +142,7 @@ export function useComments() {
         content: trimmedContent,
         color,
         initials,
+        project_id: projectId,
         created_at: new Date().toISOString(),
       };
       setComments(prev => [localComment, ...prev]);
@@ -134,15 +151,22 @@ export function useComments() {
 
     const { error: insertError } = await sb
       .from('portfolio_comments')
-      .insert({ author: trimmedAuthor, content: trimmedContent, color, initials });
+      .insert({
+        author: trimmedAuthor,
+        content: trimmedContent,
+        color,
+        initials,
+        project_id: projectId,
+      });
 
     if (insertError) {
+      console.error('[useComments] insert error:', insertError);
       setError('Failed to post comment.');
       return false;
     }
 
     return true;
-  }, []);
+  }, [projectId]);
 
   const deleteComment = useCallback(async (id: string): Promise<boolean> => {
     const sb = supabase;
@@ -154,15 +178,17 @@ export function useComments() {
     const { error: deleteError } = await sb
       .from('portfolio_comments')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('project_id', projectId);
 
     if (deleteError) {
+      console.error('[useComments] delete error:', deleteError);
       setError('Failed to delete comment.');
       return false;
     }
 
     return true;
-  }, []);
+  }, [projectId]);
 
   return { comments, loading, error, addComment, deleteComment, timeAgo };
 }
