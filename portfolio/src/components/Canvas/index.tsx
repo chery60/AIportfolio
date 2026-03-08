@@ -3,7 +3,8 @@ import type { Project } from '../../types';
 import { useCanvas } from '../../hooks/useCanvas';
 import CanvasElementRenderer from './CanvasElement';
 import Character from './Character';
-import { usePresence } from '../../hooks/usePresence';
+import type { ActiveViewer } from '../../hooks/useRealtimeSession';
+import { MousePointer2 } from 'lucide-react';
 
 interface Props {
   project: Project;
@@ -16,6 +17,10 @@ interface Props {
   onAddElement?: (element: import('../../types').CanvasElement) => void;
   onUpdateElementPosition?: (id: string, x: number, y: number) => void;
   onCanvasClick?: (x: number, y: number) => void;
+  activeViewers?: ActiveViewer[];
+  cursors?: Record<string, { x: number, y: number }>;
+  localIdentity?: ActiveViewer | null;
+  broadcastCursor?: (x: number, y: number) => void;
 }
 
 export interface CanvasControlsRef {
@@ -38,6 +43,10 @@ export default function Canvas({
   onAddElement,
   onUpdateElementPosition,
   onCanvasClick,
+  activeViewers = [],
+  cursors = {},
+  localIdentity = null,
+  broadcastCursor,
 }: Props) {
   const {
     transform,
@@ -57,7 +66,7 @@ export default function Canvas({
     setDefaultTransform,
   } = useCanvas({ defaultTransform: project.defaultView });
 
-  const { remoteCursors, updateCursor, localColor } = usePresence();
+  const localColor = localIdentity?.color || '#7C5CFC';
 
   // Expose controls to parent
   useEffect(() => {
@@ -144,7 +153,7 @@ export default function Canvas({
       const gridY = (y - transform.y) / transform.scale;
 
       setMouseGridPos({ x: gridX, y: gridY });
-      updateCursor(gridX, gridY);
+      if (broadcastCursor) broadcastCursor(gridX, gridY);
     }
   };
 
@@ -294,16 +303,47 @@ export default function Canvas({
           />
         )}
 
-        {/* Remote Characters (Other Visitors) */}
-        {Object.entries(remoteCursors).map(([id, cursor]) => (
-          <Character
-            key={id}
-            targetX={cursor.x}
-            targetY={cursor.y}
-            color={cursor.color}
-            elementBounds={elementBounds}
-          />
-        ))}
+        {/* Remote Characters and Cursors (Other Visitors) */}
+        {activeViewers.map((viewer) => {
+          if (localIdentity && viewer.id === localIdentity.id) return null;
+          const pos = cursors[viewer.id];
+          if (!pos) return null;
+
+          return (
+            <div key={viewer.id}>
+              {/* Walking Character */}
+              <Character
+                targetX={pos.x}
+                targetY={pos.y}
+                color={viewer.color}
+                elementBounds={elementBounds}
+              />
+
+              {/* Instant screen cursor for immediate feedback */}
+              <div
+                className="absolute top-0 left-0 transition-all duration-75 ease-linear will-change-transform z-[100] pointer-events-none"
+                style={{
+                  transform: `translate(${pos.x}px, ${pos.y}px) scale(${1 / transform.scale})`,
+                  transformOrigin: '0 0'
+                }}
+              >
+                <MousePointer2
+                  className="w-5 h-5"
+                  fill={viewer.color}
+                  color={viewer.color}
+                  strokeWidth={1.5}
+                  stroke="white"
+                />
+                <div
+                  className="mt-1 ml-4 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md whitespace-nowrap w-max"
+                  style={{ backgroundColor: viewer.color }}
+                >
+                  {viewer.name}
+                </div>
+              </div>
+            </div>
+          );
+        })}
 
         {/* Render all elements */}
         {project.canvasElements.map(element => (

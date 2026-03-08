@@ -10,7 +10,6 @@ import LandingPage from './components/LandingPage';
 import EditToolbar from './components/EditToolbar';
 import { supabase } from './lib/supabase';
 import { useRealtimeSession } from './hooks/useRealtimeSession';
-import LiveCursors from './components/LiveCursors';
 
 const defaultControls: CanvasControlsRef = {
   zoomIn: () => { },
@@ -288,13 +287,6 @@ export default function App() {
             transition={{ duration: 0.5, ease: 'easeOut' }}
             className="fixed inset-0 flex flex-col bg-surface-1 text-text-primary overflow-hidden"
           >
-            <LiveCursors
-              activeViewers={activeViewers}
-              cursors={cursors}
-              localIdentity={localIdentity}
-              broadcastCursor={broadcastCursor}
-            />
-
             {/* Main content area */}
             <div className="flex flex-1 overflow-hidden relative">
               {/* Canvas */}
@@ -310,6 +302,10 @@ export default function App() {
                   onAddElement={handleAddElement}
                   onUpdateElementPosition={handleUpdateElementPosition}
                   onCanvasClick={handleCanvasClick}
+                  activeViewers={activeViewers}
+                  cursors={cursors}
+                  localIdentity={localIdentity}
+                  broadcastCursor={broadcastCursor}
                 />
               </div>
 

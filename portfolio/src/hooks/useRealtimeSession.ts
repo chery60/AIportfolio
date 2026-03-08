@@ -79,14 +79,20 @@ export function useRealtimeSession() {
         };
     }, []);
 
+    const lastSendTimeRef = useRef(0);
+
     const broadcastCursor = useCallback((x: number, y: number) => {
         if (!channelRef.current || !localIdentity) return;
 
-        channelRef.current.send({
-            type: 'broadcast',
-            event: 'cursor',
-            payload: { id: localIdentity.id, x, y }
-        }).catch(() => { });
+        const now = Date.now();
+        if (now - lastSendTimeRef.current > 50) {
+            lastSendTimeRef.current = now;
+            channelRef.current.send({
+                type: 'broadcast',
+                event: 'cursor',
+                payload: { id: localIdentity.id, x, y }
+            }).catch(() => { });
+        }
     }, [localIdentity]);
 
     return { activeViewers, cursors, localIdentity, broadcastCursor };

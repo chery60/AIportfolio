@@ -166,7 +166,6 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     // Track mouse position for the Among Us character
     const handleLandingMouseMove = useCallback((e: React.MouseEvent) => {
         if (landingRef.current) {
-            const rect = landingRef.current.getBoundingClientRect();
             setMousePos({
                 x: e.clientX,
                 y: e.clientY,
