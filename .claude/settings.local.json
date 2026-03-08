@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''mcpServers'', {}\\), indent=2\\)\\)\")",
+      "Bash(cd \"/Users/cepl/Documents/AI Projects /NewTool/portfolio\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"/Users/cepl/Documents/AI Projects /NewTool/portfolio\" && npm run build 2>&1)"
+    ]
+  }
+}
