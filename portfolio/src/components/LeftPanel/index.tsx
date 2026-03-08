@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Project } from '../../types';
 import { PROJECTS } from '../../data/projects';
-import { ChevronDown, PanelLeft, PanelRight, Pencil, Zap, Box, Save, Lock, X } from 'lucide-react';
+import { ChevronDown, PanelLeft, PanelRight, Pencil, Zap, Box, Save, Lock, X, LogOut } from 'lucide-react';
 
 // ── Vibe Coded Tools list ──────────────────────────────────────────────────────
 const VIBE_TOOLS = [
@@ -40,9 +40,10 @@ interface Props {
   onSelectProject: (project: Project) => void;
   isEditing?: boolean;
   onToggleEdit?: (edit: boolean) => void;
+  onExit?: () => void;
 }
 
-export default function LeftPanel({ selectedProject, onSelectProject, isEditing = false, onToggleEdit = () => { } }: Props) {
+export default function LeftPanel({ selectedProject, onSelectProject, isEditing = false, onToggleEdit = () => { }, onExit }: Props) {
   const [activeTab, setActiveTab] = useState<'projects' | 'vibe-tools'>('projects');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -269,6 +270,24 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                 ⌘E
               </span>
             )}
+          </button>
+        )}
+
+        {/* Exit button — back to landing */}
+        {onExit && (
+          <button
+            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-panel-border bg-surface-1 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all group mt-2"
+            onClick={onExit}
+          >
+            <div className="flex items-center gap-2">
+              <LogOut className="w-3.5 h-3.5 text-text-secondary group-hover:text-red-500 transition-colors" />
+              <span className="text-xs font-semibold text-text-secondary group-hover:text-red-600 transition-colors">
+                Exit
+              </span>
+            </div>
+            <span className="text-[10px] text-text-secondary font-medium px-1.5 py-0.5 border border-panel-border rounded bg-white shadow-sm font-mono">
+              Esc
+            </span>
           </button>
         )}
       </div>

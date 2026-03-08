@@ -11,20 +11,18 @@
 
   body {
     margin: 0;
-    overflow: hidden;
-    height: 100vh;
+    height: 100%;
+    min-height: 100vh;
     width: 100vw;
     font-family: 'Inter', system-ui, sans-serif;
-    background-color: #FFFFFF;
+    background-color: #0A0B0F;
     color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    touch-action: none;
-    /* Prevent native pinch-to-zoom on touch devices */
   }
 
   #root {
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
   }
 

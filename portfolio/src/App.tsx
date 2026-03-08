@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Project } from './types';
 import { PROJECTS } from './data/projects';
 import LeftPanel from './components/LeftPanel';
 import Canvas, { type CanvasControlsRef } from './components/Canvas';
 import RightPanel from './components/RightPanel';
 import BottomToolbar from './components/BottomToolbar';
-import Splash from './components/Splash';
+import LandingPage from './components/LandingPage';
 import EditToolbar from './components/EditToolbar';
 import { supabase } from './lib/supabase';
 import { useRealtimeSession } from './hooks/useRealtimeSession';
@@ -21,7 +22,7 @@ const defaultControls: CanvasControlsRef = {
 };
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [currentView, setCurrentView] = useState<'landing' | 'canvas'>('landing');
   const [selectedProject, setSelectedProject] = useState<Project>(PROJECTS[0]);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
@@ -253,72 +254,106 @@ export default function App() {
     };
   }, []);
 
+  // Handle entering canvas with transition
+  const handleEnterCanvas = useCallback(() => {
+    setCurrentView('canvas');
+  }, []);
+
+  // Handle exiting canvas back to landing
+  const handleExitCanvas = useCallback(() => {
+    setCurrentView('landing');
+  }, []);
+
   return (
-    <div className="fixed inset-0 flex flex-col bg-surface-1 text-text-primary overflow-hidden">
-      {showSplash && <Splash onDone={() => setShowSplash(false)} />}
+    <>
+      <AnimatePresence mode="wait">
+        {currentView === 'landing' && (
+          <motion.div
+            key="landing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+          >
+            <LandingPage onEnterCanvas={handleEnterCanvas} />
+          </motion.div>
+        )}
 
-      <LiveCursors
-        activeViewers={activeViewers}
-        cursors={cursors}
-        localIdentity={localIdentity}
-        broadcastCursor={broadcastCursor}
-      />
-
-      {/* Main content area */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Canvas */}
-        <div className="absolute inset-0 w-full h-full flex flex-col">
-          <Canvas
-            project={selectedProject}
-            selectedElementId={selectedElementId}
-            onSelectElement={handleSelectElement}
-            onTransformChange={handleTransformChange}
-            canvasControlsRef={canvasControls}
-            isEditing={isEditing && !isPreviewMode}
-            isCommentMode={isCommentMode}
-            onAddElement={handleAddElement}
-            onUpdateElementPosition={handleUpdateElementPosition}
-            onCanvasClick={handleCanvasClick}
-          />
-        </div>
-
-        {/* Floating Left Panel */}
-        <div className="absolute top-3 bottom-3 left-3 z-10 pointer-events-none flex flex-col">
-          <LeftPanel
-            selectedProject={selectedProject}
-            onSelectProject={handleSelectProject}
-            isEditing={isEditing}
-            onToggleEdit={setIsEditing}
-          />
-        </div>
-
-        {/* Floating Right Panel or Edit Toolbar */}
-        <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
-          {isEditing && !isPreviewMode ? (
-            <EditToolbar projectId={selectedProject.id} />
-          ) : (
-            <RightPanel
-              project={selectedProject}
-              selectedElement={selectedElement}
+        {currentView === 'canvas' && (
+          <motion.div
+            key="canvas"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="fixed inset-0 flex flex-col bg-surface-1 text-text-primary overflow-hidden"
+          >
+            <LiveCursors
               activeViewers={activeViewers}
+              cursors={cursors}
+              localIdentity={localIdentity}
+              broadcastCursor={broadcastCursor}
             />
-          )}
-        </div>
-      </div>
 
-      {/* Bottom Toolbar */}
-      <BottomToolbar
-        project={selectedProject}
-        scale={scale}
-        isEditing={isEditing}
-        isPreviewMode={isPreviewMode}
-        onTogglePreview={setIsPreviewMode}
-        onZoomIn={() => canvasControls.current.zoomIn()}
-        onZoomOut={() => canvasControls.current.zoomOut()}
-        onResetZoom={() => canvasControls.current.resetZoom()}
-        onFitToScreen={() => canvasControls.current.fitToScreen()}
-        onAddNote={handleAddNote}
-      />
-    </div>
+            {/* Main content area */}
+            <div className="flex flex-1 overflow-hidden relative">
+              {/* Canvas */}
+              <div className="absolute inset-0 w-full h-full flex flex-col">
+                <Canvas
+                  project={selectedProject}
+                  selectedElementId={selectedElementId}
+                  onSelectElement={handleSelectElement}
+                  onTransformChange={handleTransformChange}
+                  canvasControlsRef={canvasControls}
+                  isEditing={isEditing && !isPreviewMode}
+                  isCommentMode={isCommentMode}
+                  onAddElement={handleAddElement}
+                  onUpdateElementPosition={handleUpdateElementPosition}
+                  onCanvasClick={handleCanvasClick}
+                />
+              </div>
+
+              {/* Floating Left Panel */}
+              <div className="absolute top-3 bottom-3 left-3 z-10 pointer-events-none flex flex-col">
+                <LeftPanel
+                  selectedProject={selectedProject}
+                  onSelectProject={handleSelectProject}
+                  isEditing={isEditing}
+                  onToggleEdit={setIsEditing}
+                  onExit={handleExitCanvas}
+                />
+              </div>
+
+              {/* Floating Right Panel or Edit Toolbar */}
+              <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
+                {isEditing && !isPreviewMode ? (
+                  <EditToolbar projectId={selectedProject.id} />
+                ) : (
+                  <RightPanel
+                    project={selectedProject}
+                    selectedElement={selectedElement}
+                    activeViewers={activeViewers}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Toolbar */}
+            <BottomToolbar
+              project={selectedProject}
+              scale={scale}
+              isEditing={isEditing}
+              isPreviewMode={isPreviewMode}
+              onTogglePreview={setIsPreviewMode}
+              onZoomIn={() => canvasControls.current.zoomIn()}
+              onZoomOut={() => canvasControls.current.zoomOut()}
+              onResetZoom={() => canvasControls.current.resetZoom()}
+              onFitToScreen={() => canvasControls.current.fitToScreen()}
+              onAddNote={handleAddNote}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

@@ -83,7 +83,6 @@ export function useComments(projectId: string) {
           event: 'DELETE',
           schema: 'public',
           table: 'portfolio_comments',
-          filter: `project_id=eq.${projectId}`,
         },
         (payload) => {
           const deleted = payload.old as { id: string };
@@ -187,6 +186,7 @@ export function useComments(projectId: string) {
       return false;
     }
 
+    setComments(prev => prev.filter(c => c.id !== id));
     return true;
   }, [projectId]);
 
