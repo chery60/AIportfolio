@@ -34,9 +34,12 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: './portfolio/package-lock.json'
       - name: Install dependencies
+        working-directory: ./portfolio
         run: npm ci
       - name: Build
+        working-directory: ./portfolio
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -44,7 +47,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload dist folder
-          path: './dist'
+          path: './portfolio/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
