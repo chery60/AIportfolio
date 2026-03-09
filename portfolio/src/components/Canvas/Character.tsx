@@ -79,6 +79,7 @@ export default function Character({ targetX, targetY, color, elementBounds = [] 
     const targetRef = useRef({ x: initialPos.x, y: initialPos.y });
     const requestRef = useRef<number>(0);
     const boundsRef = useRef<ElementBounds[]>(elementBounds);
+    const lastTimeRef = useRef<number>(performance.now());
 
     // Ref to the DOM element for direct transform updates
     const charRef = useRef<HTMLDivElement>(null);
@@ -90,7 +91,7 @@ export default function Character({ targetX, targetY, color, elementBounds = [] 
     const isWalkingRef = useRef(false);
 
     // Speed in pixels per frame
-    const speed = 3.0;
+    const speed = 7.0;
 
     // Update target when props change — clamp to element borders
     useEffect(() => {
@@ -113,14 +114,20 @@ export default function Character({ targetX, targetY, color, elementBounds = [] 
     }, [targetX, targetY]);
 
     // The Game Loop
-    const updatePosition = () => {
+    const updatePosition = (time: number) => {
+        const dt = time - lastTimeRef.current;
+        lastTimeRef.current = time;
+        // Cap dt to prevent massive jumps if tab is inactive
+        const safeDt = Math.min(dt, 100);
+        const timeScale = safeDt / (1000 / 60);
+
         const dx = targetRef.current.x - posRef.current.x;
         const dy = targetRef.current.y - posRef.current.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 5) {
-            let vx = (dx / distance) * speed;
-            let vy = (dy / distance) * speed;
+            let vx = (dx / distance) * speed * timeScale;
+            let vy = (dy / distance) * speed * timeScale;
 
             let nextX = posRef.current.x + vx;
             let nextY = posRef.current.y + vy;
@@ -145,7 +152,7 @@ export default function Character({ targetX, targetY, color, elementBounds = [] 
 
                 // Adjust sliding speed: boost it to full 'speed' along the Y axis
                 // to slide along the obstacle
-                const slideSpeed = dy > 0 ? speed : -speed;
+                const slideSpeed = (dy > 0 ? speed : -speed) * timeScale;
                 // Only slide if moving makes sense (distance along y is significant)
                 if (Math.abs(dy) > 2) {
                     vy = slideSpeed;
@@ -162,7 +169,7 @@ export default function Character({ targetX, targetY, color, elementBounds = [] 
                 // Blocked vertically, slide horizontally
                 nextY = posRef.current.y;
 
-                const slideSpeed = dx > 0 ? speed : -speed;
+                const slideSpeed = (dx > 0 ? speed : -speed) * timeScale;
                 if (Math.abs(dx) > 2) {
                     vx = slideSpeed;
                 }
@@ -225,6 +232,7 @@ export default function Character({ targetX, targetY, color, elementBounds = [] 
 
     useEffect(() => {
         // Start loop
+        lastTimeRef.current = performance.now();
         requestRef.current = requestAnimationFrame(updatePosition);
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);

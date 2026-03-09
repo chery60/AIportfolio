@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CanvasTransform } from '../types';
 
-const MIN_SCALE = 0.2;
+const MIN_SCALE = 0.4;
 const MAX_SCALE = 3;
 const ZOOM_SENSITIVITY = 0.001;
 

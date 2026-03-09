@@ -16,6 +16,7 @@ const GAME_CHANNEL = 'crewmate-dash-session';
 export function useGameSession() {
   const [sessionState, setSessionState] = useState<GameSessionState>('idle');
   const [currentPlayer, setCurrentPlayer] = useState<string | null>(null);
+  const [currentPlayerColor, setCurrentPlayerColor] = useState<string | undefined>(undefined);
   const [myName, setMyName] = useState<string>('');
   const [leaderboard, setLeaderboard] = useState<ScoreEntry[]>([]);
   const [isLoadingScores, setIsLoadingScores] = useState(false);
@@ -97,17 +98,27 @@ export function useGameSession() {
 
         if (players.length === 0) {
           setCurrentPlayer(null);
+          setCurrentPlayerColor(undefined);
           if (!isPlayingRef.current) {
             setSessionState(prev => prev === 'waiting' ? 'idle' : prev);
           }
         } else {
           const activePlayer = players[0];
           setCurrentPlayer(activePlayer.name ?? 'Someone');
+          setCurrentPlayerColor(activePlayer.color);
           if (!isPlayingRef.current) {
             setSessionState(prev =>
               prev === 'idle' || prev === 'waiting' ? 'waiting' : prev
             );
           }
+        }
+      });
+
+      // Listen for spectator sync broadcasts
+      channel.on('broadcast', { event: 'sync' }, (payload) => {
+        if (!isMounted) return;
+        if (!isPlayingRef.current) {
+          window.dispatchEvent(new CustomEvent('spectator-sync', { detail: payload.payload }));
         }
       });
 
@@ -128,7 +139,7 @@ export function useGameSession() {
   }, [fetchLeaderboard]);
 
   // Start playing — broadcast presence
-  const startPlaying = useCallback((name: string) => {
+  const startPlaying = useCallback((name: string, color?: string) => {
     myNameRef.current = name;
     setMyName(name);
     isPlayingRef.current = true;
@@ -139,8 +150,18 @@ export function useGameSession() {
     // Broadcast to others that we're playing (fire and forget)
     channelRef.current?.track({
       name,
+      color,
       sessionId: mySessionId.current,
       isPlaying: true,
+    }).catch(() => { });
+  }, []);
+
+  // Broadcast spectator state
+  const sendSpectatorSync = useCallback((state: any) => {
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'sync',
+      payload: state,
     }).catch(() => { });
   }, []);
 
@@ -184,6 +205,7 @@ export function useGameSession() {
   return {
     sessionState,
     currentPlayer,
+    currentPlayerColor,
     myName,
     leaderboard,
     isLoadingScores,
@@ -195,5 +217,6 @@ export function useGameSession() {
     resetGame,
     clearName,
     fetchLeaderboard,
+    sendSpectatorSync,
   };
 }

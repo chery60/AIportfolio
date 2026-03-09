@@ -9,6 +9,8 @@ import { useEffect, useRef, useCallback } from 'react';
 interface Props {
   playerColor: string;
   onGameOver: (score: number) => void;
+  isSpectator?: boolean;
+  onStateSync?: (state: any) => void;
 }
 
 type HazardKind = 'knife' | 'thief' | 'ghost';
@@ -62,13 +64,14 @@ const GRAVITY = 0.55;
 const JUMP_FORCE = -13;
 const DOUBLE_JUMP_FORCE = -11;
 const INITIAL_SPEED = 3.5;
-const SPEED_INC = 0.00075;
+// Increase difficulty scaling: speed increases faster over time
+const SPEED_INC = 0.002;
 
 // Hazard configs
 const HAZARD_CONFIGS: Record<HazardKind, { w: number; h: number; label: string; points: number }> = {
-  knife:  { w: 32, h: 36, label: '🔪 Scope Creep',       points: 10 },
-  thief:  { w: 38, h: 58, label: '🕵️ Stakeholder',        points: 15 },
-  ghost:  { w: 44, h: 44, label: '👻 Bad Brief',           points: 20 },
+  knife: { w: 32, h: 36, label: '🔪 Scope Creep', points: 10 },
+  thief: { w: 38, h: 58, label: '🕵️ Stakeholder', points: 15 },
+  ghost: { w: 44, h: 44, label: '👻 Bad Brief', points: 20 },
 };
 
 // Hazard accent colors (used for particles on hit)
@@ -103,7 +106,7 @@ function drawCrewmate(
   if (isDead) {
     // Spin and rise then fall, fade out — same feel as the canvas character dying
     const spin = (deadFrame / 18) * Math.PI * 2;
-    const arc  = Math.sin((deadFrame / 40) * Math.PI) * -40; // arc up then down
+    const arc = Math.sin((deadFrame / 40) * Math.PI) * -40; // arc up then down
     const fade = Math.max(0, 1 - deadFrame / 38);
     ctx.translate(cx, by + arc);
     ctx.rotate(spin);
@@ -332,13 +335,13 @@ function drawThief(ctx: CanvasRenderingContext2D, h: Hazard) {
   // Legs
   const legL = Math.sin(h.frame * 0.35) * 0.3;
   const legR = Math.sin(h.frame * 0.35 + Math.PI) * 0.3;
-  for (const [lx, rot] of [[-7, legL], [7, legR]] as [number,number][]) {
+  for (const [lx, rot] of [[-7, legL], [7, legR]] as [number, number][]) {
     ctx.save();
     ctx.translate(lx, -14);
     ctx.rotate(rot);
     ctx.fillStyle = '#1F1F1F';
     ctx.beginPath();
-    ctx.roundRect(-4, 0, 8, 14, [2,2,4,4]);
+    ctx.roundRect(-4, 0, 8, 14, [2, 2, 4, 4]);
     ctx.fill();
     ctx.restore();
   }
@@ -346,7 +349,7 @@ function drawThief(ctx: CanvasRenderingContext2D, h: Hazard) {
   // Body (trenchcoat)
   ctx.fillStyle = '#2D1B4E';
   ctx.beginPath();
-  ctx.roundRect(-12, -44 + bob, 24, 32, [6,6,4,4]);
+  ctx.roundRect(-12, -44 + bob, 24, 32, [6, 6, 4, 4]);
   ctx.fill();
 
   // Coat collar
@@ -495,14 +498,28 @@ function drawPlatform(ctx: CanvasRenderingContext2D, x: number, y: number, w: nu
   ctx.stroke();
 }
 
-export default function GameEngine({ playerColor, onGameOver }: Props) {
+export default function GameEngine({ playerColor, onGameOver, isSpectator, onStateSync }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const onGameOverRef = useRef(onGameOver);
+  const spectatorStateRef = useRef<any>(null);
+  const spectatorConsumedRef = useRef<boolean>(false);
+  const lastTimeRef = useRef<number>(performance.now());
+  const accumulatorRef = useRef<number>(0);
 
   useEffect(() => {
     onGameOverRef.current = onGameOver;
   }, [onGameOver]);
+
+  useEffect(() => {
+    if (!isSpectator) return;
+    const onSync = (e: any) => {
+      spectatorStateRef.current = e.detail;
+      spectatorConsumedRef.current = false; // Mark new packet as ready to consume
+    };
+    window.addEventListener('spectator-sync', onSync);
+    return () => window.removeEventListener('spectator-sync', onSync);
+  }, [isSpectator]);
 
   type GameState = {
     playerY: number;
@@ -566,123 +583,207 @@ export default function GameEngine({ playerColor, onGameOver }: Props) {
   }, []);
 
   // ── DUMMY to satisfy old references before full removal ──────────────────
-  const gameLoop = useCallback(() => {
+  const gameLoop = useCallback((time: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const s = stateRef.current;
 
-    s.frame++;
-    s.score = Math.floor(s.frame * 0.18) + s.coins * 5;
-    s.speed = INITIAL_SPEED + s.frame * SPEED_INC;
+    let dt = time - lastTimeRef.current;
+    lastTimeRef.current = time;
+    if (dt > 100) dt = 16.666;
+    accumulatorRef.current += dt;
+    const TIME_STEP = 1000 / 60;
 
-    // ── Physics ──────────────────────────────────────────────────────────
-    if (!s.gameOver) {
-      s.playerVY += GRAVITY;
-      s.playerY += s.playerVY;
-      if (s.playerY >= GROUND_Y - PH) {
-        s.playerY = GROUND_Y - PH;
-        s.playerVY = 0;
-        s.jumpsLeft = 2;
-      }
+    let shouldReturn = false;
+    while (accumulatorRef.current >= TIME_STEP) {
+      accumulatorRef.current -= TIME_STEP;
 
-      // Spawn hazards
-      const spawnInterval = Math.max(55, 110 - Math.floor(s.frame / 80));
-      if (s.frame % spawnInterval === 0) {
-        const kinds: HazardKind[] = ['knife', 'thief', 'ghost'];
-        // Ghosts only after frame 300
-        const available = s.frame > 300 ? kinds : kinds.slice(0, 2);
-        const kind = available[Math.floor(Math.random() * available.length)];
-        const cfg = HAZARD_CONFIGS[kind];
-        let yPos = GROUND_Y - cfg.h;
-        if (kind === 'ghost') {
-          yPos = GROUND_Y - cfg.h - 20 - Math.random() * (GROUND_Y * 0.4);
+      if (isSpectator) {
+        const sp = spectatorStateRef.current;
+        // 1. Consume the sync packet if it's new
+        if (sp && !spectatorConsumedRef.current) {
+          s.playerY = sp.y;
+          s.playerVY = sp.vy;
+          s.jumpsLeft = sp.jumpsLeft;
+          s.score = sp.score;
+          s.coins = sp.coins;
+          s.speed = sp.speed;
+          s.frame = sp.frame;
+          s.hazards = JSON.parse(JSON.stringify(sp.hazards || [])); // Deep copy to prevent mutating React state
+          s.coinItems = JSON.parse(JSON.stringify(sp.coinItems || [])); // Deep copy
+          s.gameOver = sp.gameOver;
+          s.deadFrame = sp.deadFrame;
+          spectatorConsumedRef.current = true;
         }
-        s.idCounter++;
-        s.hazards.push({ id: s.idCounter, kind, x: CW + 20, y: yPos, width: cfg.w, height: cfg.h, speed: s.speed, frame: 0 });
-      }
 
-      // Spawn coins every ~140 frames
-      if (s.frame % 140 === 70) {
-        s.idCounter++;
-        const coinY = GROUND_Y - PH - 40 - Math.random() * 80;
-        s.coinItems.push({ id: s.idCounter, x: CW + 20, y: coinY, collected: false, frame: 0 });
-      }
-
-      // Move hazards
-      s.hazards = s.hazards.map(h => ({ ...h, x: h.x - h.speed, frame: h.frame + 1 })).filter(h => h.x + h.width > -20);
-      s.coinItems = s.coinItems.map(c => ({ ...c, x: c.x - s.speed * 0.8, frame: c.frame + 1 })).filter(c => c.x + 20 > -20 && !c.collected);
-
-      // Move bg platforms
-      s.bgPlatforms = s.bgPlatforms.map(p => {
-        let nx = p.x - p.speed;
-        if (nx + p.w < 0) nx = CW + p.w;
-        return { ...p, x: nx };
-      });
-
-      // Move clouds
-      s.clouds = s.clouds.map(c => {
-        let nx = c.x - c.speed;
-        if (nx + c.width < 0) nx = CW + c.width;
-        return { ...c, x: nx };
-      });
-
-      // Collision with hazards (with generous margin)
-      const margin = 10;
-      const px = PLAYER_X - PW / 2 + margin;
-      const py = s.playerY + margin;
-      const pw2 = PW - margin * 2;
-      const ph2 = PH - margin * 2;
-      for (const h of s.hazards) {
-        if (px < h.x + h.width && px + pw2 > h.x && py < h.y + h.height && py + ph2 > h.y) {
-          s.gameOver = true;
-          // Spawn death particles
-          for (let i = 0; i < 16; i++) {
-            const angle = (i / 16) * Math.PI * 2;
-            s.particles.push({
-              x: PLAYER_X, y: s.playerY + PH / 2,
-              vx: Math.cos(angle) * (2 + Math.random() * 4),
-              vy: Math.sin(angle) * (2 + Math.random() * 4),
-              life: 40, maxLife: 40,
-              color: [playerColor, '#FF4444', '#FFD700'][Math.floor(Math.random() * 3)],
-              size: 3 + Math.random() * 5,
-            });
+        // 2. Client-side prediction (interpolate physics locally until next packet arrives)
+        if (!s.gameOver) {
+          s.frame++;
+          s.playerVY += GRAVITY;
+          s.playerY += s.playerVY;
+          if (s.playerY >= GROUND_Y - PH) {
+            s.playerY = GROUND_Y - PH;
+            s.playerVY = 0;
+            s.jumpsLeft = 2;
           }
+
+          s.hazards = s.hazards.map(h => ({ ...h, x: h.x - h.speed, frame: h.frame + 1 }));
+          s.coinItems = s.coinItems.map(c => ({ ...c, x: c.x - s.speed * 0.8, frame: c.frame + 1 }));
+        } else {
+          if (s.deadFrame < 40) s.deadFrame++;
+        }
+
+        // Advance platforms and clouds visually even if no update received
+        s.bgPlatforms = s.bgPlatforms.map(p => {
+          let nx = p.x - p.speed;
+          if (nx + p.w < 0) nx = CW + p.w;
+          return { ...p, x: nx };
+        });
+        s.clouds = s.clouds.map(c => {
+          let nx = c.x - c.speed;
+          if (nx + c.width < 0) nx = CW + c.width;
+          return { ...c, x: nx };
+        });
+
+        if (s.deadFrame >= 40 && s.gameOver) {
+          // end game locally for spectator if needed
+          shouldReturn = true;
           break;
         }
-      }
+      } else {
+        s.frame++;
+        s.score = Math.floor(s.frame * 0.18) + s.coins * 5;
+        s.speed = INITIAL_SPEED + s.frame * SPEED_INC;
 
-      // Coin collection
-      for (const c of s.coinItems) {
-        if (!c.collected && PLAYER_X > c.x && PLAYER_X < c.x + 20 && s.playerY < c.y + 20 && s.playerY + PH > c.y) {
-          c.collected = true;
-          s.coins++;
-          for (let i = 0; i < 6; i++) {
-            const angle = (i / 6) * Math.PI * 2;
-            s.particles.push({
-              x: c.x + 10, y: c.y + 10,
-              vx: Math.cos(angle) * (1 + Math.random() * 3),
-              vy: Math.sin(angle) * (1 + Math.random() * 3) - 2,
-              life: 25, maxLife: 25,
-              color: '#FFD700', size: 3 + Math.random() * 3,
-            });
+        // ── Physics ──────────────────────────────────────────────────────────
+        if (!s.gameOver) {
+          s.playerVY += GRAVITY;
+          s.playerY += s.playerVY;
+          if (s.playerY >= GROUND_Y - PH) {
+            s.playerY = GROUND_Y - PH;
+            s.playerVY = 0;
+            s.jumpsLeft = 2;
+          }
+
+          // Spawn hazards
+          const spawnInterval = Math.max(55, 110 - Math.floor(s.frame / 80));
+          if (s.frame % spawnInterval === 0) {
+            const kinds: HazardKind[] = ['knife', 'thief', 'ghost'];
+            // Ghosts only after frame 300
+            const available = s.frame > 300 ? kinds : kinds.slice(0, 2);
+            const kind = available[Math.floor(Math.random() * available.length)];
+            const cfg = HAZARD_CONFIGS[kind];
+            let yPos = GROUND_Y - cfg.h;
+            if (kind === 'ghost') {
+              yPos = GROUND_Y - cfg.h - 20 - Math.random() * (GROUND_Y * 0.4);
+            }
+            s.idCounter++;
+            s.hazards.push({ id: s.idCounter, kind, x: CW + 20, y: yPos, width: cfg.w, height: cfg.h, speed: s.speed, frame: 0 });
+          }
+
+          // Spawn coins every ~140 frames
+          if (s.frame % 140 === 70) {
+            s.idCounter++;
+            const coinY = GROUND_Y - PH - 40 - Math.random() * 80;
+            s.coinItems.push({ id: s.idCounter, x: CW + 20, y: coinY, collected: false, frame: 0 });
+          }
+
+          // Move hazards
+          s.hazards = s.hazards.map(h => ({ ...h, x: h.x - h.speed, frame: h.frame + 1 })).filter(h => h.x + h.width > -20);
+          s.coinItems = s.coinItems.map(c => ({ ...c, x: c.x - s.speed * 0.8, frame: c.frame + 1 })).filter(c => c.x + 20 > -20 && !c.collected);
+
+          // Move bg platforms
+          s.bgPlatforms = s.bgPlatforms.map(p => {
+            let nx = p.x - p.speed;
+            if (nx + p.w < 0) nx = CW + p.w;
+            return { ...p, x: nx };
+          });
+
+          // Move clouds
+          s.clouds = s.clouds.map(c => {
+            let nx = c.x - c.speed;
+            if (nx + c.width < 0) nx = CW + c.width;
+            return { ...c, x: nx };
+          });
+
+          // Collision with hazards (with generous margin)
+          const margin = 10;
+          const px = PLAYER_X - PW / 2 + margin;
+          const py = s.playerY + margin;
+          const pw2 = PW - margin * 2;
+          const ph2 = PH - margin * 2;
+          for (const h of s.hazards) {
+            if (px < h.x + h.width && px + pw2 > h.x && py < h.y + h.height && py + ph2 > h.y) {
+              s.gameOver = true;
+              // Spawn death particles
+              for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2;
+                s.particles.push({
+                  x: PLAYER_X, y: s.playerY + PH / 2,
+                  vx: Math.cos(angle) * (2 + Math.random() * 4),
+                  vy: Math.sin(angle) * (2 + Math.random() * 4),
+                  life: 40, maxLife: 40,
+                  color: [playerColor, '#FF4444', '#FFD700'][Math.floor(Math.random() * 3)],
+                  size: 3 + Math.random() * 5,
+                });
+              }
+              break;
+            }
+          }
+
+          // Coin collection
+          for (const c of s.coinItems) {
+            if (!c.collected && PLAYER_X > c.x && PLAYER_X < c.x + 20 && s.playerY < c.y + 20 && s.playerY + PH > c.y) {
+              c.collected = true;
+              s.coins++;
+              for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                s.particles.push({
+                  x: c.x + 10, y: c.y + 10,
+                  vx: Math.cos(angle) * (1 + Math.random() * 3),
+                  vy: Math.sin(angle) * (1 + Math.random() * 3) - 2,
+                  life: 25, maxLife: 25,
+                  color: '#FFD700', size: 3 + Math.random() * 3,
+                });
+              }
+            }
+          }
+        } else {
+          // Dead animation
+          s.deadFrame++;
+          if (s.deadFrame === 40) {
+            onGameOverRef.current(s.score);
+            shouldReturn = true;
+            break;
           }
         }
-      }
-    } else {
-      // Dead animation
-      s.deadFrame++;
-      if (s.deadFrame === 40) {
-        onGameOverRef.current(s.score);
-        return;
-      }
-    }
 
-    // Update particles
-    s.particles = s.particles.map(p => ({
-      ...p, x: p.x + p.vx, y: p.y + p.vy, vy: p.vy + 0.2, life: p.life - 1,
-    })).filter(p => p.life > 0);
+        if (!isSpectator && onStateSync && s.frame % 4 === 0) {
+          onStateSync({
+            y: s.playerY,
+            vy: s.playerVY,
+            jumpsLeft: s.jumpsLeft,
+            score: s.score,
+            coins: s.coins,
+            speed: s.speed,
+            frame: s.frame,
+            hazards: s.hazards,
+            coinItems: s.coinItems,
+            gameOver: s.gameOver,
+            deadFrame: s.deadFrame,
+          });
+        }
+      } // End of outer else (!isSpectator)
+
+      // Update particles
+      s.particles = s.particles.map(p => ({
+        ...p, x: p.x + p.vx, y: p.y + p.vy, vy: p.vy + 0.2, life: p.life - 1,
+      })).filter(p => p.life > 0);
+    } // End of while loop
+
+    if (shouldReturn) return;
 
     // ── Draw ─────────────────────────────────────────────────────────────
 
@@ -821,6 +922,7 @@ export default function GameEngine({ playerColor, onGameOver }: Props) {
 
   // Keyboard handler
   useEffect(() => {
+    if (isSpectator) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
@@ -829,10 +931,12 @@ export default function GameEngine({ playerColor, onGameOver }: Props) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [jump]);
+  }, [jump, isSpectator]);
 
   // Start / reset game loop
   useEffect(() => {
+    lastTimeRef.current = performance.now();
+    accumulatorRef.current = 0;
     stateRef.current = {
       playerY: GROUND_Y - PH,
       playerVY: 0,
@@ -873,9 +977,9 @@ export default function GameEngine({ playerColor, onGameOver }: Props) {
       ref={canvasRef}
       width={CW}
       height={CH}
-      className="cursor-pointer block w-full h-full"
+      className={`block w-full h-full ${isSpectator ? 'cursor-default' : 'cursor-pointer'}`}
       style={{ objectFit: 'contain' }}
-      onClick={jump}
+      onClick={isSpectator ? undefined : jump}
     />
   );
 }

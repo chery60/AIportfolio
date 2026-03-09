@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
-import { Sparkles, Download, ExternalLink, ArrowDown } from 'lucide-react';
+import { Sparkles, Download, ExternalLink, ArrowDown, Briefcase, Compass, ChevronDown, Check, X, File as FileIcon } from 'lucide-react';
 import Character from './Canvas/Character';
+import { createChatSession, type ChatIntent } from '../lib/gemini';
+import { saveConversationLog } from '../lib/analytics';
 
-// ── Mock AI Data ────────────────────────────────────────────────────────────
+// ── Persona & Local Data ────────────────────────────────────────────────────────────
 const PERSONA = {
     name: 'Sai Charan',
     role: 'Product Designer',
@@ -15,6 +17,14 @@ interface ChatMessage {
     id: string;
     role: 'user' | 'assistant';
     content: string;
+    attachments?: Attachment[];
+}
+
+export interface Attachment {
+    file: File;
+    base64Data: string;
+    mimeType: string;
+    previewUrl?: string; // For images
 }
 
 const STARTER_PROMPTS = [
@@ -23,37 +33,51 @@ const STARTER_PROMPTS = [
     { label: '🚀 Show me projects', prompt: 'What are his recent projects?' },
 ];
 
-const MOCK_RESPONSES: Record<string, string> = {
-    'Tell me about Sai Charan':
-        "Sai Charan is a **Product Designer** who specializes in building end-to-end design systems for enterprise and consumer products. He's worked at Oracle's Food & Beverage division, designing self-ordering kiosks, user management platforms, and B2B analytics dashboards.\n\nHe combines UX research, interaction design, and a deep understanding of data to ship products that truly solve problems. He's also passionate about AI-powered tools and vibe-coded experiments. 🎨",
-    'What kind of products does Sai Charan design?':
-        "Sai designs a diverse range of products:\n\n🥡 **Oracle Symphony Kiosk** — Self-ordering kiosk for QSRs & stadiums\n👥 **User Management** — Unified admin platform across Oracle products\n🏢 **Companies Platform** — Enterprise finance & company management\n📱 **Flow** — Task management mobile app\n📊 **Nexus B2B Analytics** — Web analytics dashboard\n🤖 **Beacon AI** — AI-powered navigation product\n\nHe works across the full spectrum from 0→1 products to system-level redesigns.",
-    'What are his recent projects?':
-        "Here are Sai's most recent projects:\n\n1. **Oracle Symphony Kiosk** (2024) — Guest self-ordering kiosk designed from scratch, covering hardware & software UX\n2. **User Management** (2024) — Unified user management system for Oracle FBGBU\n3. **Companies Platform** — Enterprise finance platform design\n4. **Flow — Task Management** — Mobile app for task & project management\n5. **Nexus B2B Analytics** — Web-based B2B analytics dashboard\n6. **Beacon AI Navigation** — AI-powered product for intelligent navigation\n\n👇 Scroll down to explore each project on the interactive canvas!",
-};
-
-const DEFAULT_RESPONSE =
-    "That's a great question! Sai Charan is a Product Designer focused on enterprise UX, AI tools, and creative experiments. Scroll down to explore his project canvas and see his work in action! 🎯";
-
+const RECRUITER_QUESTIONS = [
+    { id: 'exp', label: '/experience', text: 'Can you walk me through your most relevant experience for this role?' },
+    { id: 'process', label: '/process', text: 'What is your typical design process from concept to handoff?' },
+    { id: 'impact', label: '/impact', text: 'What project are you most proud of and what was its business impact?' },
+    { id: 'challenge', label: '/challenge', text: 'Tell me about a time you faced a significant design challenge and how you overcame it.' },
+    { id: 'tools', label: '/tools', text: 'What design and prototyping tools are you most proficient in?' }
+];
 // ── Typing Animation Hook ───────────────────────────────────────────────────
 function useTypewriter(text: string, speed = 12) {
     const [displayed, setDisplayed] = useState('');
     const [done, setDone] = useState(false);
+    const indexRef = useRef(0);
+    const textRef = useRef(text);
 
     useEffect(() => {
-        setDisplayed('');
-        setDone(false);
-        let i = 0;
+        // Only reset if the text actually changed to a brand new text
+        // This prevents re-renders from restarting the typing animation midway
+        if (text !== textRef.current) {
+            setDisplayed('');
+            setDone(false);
+            indexRef.current = 0;
+            textRef.current = text;
+        }
+
+        // If we've already done typing this text, just return
+        if (indexRef.current >= text.length) {
+            if (!done) {
+                setDisplayed(text);
+                setDone(true);
+            }
+            return;
+        }
+
         const timer = setInterval(() => {
-            i++;
-            setDisplayed(text.slice(0, i));
-            if (i >= text.length) {
+            indexRef.current++;
+            setDisplayed(text.slice(0, indexRef.current));
+
+            if (indexRef.current >= text.length) {
                 clearInterval(timer);
                 setDone(true);
             }
         }, speed);
+
         return () => clearInterval(timer);
-    }, [text, speed]);
+    }, [text, speed, done]);
 
     return { displayed, done };
 }
@@ -78,8 +102,26 @@ function ChatBubble({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+            className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}
         >
+            {/* Render User Attachments */}
+            {isUser && message.attachments && message.attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-end max-w-[85%]">
+                    {message.attachments.map((att, idx) => (
+                        <div key={idx} className="relative rounded-xl overflow-hidden border border-white/10 bg-[#1A1B2E]">
+                            {att.mimeType.startsWith('image/') && att.previewUrl ? (
+                                <img src={att.previewUrl} alt="attachment" className="w-auto h-24 object-cover" />
+                            ) : (
+                                <div className="flex items-center gap-2 px-3 py-2 h-12">
+                                    <FileIcon className="w-4 h-4 text-[#7C5CFC]" />
+                                    <span className="text-xs text-[#E4E4E5] truncate max-w-[120px]">{att.file.name}</span>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
             <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser
                     ? 'bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white'
@@ -116,7 +158,28 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // AI Integration
+    const [intent, setIntent] = useState<ChatIntent>('explore');
+    const [isIntentDropdownOpen, setIsIntentDropdownOpen] = useState(false);
+
+    // Slash commands
+    const [isSlashMenuOpen, setIsSlashMenuOpen] = useState(false);
+    const [slashIndex, setSlashIndex] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chatSessionRef = useRef<any>(null);
+    const messagesRef = useRef<ChatMessage[]>([]); // To access latest in unmount
+    const hasSavedRef = useRef(false);
+
+    useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
+
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const rightPanelRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const landingRef = useRef<HTMLDivElement>(null);
     const [mousePos, setMousePos] = useState({ x: 200, y: 300 });
@@ -139,6 +202,13 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
 
     useEffect(() => {
         const handleWheel = (e: WheelEvent) => {
+            // If the user scrolls anywhere inside the right chat panel, immediately return
+            // and let the browser handle standard scrolling (i.e. chat history overflow).
+            // This prevents opening the canvas when interacting with the chat interface.
+            if (rightPanelRef.current && rightPanelRef.current.contains(e.target as Node)) {
+                return;
+            }
+
             // Prevent actual scrolling of the body to keep hijacked scroll
             e.preventDefault();
 
@@ -162,6 +232,43 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             if (wrapper) wrapper.removeEventListener('wheel', handleWheel);
         };
     }, [rawProgress, onEnterCanvas]);
+
+    // Cleanup -> Save log
+    useEffect(() => {
+        return () => {
+            if (!hasSavedRef.current && messagesRef.current.length > 0) {
+                hasSavedRef.current = true;
+                saveConversationLog(intent, messagesRef.current);
+            }
+        };
+    }, [intent]);
+
+    // Init Gemini
+    useEffect(() => {
+        let isMounted = true;
+        const init = async () => {
+            try {
+                const session = await createChatSession(intent);
+                if (isMounted) chatSessionRef.current = session;
+            } catch (err) {
+                console.error("Failed to init chat", err);
+            }
+        };
+        init();
+        return () => { isMounted = false; };
+    }, [intent]);
+
+    const handleIntentChange = (newIntent: ChatIntent) => {
+        if (newIntent === intent) return;
+        // Save current session if there are messages
+        if (messages.length > 0 && !hasSavedRef.current) {
+            saveConversationLog(intent, messages);
+            setMessages([]);
+        }
+        setIntent(newIntent);
+        setIsIntentDropdownOpen(false);
+        hasSavedRef.current = false;
+    };
 
     // Track mouse position for the Among Us character
     const handleLandingMouseMove = useCallback((e: React.MouseEvent) => {
@@ -188,45 +295,207 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                if (typeof reader.result === 'string') {
+                    // Extract just the base64 part
+                    const base64String = reader.result.split(',')[1];
+                    resolve(base64String);
+                } else {
+                    reject(new Error('Failed to read file ad base64'));
+                }
+            };
+            reader.onerror = error => reject(error);
+        });
+    };
+
+    const handleFiles = async (files: FileList | File[]) => {
+        const newAttachments: Attachment[] = [];
+        for (const file of Array.from(files)) {
+            try {
+                const base64Data = await fileToBase64(file);
+                let previewUrl;
+                if (file.type.startsWith('image/')) {
+                    previewUrl = URL.createObjectURL(file);
+                }
+                newAttachments.push({
+                    file,
+                    base64Data,
+                    mimeType: file.type,
+                    previewUrl,
+                });
+            } catch (err) {
+                console.error("Error processing file", err);
+            }
+        }
+        setAttachments(prev => [...prev, ...newAttachments]);
+    };
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            handleFiles(e.target.files);
+        }
+        // Reset input so the same file can be selected again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent) => {
+        if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+            handleFiles(e.clipboardData.files);
+        }
+    };
+
+    const removeAttachment = (indexToRemove: number) => {
+        setAttachments(prev => {
+            const up = [...prev];
+            const removed = up.splice(indexToRemove, 1)[0];
+            if (removed.previewUrl) {
+                URL.revokeObjectURL(removed.previewUrl);
+            }
+            return up;
+        });
+    };
+
     const sendMessage = useCallback(
-        (text: string) => {
-            if (isTyping) return;
+        async (text: string) => {
+            if (isTyping || (!text.trim() && attachments.length === 0)) return;
+
+            const currentAttachments = [...attachments];
+            setAttachments([]); // Clear immediately for UI responsiveness
 
             const userMsg: ChatMessage = {
                 id: `user-${Date.now()}`,
                 role: 'user',
                 content: text,
+                attachments: currentAttachments.length > 0 ? currentAttachments : undefined
             };
             setMessages((prev) => [...prev, userMsg]);
             setInputValue('');
+            if (inputRef.current) {
+                inputRef.current.style.height = '44px';
+                inputRef.current.focus();
+            }
             setIsTyping(true);
 
-            // Simulate AI response delay
-            setTimeout(() => {
-                const response =
-                    MOCK_RESPONSES[text] || DEFAULT_RESPONSE;
+            try {
+                if (!chatSessionRef.current) {
+                    chatSessionRef.current = await createChatSession(intent);
+                }
+
+                // Construct Gemini payload
+                const parts: Array<string | { inlineData: { data: string, mimeType: string } }> = [];
+                if (text) parts.push(text);
+
+                for (const att of currentAttachments) {
+                    parts.push({
+                        inlineData: {
+                            data: att.base64Data,
+                            mimeType: att.mimeType
+                        }
+                    });
+                }
+
+                // If no parts (only spaces or empty string with no attachments), don't send
+                if (parts.length === 0) {
+                    setIsTyping(false);
+                    return;
+                }
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const result = await chatSessionRef.current.sendMessage(parts);
+                const responseText = result.response.text();
+
                 const aiMsg: ChatMessage = {
                     id: `ai-${Date.now()}`,
                     role: 'assistant',
-                    content: response,
+                    content: responseText,
                 };
                 setMessages((prev) => [...prev, aiMsg]);
+            } catch (err: unknown) {
+                console.error("Chat error", err);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const isQuotaError = (err as any)?.message?.includes('429') || (err as any)?.status === 429;
+                const errorResponse = isQuotaError
+                    ? "I'm currently receiving a lot of messages and have reached my quota! Please scroll down the website to view the projects Sai Charan has worked on."
+                    : "Oops, something went wrong with the connection. Please try again or scroll down to view my projects.";
+
+                setMessages((prev) => [...prev, {
+                    id: `ai-err-${Date.now()}`,
+                    role: 'assistant',
+                    content: errorResponse
+                }]);
+            } finally {
                 setIsTyping(false);
-            }, 600 + Math.random() * 400);
+            }
         },
-        [isTyping]
+        [isTyping, intent, attachments]
     );
 
     const handleSend = () => {
         const text = inputValue.trim();
-        if (!text) return;
+        if (!text && attachments.length === 0) return;
         sendMessage(text);
     };
 
+    const filteredCommands = RECRUITER_QUESTIONS.filter(cmd =>
+        cmd.label.toLowerCase().startsWith(inputValue.toLowerCase())
+    );
+
+    const handleSelectCommand = (text: string) => {
+        setInputValue(text);
+        setIsSlashMenuOpen(false);
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (isSlashMenuOpen) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSlashIndex((prev) => Math.min(prev + 1, filteredCommands.length - 1));
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSlashIndex((prev) => Math.max(prev - 1, 0));
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredCommands.length > 0) {
+                    handleSelectCommand(filteredCommands[slashIndex].text);
+                } else {
+                    setIsSlashMenuOpen(false);
+                }
+                return;
+            }
+            if (e.key === 'Escape') {
+                setIsSlashMenuOpen(false);
+                return;
+            }
+        }
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const val = e.target.value;
+        setInputValue(val);
+
+        if (val.startsWith('/')) {
+            setIsSlashMenuOpen(true);
+            setSlashIndex(0);
+        } else {
+            setIsSlashMenuOpen(false);
         }
     };
 
@@ -362,6 +631,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
 
                     {/* ═══ RIGHT SECTION — AI Chat Panel ═══ */}
                     <motion.div
+                        ref={rightPanelRef}
                         initial={{ opacity: 0, x: 40 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
@@ -369,9 +639,9 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     >
                         <div className="w-full h-full border-l border-white/[0.04] bg-[#09090B] flex flex-col pt-12">
                             {/* Chat messages area */}
-                            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-thin">
-                                {messages.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
+                            <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 scrollbar-thin scroll-smooth flex flex-col">
+                                {messages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-8">
                                         <div className="w-16 h-16 relative flex items-center justify-center mb-2">
                                             <div className="absolute inset-0 bg-[#4C3B73]/20 rounded-2xl blur-xl pb-2"></div>
                                             <div className="w-14 h-14 rounded-2xl bg-[#2A2141] border border-[#4C3B73]/40 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(76,59,115,0.4)]">
@@ -403,69 +673,175 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                             ))}
                                         </div>
                                     </div>
+                                ) : (
+                                    <div className="flex flex-col gap-4">
+                                        <AnimatePresence>
+                                            {messages.map((msg, idx) => (
+                                                <ChatBubble
+                                                    key={msg.id}
+                                                    message={msg}
+                                                    isLatest={idx === messages.length - 1}
+                                                />
+                                            ))}
+                                        </AnimatePresence>
+
+                                        {isTyping && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                className="flex gap-1.5 px-4 py-3"
+                                            >
+                                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            </motion.div>
+                                        )}
+
+                                        <div ref={chatEndRef} />
+                                    </div>
                                 )}
-
-                                <AnimatePresence>
-                                    {messages.map((msg, idx) => (
-                                        <ChatBubble
-                                            key={msg.id}
-                                            message={msg}
-                                            isLatest={idx === messages.length - 1}
-                                        />
-                                    ))}
-                                </AnimatePresence>
-
-                                {isTyping && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="flex gap-1.5 px-4 py-3"
-                                    >
-                                        <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '0ms' }} />
-                                        <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '150ms' }} />
-                                        <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '300ms' }} />
-                                    </motion.div>
-                                )}
-
-                                <div ref={chatEndRef} />
                             </div>
 
                             {/* Chat input area */}
-                            <div className="p-4 bg-[#09090B]">
+                            <div className="p-4 bg-[#09090B] flex flex-col gap-2">
+                                {/* Attachment Previews */}
+                                {attachments.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 px-2 pt-2">
+                                        {attachments.map((att, idx) => (
+                                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#1A1A1E]">
+                                                {att.mimeType.startsWith('image/') && att.previewUrl ? (
+                                                    <img src={att.previewUrl} alt="preview" className="w-16 h-16 object-cover" />
+                                                ) : (
+                                                    <div className="w-16 h-16 flex flex-col items-center justify-center p-1">
+                                                        <FileIcon className="w-5 h-5 text-[#86868B] mb-1" />
+                                                        <span className="text-[9px] text-[#A1A1AA] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase() || 'FILE'}</span>
+                                                    </div>
+                                                )}
+                                                <button
+                                                    onClick={() => removeAttachment(idx)}
+                                                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
                                 <div className="bg-[#121214] border border-white/[0.06] rounded-[20px] shadow-sm relative focus-within:border-white/[0.12] transition-colors duration-200">
+                                    {/* Slash command menu */}
+                                    <AnimatePresence>
+                                        {isSlashMenuOpen && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute bottom-[calc(100%+8px)] left-0 w-full bg-[#121214] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 z-[100]"
+                                            >
+                                                <div className="px-3 py-1.5 text-xs font-semibold text-[#86868B] uppercase tracking-wider">
+                                                    Recruiter Questions
+                                                </div>
+                                                <div className="max-h-[200px] overflow-y-auto scrollbar-thin">
+                                                    {filteredCommands.map((cmd, idx) => (
+                                                        <button
+                                                            key={cmd.id}
+                                                            onMouseEnter={() => setSlashIndex(idx)}
+                                                            onClick={() => handleSelectCommand(cmd.text)}
+                                                            className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${slashIndex === idx
+                                                                ? 'bg-white/10 text-[#F4F4F5]'
+                                                                : 'text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5]'
+                                                                }`}
+                                                        >
+                                                            <span className="flex flex-col gap-0.5">
+                                                                <span className="font-medium text-[#7C5CFC]">{cmd.label}</span>
+                                                                <span className="text-[11px] opacity-80 truncate max-w-[400px]">{cmd.text}</span>
+                                                            </span>
+                                                        </button>
+                                                    ))}
+                                                    {filteredCommands.length === 0 && (
+                                                        <div className="px-3 py-2 text-[12px] text-[#71717A]">No commands found</div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
                                     <textarea
                                         ref={inputRef}
                                         value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
+                                        onChange={handleInputChange}
                                         onKeyDown={handleKeyDown}
-                                        placeholder="Describe what you want to create..."
+                                        onPaste={handlePaste}
+                                        placeholder={attachments.length > 0 ? "Add a message..." : "Describe what you want to create or type / for recruiter questions..."}
                                         rows={1}
                                         className="w-full bg-transparent text-[#E4E4E5] text-[13px] px-4 py-3 min-h-[44px] max-h-[200px] placeholder-[#71717A] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-[20px]"
                                     />
                                     <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
                                         <div className="flex items-center gap-2">
-                                            <button className="w-6 h-6 rounded-full flex items-center justify-center text-[#A1A1AA] hover:text-[#E4E4E5] hover:bg-white/5 transition-colors">
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleFileInputChange}
+                                                className="hidden"
+                                                multiple
+                                                accept="image/*,application/pdf,.doc,.docx,.txt"
+                                            />
+                                            <button onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full flex items-center justify-center text-[#A1A1AA] hover:text-[#E4E4E5] hover:bg-white/5 transition-colors">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                                            </button>
-                                            <button className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] text-[#A1A1AA] hover:text-[#E4E4E5] transition-colors border border-white/[0.06] bg-[#18181B]">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /></svg>
-                                                Aspect Ratio
                                             </button>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] text-[#A1A1AA] bg-transparent hover:text-[#E4E4E5] transition-colors cursor-pointer">
-                                                Alchemy 4.5 Pro
-                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                            <div className="relative">
+                                                <div
+                                                    onClick={() => setIsIntentDropdownOpen(!isIntentDropdownOpen)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] text-[#A1A1AA] bg-[#1A1A1E] hover:text-[#E4E4E5] hover:bg-white/10 transition-colors cursor-pointer border border-white/[0.04]"
+                                                >
+                                                    {intent === 'hire' ? <Briefcase className="w-3 h-3 text-emerald-400" /> : <Compass className="w-3 h-3 text-blue-400" />}
+                                                    {intent === 'hire' ? 'Intend to Hire' : 'Just Exploring'}
+                                                    <ChevronDown className={`w-3 h-3 transition-transform ${isIntentDropdownOpen ? 'rotate-180' : ''}`} />
+                                                </div>
+
+                                                <AnimatePresence>
+                                                    {isIntentDropdownOpen && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                            transition={{ duration: 0.15 }}
+                                                            className="absolute bottom-[calc(100%+8px)] left-0 w-40 bg-[#121214] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1 z-[100]"
+                                                        >
+                                                            <button
+                                                                onClick={() => handleIntentChange('hire')}
+                                                                className="w-full text-left px-3 py-2 text-[11px] text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5] flex items-center justify-between transition-colors"
+                                                            >
+                                                                <span className="flex items-center gap-2">
+                                                                    <Briefcase className="w-3 h-3 text-emerald-400" /> Intend to Hire
+                                                                </span>
+                                                                {intent === 'hire' && <Check className="w-3 h-3" />}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleIntentChange('explore')}
+                                                                className="w-full text-left px-3 py-2 text-[11px] text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5] flex items-center justify-between transition-colors"
+                                                            >
+                                                                <span className="flex items-center gap-2">
+                                                                    <Compass className="w-3 h-3 text-blue-400" /> Just Exploring
+                                                                </span>
+                                                                {intent === 'explore' && <Check className="w-3 h-3" />}
+                                                            </button>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
                                             <button
                                                 onClick={handleSend}
-                                                disabled={!inputValue.trim() || isTyping}
-                                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${inputValue.trim() && !isTyping
+                                                disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
+                                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${((inputValue.trim() || attachments.length > 0) && !isTyping)
                                                     ? 'bg-white text-black hover:bg-[#E4E4E5] shadow-md'
                                                     : 'bg-[#27272A] text-[#52525B] cursor-not-allowed'
                                                     }`}
                                             >
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${inputValue.trim() && !isTyping ? 'animate-in slide-in-from-bottom-2 fade-in duration-200' : ''}`}><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${(inputValue.trim() || attachments.length > 0) && !isTyping ? 'animate-in slide-in-from-bottom-2 fade-in duration-200' : ''}`}><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
                                             </button>
                                         </div>
                                     </div>
@@ -493,14 +869,14 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     transition={{ delay: 1.5, duration: 0.8 }}
                     className="absolute bottom-8 left-1/4 -translate-x-1/2 flex flex-col items-center gap-2 z-10 pointer-events-none"
                 >
-                    <span className="text-[10px] text-[#3A3C5A] font-mono tracking-widest uppercase">
+                    <span className="text-[10px] text-[#8B8FAF] font-mono tracking-widest uppercase">
                         Scroll to explore projects
                     </span>
                     <motion.div
                         animate={{ y: [0, 8, 0] }}
                         transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
                     >
-                        <ArrowDown className="w-4 h-4 text-[#3A3C5A]" />
+                        <ArrowDown className="w-4 h-4 text-[#8B8FAF]" />
                     </motion.div>
                 </motion.div>
             </motion.div>

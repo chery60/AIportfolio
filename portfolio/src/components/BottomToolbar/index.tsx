@@ -188,7 +188,7 @@ export default function BottomToolbar({
         className="px-3 h-10 rounded-full text-xs font-bold text-text-primary hover:bg-surface-1 transition-colors min-w-[64px]"
         title="Reset Zoom to 100%"
       >
-        {Math.round(scale * 100)}%
+        {Math.max(0, Math.round(scale * 100) - 40)}%
       </button>
 
       <ToolBtn onClick={onZoomIn} title="Zoom In (+)">

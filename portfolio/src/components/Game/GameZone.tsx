@@ -3,7 +3,6 @@ import type { GameZoneElement } from '../../types';
 import { useGameSession } from '../../hooks/useGameSession';
 import GameEngine from './GameEngine';
 import Leaderboard from './Leaderboard';
-import WaitingRoom from './WaitingRoom';
 
 interface Props {
   element: GameZoneElement;
@@ -21,6 +20,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
   const {
     sessionState,
     currentPlayer,
+    currentPlayerColor,
     myName,
     leaderboard,
     isLoadingScores,
@@ -29,6 +29,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
     endGame,
     resetGame,
     clearName,
+    sendSpectatorSync,
   } = useGameSession();
 
   const [nameInput, setNameInput] = useState('');
@@ -38,7 +39,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
   const handleStartClick = () => {
     // If we already have a saved name from a previous game, reuse it directly
     if (myName && myName.length >= 2) {
-      startPlaying(myName);
+      startPlaying(myName, SESSION_COLOR);
       return;
     }
     const trimmed = nameInput.trim();
@@ -52,7 +53,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
       return;
     }
     setNameError('');
-    startPlaying(trimmed);
+    startPlaying(trimmed, SESSION_COLOR);
   };
 
   const handleGameOver = useCallback((score: number) => {
@@ -117,13 +118,19 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
 
       {/* ── IDLE STATE — full-width game preview + leaderboard below ── */}
       {(sessionState === 'idle' || sessionState === 'waiting') && (
-        <div className="flex flex-col h-[calc(100%-52px-180px)]">
+        <div className="flex flex-col h-[calc(100%-52px-210px)]">
           {sessionState === 'waiting' ? (
-            <WaitingRoom
-              currentPlayerName={currentPlayer}
-              playerColor={SESSION_COLOR}
-              onCancel={resetGame}
-            />
+            <div className="flex-1 w-full relative bg-[#0A0B0F] overflow-hidden">
+              <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full border border-white/10">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-white/80 text-xs font-semibold">Watching {currentPlayer} live</span>
+              </div>
+              <GameEngine
+                playerColor={currentPlayerColor || SESSION_COLOR}
+                onGameOver={() => { }}
+                isSpectator={true}
+              />
+            </div>
           ) : (
             <>
               {/* Game preview card — full width, grows to fill */}
@@ -147,22 +154,22 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
                 <div className="flex items-center justify-center gap-6">
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-xl">⎵</span>
-                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Space / Tap<br/>to Jump</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Space / Tap<br />to Jump</span>
                   </div>
                   <div className="w-px h-10 bg-white/10" />
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-xl">⬆️</span>
-                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Double<br/>Jump</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Double<br />Jump</span>
                   </div>
                   <div className="w-px h-10 bg-white/10" />
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-xl">🚫</span>
-                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Dodge<br/>Obstacles</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Dodge<br />Obstacles</span>
                   </div>
                   <div className="w-px h-10 bg-white/10" />
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-xl">★</span>
-                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Collect<br/>Coins</span>
+                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Collect<br />Coins</span>
                   </div>
                 </div>
               </div>
@@ -248,6 +255,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
             <GameEngine
               playerColor={SESSION_COLOR}
               onGameOver={handleGameOver}
+              onStateSync={sendSpectatorSync}
             />
           </div>
         </div>
@@ -255,7 +263,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
 
       {/* ── GAME OVER STATE ── */}
       {sessionState === 'gameover' && (
-        <div className="flex flex-col h-[calc(100%-52px)] overflow-y-auto">
+        <div className="flex flex-col h-[calc(100%-52px)] overflow-hidden">
           {/* Result card — full width */}
           <div className="flex flex-col items-center justify-center gap-5 flex-1 px-8 py-6">
             {/* Score display */}
@@ -327,7 +335,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
 
           {/* Leaderboard — below result, full width */}
           <div
-            className="px-8 py-5"
+            className="px-8 pt-5 pb-8"
             style={{ borderTop: 'rgba(255,255,255,0.06) 1px solid' }}
           >
             <Leaderboard
@@ -343,11 +351,11 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
       {/* Leaderboard — always visible below idle state */}
       {(sessionState === 'idle' || sessionState === 'waiting') && (
         <div
-          className="absolute bottom-0 left-0 right-0 px-8 py-4 overflow-y-auto"
+          className="absolute bottom-0 left-0 right-0 px-8 pt-4 pb-6 overflow-hidden"
           style={{
             borderTop: '1px solid rgba(255,255,255,0.06)',
             background: 'rgba(10,11,15,0.95)',
-            maxHeight: 180,
+            maxHeight: 210,
           }}
         >
           <Leaderboard
