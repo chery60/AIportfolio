@@ -8,8 +8,11 @@ import RightPanel from './components/RightPanel';
 import BottomToolbar from './components/BottomToolbar';
 import LandingPage from './components/LandingPage';
 import EditToolbar from './components/EditToolbar';
+import MobileCanvasView from './components/MobileCanvasView';
+import MobileProjectList from './components/MobileProjectList';
 import { supabase } from './lib/supabase';
 import { useRealtimeSession } from './hooks/useRealtimeSession';
+import { useIsMobile } from './hooks/useIsMobile';
 
 const defaultControls: CanvasControlsRef = {
   zoomIn: () => { },
@@ -22,6 +25,7 @@ const defaultControls: CanvasControlsRef = {
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'canvas'>('landing');
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
   const [selectedProject, setSelectedProject] = useState<Project>(PROJECTS[0]);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
@@ -30,6 +34,7 @@ export default function App() {
   const [isCommentMode, setIsCommentMode] = useState(false);
   const canvasControls = useRef<CanvasControlsRef>(defaultControls);
   const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession();
+  const isMobile = useIsMobile();
 
   const selectedElement = selectedProject.canvasElements.find(
     el => el.id === selectedElementId
@@ -112,6 +117,24 @@ export default function App() {
   const handleSelectProject = useCallback((project: Project) => {
     setSelectedProject(project);
     setSelectedElementId(null);
+  }, []);
+
+  // Mobile: select a project and go to detail view
+  const handleMobileSelectProject = useCallback((project: Project) => {
+    setSelectedProject(project);
+    setSelectedElementId(null);
+    setMobileView('detail');
+  }, []);
+
+  // Mobile: back from detail to list
+  const handleMobileBackToList = useCallback(() => {
+    setMobileView('list');
+  }, []);
+
+  // Mobile: back from list to landing
+  const handleMobileExitToLanding = useCallback(() => {
+    setCurrentView('landing');
+    setMobileView('list');
   }, []);
 
   const handleSelectElement = useCallback((id: string | null) => {
@@ -287,66 +310,86 @@ export default function App() {
             transition={{ duration: 0.5, ease: 'easeOut' }}
             className="fixed inset-0 flex flex-col bg-surface-1 text-text-primary overflow-hidden"
           >
-            {/* Main content area */}
-            <div className="flex flex-1 overflow-hidden relative">
-              {/* Canvas */}
-              <div className="absolute inset-0 w-full h-full flex flex-col">
-                <Canvas
+            {isMobile ? (
+              /* ── Mobile Views ── */
+              mobileView === 'list' ? (
+                <MobileProjectList
+                  onSelectProject={handleMobileSelectProject}
+                  onExit={handleMobileExitToLanding}
+                />
+              ) : (
+                <MobileCanvasView
                   project={selectedProject}
-                  selectedElementId={selectedElementId}
-                  onSelectElement={handleSelectElement}
-                  onTransformChange={handleTransformChange}
-                  canvasControlsRef={canvasControls}
-                  isEditing={isEditing && !isPreviewMode}
-                  isCommentMode={isCommentMode}
-                  onAddElement={handleAddElement}
-                  onUpdateElementPosition={handleUpdateElementPosition}
-                  onCanvasClick={handleCanvasClick}
+                  onSelectProject={handleMobileSelectProject}
+                  onBack={handleMobileBackToList}
                   activeViewers={activeViewers}
-                  cursors={cursors}
-                  localIdentity={localIdentity}
-                  broadcastCursor={broadcastCursor}
                 />
-              </div>
+              )
+            ) : (
+              /* ── Desktop Canvas View ── */
+              <>
+                {/* Main content area */}
+                <div className="flex flex-1 overflow-hidden relative">
+                  {/* Canvas */}
+                  <div className="absolute inset-0 w-full h-full flex flex-col">
+                    <Canvas
+                      project={selectedProject}
+                      selectedElementId={selectedElementId}
+                      onSelectElement={handleSelectElement}
+                      onTransformChange={handleTransformChange}
+                      canvasControlsRef={canvasControls}
+                      isEditing={isEditing && !isPreviewMode}
+                      isCommentMode={isCommentMode}
+                      onAddElement={handleAddElement}
+                      onUpdateElementPosition={handleUpdateElementPosition}
+                      onCanvasClick={handleCanvasClick}
+                      activeViewers={activeViewers}
+                      cursors={cursors}
+                      localIdentity={localIdentity}
+                      broadcastCursor={broadcastCursor}
+                    />
+                  </div>
 
-              {/* Floating Left Panel */}
-              <div className="absolute top-3 bottom-3 left-3 z-10 pointer-events-none flex flex-col">
-                <LeftPanel
-                  selectedProject={selectedProject}
-                  onSelectProject={handleSelectProject}
+                  {/* Floating Left Panel */}
+                  <div className="absolute top-3 bottom-3 left-3 z-10 pointer-events-none flex flex-col">
+                    <LeftPanel
+                      selectedProject={selectedProject}
+                      onSelectProject={handleSelectProject}
+                      isEditing={isEditing}
+                      onToggleEdit={setIsEditing}
+                      onExit={handleExitCanvas}
+                    />
+                  </div>
+
+                  {/* Floating Right Panel or Edit Toolbar */}
+                  <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
+                    {isEditing && !isPreviewMode ? (
+                      <EditToolbar projectId={selectedProject.id} />
+                    ) : (
+                      <RightPanel
+                        project={selectedProject}
+                        selectedElement={selectedElement}
+                        activeViewers={activeViewers}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Bottom Toolbar */}
+                <BottomToolbar
+                  project={selectedProject}
+                  scale={scale}
                   isEditing={isEditing}
-                  onToggleEdit={setIsEditing}
-                  onExit={handleExitCanvas}
+                  isPreviewMode={isPreviewMode}
+                  onTogglePreview={setIsPreviewMode}
+                  onZoomIn={() => canvasControls.current.zoomIn()}
+                  onZoomOut={() => canvasControls.current.zoomOut()}
+                  onResetZoom={() => canvasControls.current.resetZoom()}
+                  onFitToScreen={() => canvasControls.current.fitToScreen()}
+                  onAddNote={handleAddNote}
                 />
-              </div>
-
-              {/* Floating Right Panel or Edit Toolbar */}
-              <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
-                {isEditing && !isPreviewMode ? (
-                  <EditToolbar projectId={selectedProject.id} />
-                ) : (
-                  <RightPanel
-                    project={selectedProject}
-                    selectedElement={selectedElement}
-                    activeViewers={activeViewers}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Bottom Toolbar */}
-            <BottomToolbar
-              project={selectedProject}
-              scale={scale}
-              isEditing={isEditing}
-              isPreviewMode={isPreviewMode}
-              onTogglePreview={setIsPreviewMode}
-              onZoomIn={() => canvasControls.current.zoomIn()}
-              onZoomOut={() => canvasControls.current.zoomOut()}
-              onResetZoom={() => canvasControls.current.resetZoom()}
-              onFitToScreen={() => canvasControls.current.fitToScreen()}
-              onAddNote={handleAddNote}
-            />
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

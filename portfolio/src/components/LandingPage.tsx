@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
-import { Sparkles, Download, ExternalLink, ArrowDown, Briefcase, Compass, ChevronDown, Check, X, File as FileIcon } from 'lucide-react';
+import { Sparkles, Download, ExternalLink, ArrowDown, Briefcase, Compass, ChevronDown, Check, X, File as FileIcon, MessageCircle, ArrowLeft } from 'lucide-react';
 import Character from './Canvas/Character';
 import { createChatSession, type ChatIntent } from '../lib/gemini';
 import { saveConversationLog } from '../lib/analytics';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 // ── Persona & Local Data ────────────────────────────────────────────────────────────
 const PERSONA = {
@@ -155,6 +156,8 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
+    const isMobile = useIsMobile();
+    const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -200,11 +203,13 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     const canvasOpacity = useTransform(progress, [0, 0.15], [0, 1]);
     const canvasRadius = useTransform(progress, [0, 1], ["24px", "0px"]);
 
+    // Touch tracking for mobile swipe-to-canvas
+    const touchStartY = useRef<number | null>(null);
+
     useEffect(() => {
         const handleWheel = (e: WheelEvent) => {
             // If the user scrolls anywhere inside the right chat panel, immediately return
             // and let the browser handle standard scrolling (i.e. chat history overflow).
-            // This prevents opening the canvas when interacting with the chat interface.
             if (rightPanelRef.current && rightPanelRef.current.contains(e.target as Node)) {
                 return;
             }
@@ -224,14 +229,55 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             }
         };
 
+        // Touch handlers for mobile
+        const handleTouchStart = (e: TouchEvent) => {
+            if (rightPanelRef.current && rightPanelRef.current.contains(e.target as Node)) return;
+            if (isMobileChatOpen) return;
+            touchStartY.current = e.touches[0].clientY;
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (rightPanelRef.current && rightPanelRef.current.contains(e.target as Node)) return;
+            if (isMobileChatOpen) return;
+            if (touchStartY.current === null) return;
+
+            const deltaY = touchStartY.current - e.touches[0].clientY;
+            if (deltaY > 0) {
+                e.preventDefault();
+                let target = rawProgress.get() + deltaY * 0.003;
+                target = Math.max(0, Math.min(1.05, target));
+                rawProgress.set(target);
+                touchStartY.current = e.touches[0].clientY;
+
+                if (target >= 1 && !hasTriggeredEnter.current) {
+                    hasTriggeredEnter.current = true;
+                    setTimeout(() => {
+                        onEnterCanvas();
+                    }, 100);
+                }
+            }
+        };
+
+        const handleTouchEnd = () => {
+            touchStartY.current = null;
+        };
+
         const wrapper = landingRef.current;
         if (wrapper) {
             wrapper.addEventListener('wheel', handleWheel, { passive: false });
+            wrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
+            wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
+            wrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
         return () => {
-            if (wrapper) wrapper.removeEventListener('wheel', handleWheel);
+            if (wrapper) {
+                wrapper.removeEventListener('wheel', handleWheel);
+                wrapper.removeEventListener('touchstart', handleTouchStart);
+                wrapper.removeEventListener('touchmove', handleTouchMove);
+                wrapper.removeEventListener('touchend', handleTouchEnd);
+            }
         };
-    }, [rawProgress, onEnterCanvas]);
+    }, [rawProgress, onEnterCanvas, isMobileChatOpen]);
 
     // Cleanup -> Save log
     useEffect(() => {
@@ -499,21 +545,170 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
         }
     };
 
+    // ── Mobile Chat Overlay Component ──────────────────────────────────
+    const renderMobileChatOverlay = () => (
+        <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed inset-0 z-[200] bg-[#09090B] flex flex-col"
+        >
+            {/* Chat Header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] mobile-safe-top">
+                <button
+                    onClick={() => setIsMobileChatOpen(false)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="flex-1">
+                    <p className="text-sm font-semibold text-[#F4F4F5]">Portfolio AI Assistant</p>
+                    <p className="text-[11px] text-[#86868B]">Ask about Sai Charan's work</p>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+
+            {/* Chat Messages */}
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scroll-smooth flex flex-col">
+                {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-8">
+                        <div className="w-16 h-16 relative flex items-center justify-center mb-2">
+                            <div className="absolute inset-0 bg-[#4C3B73]/20 rounded-2xl blur-xl pb-2"></div>
+                            <div className="w-14 h-14 rounded-2xl bg-[#2A2141] border border-[#4C3B73]/40 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(76,59,115,0.4)]">
+                                <Sparkles className="w-6 h-6 text-[#9D7BFF]" />
+                            </div>
+                        </div>
+                        <div className="text-center mb-6">
+                            <p className="text-base font-semibold text-[#F4F4F5] mb-1.5">
+                                Portfolio AI Assistant
+                            </p>
+                            <p className="text-[13px] text-[#86868B] max-w-[280px]">
+                                Ask me anything about Sai Charan's work,
+                                skills, and projects.
+                            </p>
+                        </div>
+                        <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
+                            {STARTER_PROMPTS.map((sp) => (
+                                <button
+                                    key={sp.label}
+                                    onClick={() => sendMessage(sp.prompt)}
+                                    className="w-full text-left px-5 py-3.5 rounded-xl border border-white/[0.04] bg-[#121214] text-[13px] text-[#A1A1AA] hover:text-[#F4F4F5] hover:border-white/[0.08] hover:bg-[#1A1A1E] transition-all flex items-center group"
+                                >
+                                    <span className="group-hover:translate-x-1 inline-block transition-transform">
+                                        {sp.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-4">
+                        <AnimatePresence>
+                            {messages.map((msg, idx) => (
+                                <ChatBubble
+                                    key={msg.id}
+                                    message={msg}
+                                    isLatest={idx === messages.length - 1}
+                                />
+                            ))}
+                        </AnimatePresence>
+                        {isTyping && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex gap-1.5 px-4 py-3"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </motion.div>
+                        )}
+                        <div ref={chatEndRef} />
+                    </div>
+                )}
+            </div>
+
+            {/* Chat Input */}
+            <div className="p-3 bg-[#09090B] border-t border-white/[0.06] mobile-safe-bottom">
+                {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 px-2 pt-2 pb-1">
+                        {attachments.map((att, idx) => (
+                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#1A1A1E]">
+                                {att.mimeType.startsWith('image/') && att.previewUrl ? (
+                                    <img src={att.previewUrl} alt="preview" className="w-14 h-14 object-cover" />
+                                ) : (
+                                    <div className="w-14 h-14 flex flex-col items-center justify-center p-1">
+                                        <FileIcon className="w-4 h-4 text-[#86868B] mb-1" />
+                                        <span className="text-[8px] text-[#A1A1AA] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase()}</span>
+                                    </div>
+                                )}
+                                <button
+                                    onClick={() => removeAttachment(idx)}
+                                    className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white flex items-center justify-center"
+                                >
+                                    <X className="w-2.5 h-2.5" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <div className="bg-[#121214] border border-white/[0.06] rounded-2xl relative focus-within:border-white/[0.12] transition-colors duration-200">
+                    <textarea
+                        ref={inputRef}
+                        value={inputValue}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        onPaste={handlePaste}
+                        placeholder="Ask about Sai Charan..."
+                        rows={1}
+                        className="w-full bg-transparent text-[#E4E4E5] text-[13px] px-4 py-3 min-h-[44px] max-h-[120px] placeholder-[#71717A] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-2xl"
+                    />
+                    <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
+                        <div className="flex items-center gap-2">
+                            <input type="file" ref={fileInputRef} onChange={handleFileInputChange} className="hidden" multiple accept="image/*,application/pdf,.doc,.docx,.txt" />
+                            <button onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full flex items-center justify-center text-[#A1A1AA] hover:text-[#E4E4E5] hover:bg-white/5 transition-colors">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                            </button>
+                        </div>
+                        <button
+                            onClick={handleSend}
+                            disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${((inputValue.trim() || attachments.length > 0) && !isTyping)
+                                    ? 'bg-white text-black hover:bg-[#E4E4E5] shadow-md'
+                                    : 'bg-[#27272A] text-[#52525B] cursor-not-allowed'
+                                }`}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+
     return (
         <div
             ref={landingRef}
             className="fixed inset-0 z-50 overflow-hidden bg-[#0A0B0F]"
-            onMouseMove={handleLandingMouseMove}
+            onMouseMove={!isMobile ? handleLandingMouseMove : undefined}
         >
-            {/* ── Walking Among Us Character (follows cursor) ──────────── */}
-            <div className="fixed inset-0 pointer-events-none z-[60]">
-                <Character
-                    targetX={mousePos.x}
-                    targetY={mousePos.y}
-                    color="#7B5CFA"
-                    elementBounds={[]}
-                />
-            </div>
+            {/* ── Walking Among Us Character (desktop only) ──────────── */}
+            {!isMobile && (
+                <div className="fixed inset-0 pointer-events-none z-[60]">
+                    <Character
+                        targetX={mousePos.x}
+                        targetY={mousePos.y}
+                        color="#7B5CFA"
+                        elementBounds={[]}
+                    />
+                </div>
+            )}
+
+            {/* ── Mobile Chat Overlay ──────────────────────────────────── */}
+            <AnimatePresence>
+                {isMobile && isMobileChatOpen && renderMobileChatOverlay()}
+            </AnimatePresence>
 
             {/* ── MAIN CONTENT LAYER (fades/scales down on scroll) ──────── */}
             <motion.div
@@ -562,17 +757,17 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     </div>
                 </div>
 
-                {/* ── Two-column layout ──────────────────────────────────────── */}
-                <div className="relative z-10 flex items-stretch w-full h-screen">
+                {/* ── Layout — two-column desktop, single-column mobile ── */}
+                <div className={`relative z-10 flex items-stretch w-full h-screen ${isMobile ? 'flex-col' : ''}`}>
                     {/* ═══ LEFT SECTION — Creative intro ═══ */}
-                    <div className="flex-1 flex flex-col justify-center px-6 lg:px-12 xl:px-24">
+                    <div className={`flex flex-col justify-center ${isMobile ? 'flex-1 px-6 pt-16' : 'flex-1 px-6 lg:px-12 xl:px-24'}`}>
                         {/* Name */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.4 }}
                         >
-                            <h1 className="text-5xl lg:text-6xl font-bold text-[#F0F0FF] tracking-tight leading-none mb-2">
+                            <h1 className={`${isMobile ? 'text-4xl' : 'text-5xl lg:text-6xl'} font-bold text-[#F0F0FF] tracking-tight leading-none mb-2`}>
                                 {PERSONA.name}
                             </h1>
                             <p className="text-lg text-[#7C5CFC] font-semibold mb-5">
@@ -629,237 +824,239 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                         </motion.div>
                     </div>
 
-                    {/* ═══ RIGHT SECTION — AI Chat Panel ═══ */}
-                    <motion.div
-                        ref={rightPanelRef}
-                        initial={{ opacity: 0, x: 40 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="w-[500px] xl:w-[640px] h-full"
-                    >
-                        <div className="w-full h-full border-l border-white/[0.04] bg-[#09090B] flex flex-col pt-12">
-                            {/* Chat messages area */}
-                            <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 scrollbar-thin scroll-smooth flex flex-col">
-                                {messages.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-8">
-                                        <div className="w-16 h-16 relative flex items-center justify-center mb-2">
-                                            <div className="absolute inset-0 bg-[#4C3B73]/20 rounded-2xl blur-xl pb-2"></div>
-                                            <div className="w-14 h-14 rounded-2xl bg-[#2A2141] border border-[#4C3B73]/40 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(76,59,115,0.4)]">
-                                                <Sparkles className="w-6 h-6 text-[#9D7BFF]" />
+                    {/* ═══ RIGHT SECTION — AI Chat Panel (desktop only) ═══ */}
+                    {!isMobile && (
+                        <motion.div
+                            ref={rightPanelRef}
+                            initial={{ opacity: 0, x: 40 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.6, delay: 0.3 }}
+                            className="w-[500px] xl:w-[640px] h-full"
+                        >
+                            <div className="w-full h-full border-l border-white/[0.04] bg-[#09090B] flex flex-col pt-12">
+                                {/* Chat messages area */}
+                                <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 scrollbar-thin scroll-smooth flex flex-col">
+                                    {messages.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center flex-1 gap-4 py-8">
+                                            <div className="w-16 h-16 relative flex items-center justify-center mb-2">
+                                                <div className="absolute inset-0 bg-[#4C3B73]/20 rounded-2xl blur-xl pb-2"></div>
+                                                <div className="w-14 h-14 rounded-2xl bg-[#2A2141] border border-[#4C3B73]/40 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(76,59,115,0.4)]">
+                                                    <Sparkles className="w-6 h-6 text-[#9D7BFF]" />
+                                                </div>
+                                            </div>
+                                            <div className="text-center mb-6">
+                                                <p className="text-base font-semibold text-[#F4F4F5] mb-1.5">
+                                                    Portfolio AI Assistant
+                                                </p>
+                                                <p className="text-[13px] text-[#86868B] max-w-[280px]">
+                                                    Ask me anything about Sai Charan's work,
+                                                    skills, and projects.
+                                                </p>
+                                            </div>
+
+                                            {/* Starter prompts */}
+                                            <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
+                                                {STARTER_PROMPTS.map((sp) => (
+                                                    <button
+                                                        key={sp.label}
+                                                        onClick={() => sendMessage(sp.prompt)}
+                                                        className="w-full text-left px-5 py-3.5 rounded-xl border border-white/[0.04] bg-[#121214] text-[13px] text-[#A1A1AA] hover:text-[#F4F4F5] hover:border-white/[0.08] hover:bg-[#1A1A1E] transition-all flex items-center group"
+                                                    >
+                                                        <span className="group-hover:translate-x-1 inline-block transition-transform">
+                                                            {sp.label}
+                                                        </span>
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
-                                        <div className="text-center mb-6">
-                                            <p className="text-base font-semibold text-[#F4F4F5] mb-1.5">
-                                                Portfolio AI Assistant
-                                            </p>
-                                            <p className="text-[13px] text-[#86868B] max-w-[280px]">
-                                                Ask me anything about Sai Charan's work,
-                                                skills, and projects.
-                                            </p>
-                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-4">
+                                            <AnimatePresence>
+                                                {messages.map((msg, idx) => (
+                                                    <ChatBubble
+                                                        key={msg.id}
+                                                        message={msg}
+                                                        isLatest={idx === messages.length - 1}
+                                                    />
+                                                ))}
+                                            </AnimatePresence>
 
-                                        {/* Starter prompts */}
-                                        <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
-                                            {STARTER_PROMPTS.map((sp) => (
-                                                <button
-                                                    key={sp.label}
-                                                    onClick={() => sendMessage(sp.prompt)}
-                                                    className="w-full text-left px-5 py-3.5 rounded-xl border border-white/[0.04] bg-[#121214] text-[13px] text-[#A1A1AA] hover:text-[#F4F4F5] hover:border-white/[0.08] hover:bg-[#1A1A1E] transition-all flex items-center group"
+                                            {isTyping && (
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    className="flex gap-1.5 px-4 py-3"
                                                 >
-                                                    <span className="group-hover:translate-x-1 inline-block transition-transform">
-                                                        {sp.label}
-                                                    </span>
-                                                </button>
+                                                    <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                    <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                    <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '300ms' }} />
+                                                </motion.div>
+                                            )}
+
+                                            <div ref={chatEndRef} />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Chat input area */}
+                                <div className="p-4 bg-[#09090B] flex flex-col gap-2">
+                                    {/* Attachment Previews */}
+                                    {attachments.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 px-2 pt-2">
+                                            {attachments.map((att, idx) => (
+                                                <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#1A1A1E]">
+                                                    {att.mimeType.startsWith('image/') && att.previewUrl ? (
+                                                        <img src={att.previewUrl} alt="preview" className="w-16 h-16 object-cover" />
+                                                    ) : (
+                                                        <div className="w-16 h-16 flex flex-col items-center justify-center p-1">
+                                                            <FileIcon className="w-5 h-5 text-[#86868B] mb-1" />
+                                                            <span className="text-[9px] text-[#A1A1AA] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase() || 'FILE'}</span>
+                                                        </div>
+                                                    )}
+                                                    <button
+                                                        onClick={() => removeAttachment(idx)}
+                                                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
                                             ))}
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col gap-4">
+                                    )}
+
+                                    <div className="bg-[#121214] border border-white/[0.06] rounded-[20px] shadow-sm relative focus-within:border-white/[0.12] transition-colors duration-200">
+                                        {/* Slash command menu */}
                                         <AnimatePresence>
-                                            {messages.map((msg, idx) => (
-                                                <ChatBubble
-                                                    key={msg.id}
-                                                    message={msg}
-                                                    isLatest={idx === messages.length - 1}
-                                                />
-                                            ))}
+                                            {isSlashMenuOpen && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    transition={{ duration: 0.15 }}
+                                                    className="absolute bottom-[calc(100%+8px)] left-0 w-full bg-[#121214] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 z-[100]"
+                                                >
+                                                    <div className="px-3 py-1.5 text-xs font-semibold text-[#86868B] uppercase tracking-wider">
+                                                        Recruiter Questions
+                                                    </div>
+                                                    <div className="max-h-[200px] overflow-y-auto scrollbar-thin">
+                                                        {filteredCommands.map((cmd, idx) => (
+                                                            <button
+                                                                key={cmd.id}
+                                                                onMouseEnter={() => setSlashIndex(idx)}
+                                                                onClick={() => handleSelectCommand(cmd.text)}
+                                                                className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${slashIndex === idx
+                                                                    ? 'bg-white/10 text-[#F4F4F5]'
+                                                                    : 'text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5]'
+                                                                    }`}
+                                                            >
+                                                                <span className="flex flex-col gap-0.5">
+                                                                    <span className="font-medium text-[#7C5CFC]">{cmd.label}</span>
+                                                                    <span className="text-[11px] opacity-80 truncate max-w-[400px]">{cmd.text}</span>
+                                                                </span>
+                                                            </button>
+                                                        ))}
+                                                        {filteredCommands.length === 0 && (
+                                                            <div className="px-3 py-2 text-[12px] text-[#71717A]">No commands found</div>
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+                                            )}
                                         </AnimatePresence>
 
-                                        {isTyping && (
-                                            <motion.div
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="flex gap-1.5 px-4 py-3"
-                                            >
-                                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                <div className="w-2 h-2 rounded-full bg-[#7C5CFC] animate-bounce" style={{ animationDelay: '300ms' }} />
-                                            </motion.div>
-                                        )}
-
-                                        <div ref={chatEndRef} />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Chat input area */}
-                            <div className="p-4 bg-[#09090B] flex flex-col gap-2">
-                                {/* Attachment Previews */}
-                                {attachments.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 px-2 pt-2">
-                                        {attachments.map((att, idx) => (
-                                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#1A1A1E]">
-                                                {att.mimeType.startsWith('image/') && att.previewUrl ? (
-                                                    <img src={att.previewUrl} alt="preview" className="w-16 h-16 object-cover" />
-                                                ) : (
-                                                    <div className="w-16 h-16 flex flex-col items-center justify-center p-1">
-                                                        <FileIcon className="w-5 h-5 text-[#86868B] mb-1" />
-                                                        <span className="text-[9px] text-[#A1A1AA] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase() || 'FILE'}</span>
-                                                    </div>
-                                                )}
-                                                <button
-                                                    onClick={() => removeAttachment(idx)}
-                                                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
-                                                >
-                                                    <X className="w-3 h-3" />
+                                        <textarea
+                                            ref={inputRef}
+                                            value={inputValue}
+                                            onChange={handleInputChange}
+                                            onKeyDown={handleKeyDown}
+                                            onPaste={handlePaste}
+                                            placeholder={attachments.length > 0 ? "Add a message..." : "Describe what you want to create or type / for recruiter questions..."}
+                                            rows={1}
+                                            className="w-full bg-transparent text-[#E4E4E5] text-[13px] px-4 py-3 min-h-[44px] max-h-[200px] placeholder-[#71717A] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-[20px]"
+                                        />
+                                        <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="file"
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileInputChange}
+                                                    className="hidden"
+                                                    multiple
+                                                    accept="image/*,application/pdf,.doc,.docx,.txt"
+                                                />
+                                                <button onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full flex items-center justify-center text-[#A1A1AA] hover:text-[#E4E4E5] hover:bg-white/5 transition-colors">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                                                 </button>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                            <div className="flex items-center gap-2">
+                                                <div className="relative">
+                                                    <div
+                                                        onClick={() => setIsIntentDropdownOpen(!isIntentDropdownOpen)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] text-[#A1A1AA] bg-[#1A1A1E] hover:text-[#E4E4E5] hover:bg-white/10 transition-colors cursor-pointer border border-white/[0.04]"
+                                                    >
+                                                        {intent === 'hire' ? <Briefcase className="w-3 h-3 text-emerald-400" /> : <Compass className="w-3 h-3 text-blue-400" />}
+                                                        {intent === 'hire' ? 'Intend to Hire' : 'Just Exploring'}
+                                                        <ChevronDown className={`w-3 h-3 transition-transform ${isIntentDropdownOpen ? 'rotate-180' : ''}`} />
+                                                    </div>
 
-                                <div className="bg-[#121214] border border-white/[0.06] rounded-[20px] shadow-sm relative focus-within:border-white/[0.12] transition-colors duration-200">
-                                    {/* Slash command menu */}
-                                    <AnimatePresence>
-                                        {isSlashMenuOpen && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                transition={{ duration: 0.15 }}
-                                                className="absolute bottom-[calc(100%+8px)] left-0 w-full bg-[#121214] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 z-[100]"
-                                            >
-                                                <div className="px-3 py-1.5 text-xs font-semibold text-[#86868B] uppercase tracking-wider">
-                                                    Recruiter Questions
+                                                    <AnimatePresence>
+                                                        {isIntentDropdownOpen && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                transition={{ duration: 0.15 }}
+                                                                className="absolute bottom-[calc(100%+8px)] left-0 w-40 bg-[#121214] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1 z-[100]"
+                                                            >
+                                                                <button
+                                                                    onClick={() => handleIntentChange('hire')}
+                                                                    className="w-full text-left px-3 py-2 text-[11px] text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5] flex items-center justify-between transition-colors"
+                                                                >
+                                                                    <span className="flex items-center gap-2">
+                                                                        <Briefcase className="w-3 h-3 text-emerald-400" /> Intend to Hire
+                                                                    </span>
+                                                                    {intent === 'hire' && <Check className="w-3 h-3" />}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleIntentChange('explore')}
+                                                                    className="w-full text-left px-3 py-2 text-[11px] text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5] flex items-center justify-between transition-colors"
+                                                                >
+                                                                    <span className="flex items-center gap-2">
+                                                                        <Compass className="w-3 h-3 text-blue-400" /> Just Exploring
+                                                                    </span>
+                                                                    {intent === 'explore' && <Check className="w-3 h-3" />}
+                                                                </button>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
                                                 </div>
-                                                <div className="max-h-[200px] overflow-y-auto scrollbar-thin">
-                                                    {filteredCommands.map((cmd, idx) => (
-                                                        <button
-                                                            key={cmd.id}
-                                                            onMouseEnter={() => setSlashIndex(idx)}
-                                                            onClick={() => handleSelectCommand(cmd.text)}
-                                                            className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${slashIndex === idx
-                                                                ? 'bg-white/10 text-[#F4F4F5]'
-                                                                : 'text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5]'
-                                                                }`}
-                                                        >
-                                                            <span className="flex flex-col gap-0.5">
-                                                                <span className="font-medium text-[#7C5CFC]">{cmd.label}</span>
-                                                                <span className="text-[11px] opacity-80 truncate max-w-[400px]">{cmd.text}</span>
-                                                            </span>
-                                                        </button>
-                                                    ))}
-                                                    {filteredCommands.length === 0 && (
-                                                        <div className="px-3 py-2 text-[12px] text-[#71717A]">No commands found</div>
-                                                    )}
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-
-                                    <textarea
-                                        ref={inputRef}
-                                        value={inputValue}
-                                        onChange={handleInputChange}
-                                        onKeyDown={handleKeyDown}
-                                        onPaste={handlePaste}
-                                        placeholder={attachments.length > 0 ? "Add a message..." : "Describe what you want to create or type / for recruiter questions..."}
-                                        rows={1}
-                                        className="w-full bg-transparent text-[#E4E4E5] text-[13px] px-4 py-3 min-h-[44px] max-h-[200px] placeholder-[#71717A] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-[20px]"
-                                    />
-                                    <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="file"
-                                                ref={fileInputRef}
-                                                onChange={handleFileInputChange}
-                                                className="hidden"
-                                                multiple
-                                                accept="image/*,application/pdf,.doc,.docx,.txt"
-                                            />
-                                            <button onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full flex items-center justify-center text-[#A1A1AA] hover:text-[#E4E4E5] hover:bg-white/5 transition-colors">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="relative">
-                                                <div
-                                                    onClick={() => setIsIntentDropdownOpen(!isIntentDropdownOpen)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] text-[#A1A1AA] bg-[#1A1A1E] hover:text-[#E4E4E5] hover:bg-white/10 transition-colors cursor-pointer border border-white/[0.04]"
+                                                <button
+                                                    onClick={handleSend}
+                                                    disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
+                                                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${((inputValue.trim() || attachments.length > 0) && !isTyping)
+                                                        ? 'bg-white text-black hover:bg-[#E4E4E5] shadow-md'
+                                                        : 'bg-[#27272A] text-[#52525B] cursor-not-allowed'
+                                                        }`}
                                                 >
-                                                    {intent === 'hire' ? <Briefcase className="w-3 h-3 text-emerald-400" /> : <Compass className="w-3 h-3 text-blue-400" />}
-                                                    {intent === 'hire' ? 'Intend to Hire' : 'Just Exploring'}
-                                                    <ChevronDown className={`w-3 h-3 transition-transform ${isIntentDropdownOpen ? 'rotate-180' : ''}`} />
-                                                </div>
-
-                                                <AnimatePresence>
-                                                    {isIntentDropdownOpen && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                            transition={{ duration: 0.15 }}
-                                                            className="absolute bottom-[calc(100%+8px)] left-0 w-40 bg-[#121214] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1 z-[100]"
-                                                        >
-                                                            <button
-                                                                onClick={() => handleIntentChange('hire')}
-                                                                className="w-full text-left px-3 py-2 text-[11px] text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5] flex items-center justify-between transition-colors"
-                                                            >
-                                                                <span className="flex items-center gap-2">
-                                                                    <Briefcase className="w-3 h-3 text-emerald-400" /> Intend to Hire
-                                                                </span>
-                                                                {intent === 'hire' && <Check className="w-3 h-3" />}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleIntentChange('explore')}
-                                                                className="w-full text-left px-3 py-2 text-[11px] text-[#A1A1AA] hover:bg-white/5 hover:text-[#F4F4F5] flex items-center justify-between transition-colors"
-                                                            >
-                                                                <span className="flex items-center gap-2">
-                                                                    <Compass className="w-3 h-3 text-blue-400" /> Just Exploring
-                                                                </span>
-                                                                {intent === 'explore' && <Check className="w-3 h-3" />}
-                                                            </button>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${(inputValue.trim() || attachments.length > 0) && !isTyping ? 'animate-in slide-in-from-bottom-2 fade-in duration-200' : ''}`}><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
+                                                </button>
                                             </div>
-                                            <button
-                                                onClick={handleSend}
-                                                disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
-                                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${((inputValue.trim() || attachments.length > 0) && !isTyping)
-                                                    ? 'bg-white text-black hover:bg-[#E4E4E5] shadow-md'
-                                                    : 'bg-[#27272A] text-[#52525B] cursor-not-allowed'
-                                                    }`}
-                                            >
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${(inputValue.trim() || attachments.length > 0) && !isTyping ? 'animate-in slide-in-from-bottom-2 fade-in duration-200' : ''}`}><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* New chat button */}
-                                <div className="flex justify-center mt-3">
-                                    <button
-                                        onClick={() => setMessages([])}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] text-[#71717A] hover:text-[#A1A1AA] transition-colors"
-                                    >
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                        New chat
-                                    </button>
+                                    {/* New chat button */}
+                                    <div className="flex justify-center mt-3">
+                                        <button
+                                            onClick={() => setMessages([])}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+                                        >
+                                            <Sparkles className="w-3.5 h-3.5" />
+                                            New chat
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    )}
                 </div>
 
                 {/* ── Scroll indicator ───────────────────────────────────────── */}
@@ -867,10 +1064,10 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.5, duration: 0.8 }}
-                    className="absolute bottom-8 left-1/4 -translate-x-1/2 flex flex-col items-center gap-2 z-10 pointer-events-none"
+                    className={`absolute bottom-8 flex flex-col items-center gap-2 z-10 pointer-events-none ${isMobile ? 'left-1/2 -translate-x-1/2' : 'left-1/4 -translate-x-1/2'}`}
                 >
                     <span className="text-[10px] text-[#8B8FAF] font-mono tracking-widest uppercase">
-                        Scroll to explore projects
+                        {isMobile ? 'Swipe up to explore projects' : 'Scroll to explore projects'}
                     </span>
                     <motion.div
                         animate={{ y: [0, 8, 0] }}
@@ -879,6 +1076,19 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                         <ArrowDown className="w-4 h-4 text-[#8B8FAF]" />
                     </motion.div>
                 </motion.div>
+
+                {/* ── Mobile Chat FAB ──────────────────────────────────────── */}
+                {isMobile && !isMobileChatOpen && (
+                    <motion.button
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 1, type: 'spring', stiffness: 260, damping: 20 }}
+                        onClick={() => setIsMobileChatOpen(true)}
+                        className="fixed bottom-24 right-5 z-[100] w-14 h-14 rounded-full bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white flex items-center justify-center shadow-lg shadow-[#7C5CFC]/30 active:scale-90 transition-transform mobile-safe-bottom"
+                    >
+                        <MessageCircle className="w-6 h-6" />
+                    </motion.button>
+                )}
             </motion.div>
 
             {/* ── Canvas Preview / Scroll Transition ────────────────────── */}
