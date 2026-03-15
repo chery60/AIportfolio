@@ -11,7 +11,7 @@ interface Props {
 export default function MobileProjectsTab({ onSelectProject }: Props) {
   return (
     <div className="h-full overflow-y-auto bg-[#0A0B0F]">
-      <div className="px-5 pt-4 pb-8">
+      <div className="px-5 pt-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
 
         {/* Header — same padding as Chat tab (px-5 py-4) */}
         <BlurFade delay={0}>

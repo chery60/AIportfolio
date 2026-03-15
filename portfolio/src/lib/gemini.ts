@@ -7,7 +7,7 @@ export type ChatIntent = 'hire' | 'explore';
 
 const CONTEXT_CHARAN = `
 Background:
-- Sai Charan Kalla is a Senior Product Designer with 6+ years of experience, based in Bangalore, India.
+- Sai Charan Kalla is a Senior Product Designer and specialist in enterprise and SaaS products, with 6+ years of experience, based in Bangalore, India.
 - Tech background graduate (BTech, Computer Science) turned designer. Entrepreneurial mindset. Learns from failures.
 - Email: kc60488charan@gmail.com
 - LinkedIn: www.linkedin.com/in/sai-charan-92a8ab13b/

@@ -21,7 +21,8 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="bottom-sheet-overlay"
+                        className="fixed inset-0 z-40"
+                        style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
                         onClick={onClose}
                     />
                     <motion.div
@@ -29,23 +30,37 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-                        className="bottom-sheet"
+                        className="fixed bottom-0 left-0 right-0 z-50"
+                        style={{
+                            background: '#111218',
+                            borderRadius: '20px 20px 0 0',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderBottom: 'none',
+                            maxHeight: '75vh',
+                        }}
                     >
-                        <div className="bottom-sheet-handle" />
+                        {/* Handle */}
+                        <div className="flex justify-center pt-3 pb-1">
+                            <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                        </div>
 
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-panel-border">
-                            <h3 className="text-sm font-bold text-text-primary">Switch Project</h3>
+                        <div
+                            className="flex items-center justify-between px-5 py-3"
+                            style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+                        >
+                            <h3 className="text-sm font-bold" style={{ color: '#F0F0FF' }}>Switch Project</h3>
                             <button
                                 onClick={onClose}
-                                className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-1 text-text-secondary hover:text-text-primary transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(240,240,255,0.5)' }}
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         {/* Project List */}
-                        <div className="px-4 py-3 max-h-[60vh] overflow-y-auto">
+                        <div className="px-4 py-3 overflow-y-auto" style={{ maxHeight: '55vh' }}>
                             <div className="space-y-1">
                                 {PROJECTS.map((project, idx) => {
                                     const isActive = selectedProject.id === project.id;
@@ -56,32 +71,36 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                                                 onSelectProject(project);
                                                 onClose();
                                             }}
-                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all ${isActive
-                                                    ? 'bg-surface-2 border border-panel-border shadow-sm'
-                                                    : 'hover:bg-surface-1 border border-transparent'
-                                                }`}
+                                            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all"
+                                            style={{
+                                                background: isActive ? `${project.accentColor}18` : 'rgba(255,255,255,0.04)',
+                                                border: `1px solid ${isActive ? project.accentColor + '35' : 'rgba(255,255,255,0.06)'}`,
+                                            }}
                                         >
                                             <div
-                                                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-mono font-bold text-sm"
+                                                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-mono font-bold text-sm"
                                                 style={{
-                                                    background: isActive ? `${project.accentColor}20` : '#F3F4F6',
-                                                    color: isActive ? project.accentColor : '#9CA3AF',
+                                                    background: isActive ? `${project.accentColor}25` : 'rgba(255,255,255,0.07)',
+                                                    color: isActive ? project.accentColor : 'rgba(240,240,255,0.35)',
                                                 }}
                                             >
-                                                {idx + 1}
+                                                {String(idx + 1).padStart(2, '0')}
                                             </div>
                                             <div className="flex-1 min-w-0 text-left">
-                                                <p className={`text-sm font-semibold truncate ${isActive ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                                <p
+                                                    className="text-sm font-semibold truncate"
+                                                    style={{ color: isActive ? '#F0F0FF' : 'rgba(240,240,255,0.6)' }}
+                                                >
                                                     {project.title}
                                                 </p>
-                                                <p className="text-xs text-text-secondary opacity-70 truncate mt-0.5">
+                                                <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(240,240,255,0.3)' }}>
                                                     {project.category} · {project.year}
                                                 </p>
                                             </div>
                                             {isActive ? (
                                                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: project.accentColor }} />
                                             ) : (
-                                                <ChevronRight className="w-4 h-4 text-text-secondary opacity-40 flex-shrink-0" />
+                                                <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(240,240,255,0.2)' }} />
                                             )}
                                         </button>
                                     );
@@ -89,7 +108,6 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                             </div>
                         </div>
 
-                        {/* Bottom safe area */}
                         <div className="mobile-safe-bottom" />
                     </motion.div>
                 </>

@@ -48,9 +48,7 @@ export default function MobileView({ activeViewers }: Props) {
       <div
         className="flex-1 overflow-hidden"
         style={{
-          paddingBottom: selectedProject
-            ? 0
-            : `calc(${DOCK_HEIGHT}px + env(safe-area-inset-bottom, 0px))`,
+          paddingBottom: selectedProject ? 0 : 0,
         }}
       >
         <AnimatePresence mode="wait">
@@ -101,34 +99,38 @@ export default function MobileView({ activeViewers }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── Bottom Dock ──────────────────────────────────────── */}
+      {/* ── Footer (transparent) + floating Dock ───────────────── */}
       {!selectedProject && (
-        <Dock>
-          <DockIcon
-            icon={<Home className="w-5 h-5" />}
-            label="Home"
-            isActive={activeTab === 'home' && !isChatOpen}
-            onClick={() => handleTabChange('home')}
-          />
-          <DockIcon
-            icon={<MessageCircle className="w-5 h-5" />}
-            label="Chat"
-            isActive={isChatOpen}
-            onClick={handleChatToggle}
-          />
-          <DockIcon
-            icon={<Grid2X2 className="w-5 h-5" />}
-            label="Projects"
-            isActive={activeTab === 'projects' && !isChatOpen}
-            onClick={() => handleTabChange('projects')}
-          />
-          <DockIcon
-            icon={<Gamepad2 className="w-5 h-5" />}
-            label="Game"
-            isActive={activeTab === 'game' && !isChatOpen}
-            onClick={() => handleTabChange('game')}
-          />
-        </Dock>
+        <footer className="fixed bottom-0 left-0 right-0 z-50 pt-4 pb-6 flex justify-center pointer-events-none mobile-safe-bottom bg-transparent">
+          <div className="pointer-events-auto bg-transparent">
+            <Dock>
+              <DockIcon
+                icon={<Home className="w-5 h-5" />}
+                label="Home"
+                isActive={activeTab === 'home' && !isChatOpen}
+                onClick={() => handleTabChange('home')}
+              />
+              <DockIcon
+                icon={<MessageCircle className="w-5 h-5" />}
+                label="Chat"
+                isActive={isChatOpen}
+                onClick={handleChatToggle}
+              />
+              <DockIcon
+                icon={<Grid2X2 className="w-5 h-5" />}
+                label="Projects"
+                isActive={activeTab === 'projects' && !isChatOpen}
+                onClick={() => handleTabChange('projects')}
+              />
+              <DockIcon
+                icon={<Gamepad2 className="w-5 h-5" />}
+                label="Game"
+                isActive={activeTab === 'game' && !isChatOpen}
+                onClick={() => handleTabChange('game')}
+              />
+            </Dock>
+          </div>
+        </footer>
       )}
     </div>
   );

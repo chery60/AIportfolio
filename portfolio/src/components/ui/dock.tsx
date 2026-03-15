@@ -63,6 +63,7 @@ export function Dock({ children, className }: DockProps) {
         'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
         'bg-[#111218]/95 backdrop-blur-xl border border-[#1E1F2C]',
         'rounded-full w-fit px-2',
+        'shadow-[0_-4px_24px_rgba(0,0,0,0.4)]',
         className
       )}
     >

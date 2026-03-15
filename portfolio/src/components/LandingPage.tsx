@@ -18,7 +18,7 @@ const PERSONA = {
     role: 'Senior Product Designer',
     bio: (
         <>
-            Adaptive designer with a strong passion for <Highlighter color="#7C5CFC80"><span className="text-white">UX Design</span></Highlighter>. I help companies design efficient experiences based on <Highlighter action="underline" color="#FF6B9Dcc"><span className="text-white">user-centric strategy</span></Highlighter>, with the aim of user and customer satisfaction. On a path to become <Highlighter action="highlight" color="#87CEFA80"><span className="text-white">irreplaceable by AI</span></Highlighter> — a lifelong learner who values craft above all.
+            Specialist in enterprise and SaaS products. Adaptive designer with a strong passion for <Highlighter color="#7C5CFC80"><span className="text-white">UX Design</span></Highlighter>. I help companies design efficient experiences based on <Highlighter action="underline" color="#FF6B9Dcc"><span className="text-white">user-centric strategy</span></Highlighter>, with the aim of user and customer satisfaction. On a path to become <Highlighter action="highlight" color="#87CEFA80"><span className="text-white">irreplaceable by AI</span></Highlighter> — a lifelong learner who values craft above all.
         </>
     ),
     codeLiner: 'const passion = "Designing for humans, powered by craft"',
@@ -850,7 +850,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             </h1>
                             <p className="text-lg text-[#7C5CFC] font-semibold mb-5 min-h-[1.75rem]">
                                 <RotatingText
-                                    words={['Information Architect L2', 'UX Designer', 'Interaction Designer', 'Senior Product Designer']}
+                                    words={['Enterprise & SaaS Specialist', 'Information Architect L2', 'UX Designer', 'Interaction Designer', 'Senior Product Designer']}
                                     interval={2800}
                                     className="text-[#7C5CFC]"
                                 />
@@ -896,15 +896,15 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             className="flex gap-3"
                         >
                             <CoolMode>
-                                <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white text-sm font-semibold shadow-lg shadow-[#7C5CFC]/25 hover:shadow-xl hover:shadow-[#7C5CFC]/30 hover:scale-105 transition-all active:scale-95">
+                                <a href={`${import.meta.env.BASE_URL}sai%20charan%20kalla_Latest%20Resume.pdf`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white text-sm font-semibold shadow-lg shadow-[#7C5CFC]/25 hover:shadow-xl hover:shadow-[#7C5CFC]/30 hover:scale-105 transition-all active:scale-95">
                                     <Download className="w-4 h-4" />
                                     Download Resume
-                                </button>
+                                </a>
                             </CoolMode>
-                            <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#12131F] border border-white/10 text-[#C8CAE5] text-sm font-semibold hover:bg-[#1A1B2E] hover:border-white/20 hover:scale-105 transition-all active:scale-95">
+                            <a href="https://www.linkedin.com/in/sai-charan-92a8ab13b/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#12131F] border border-white/10 text-[#C8CAE5] text-sm font-semibold hover:bg-[#1A1B2E] hover:border-white/20 hover:scale-105 transition-all active:scale-95">
                                 <ExternalLink className="w-4 h-4" />
-                                View Links
-                            </button>
+                                LinkedIn
+                            </a>
                         </motion.div>
                     </div>
 

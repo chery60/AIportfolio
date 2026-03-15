@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import { ExternalLink, Briefcase, Sparkles } from 'lucide-react';
+import { ExternalLink, Download, Sparkles } from 'lucide-react';
 import { ScrollReveal } from './ui/scroll-reveal';
 import { RotatingText } from './ui/rotating-text';
 import { Highlighter } from './ui/highlighter';
 import Stack from './Stack/Stack';
 
 const ROLES = [
+  'Enterprise & SaaS Specialist',
   'Information Architect L2',
   'UX Designer',
   'Interaction Designer',
@@ -16,7 +17,6 @@ const STATS = [
   { value: '6+', label: 'Years Exp.' },
   { value: '5', label: 'Companies' },
   { value: '10+', label: 'Products' },
-  { value: 'B2B', label: 'Specialist' },
 ];
 
 const SKILLS = [
@@ -40,11 +40,11 @@ const EXPERIENCE = [
 
 export default function MobileHomeTab() {
   return (
-    <div className="h-full overflow-y-auto bg-[#0A0B0F] scroll-smooth">
-      <div className="px-5 pt-14 pb-24 flex flex-col gap-10">
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-[#0A0B0F] scroll-smooth mobile-snap-y mobile-no-scrollbar">
+      <div className="px-5 pt-14 flex flex-col gap-6" style={{ paddingBottom: 'calc(10rem + env(safe-area-inset-bottom, 0px))' }}>
 
         {/* Available for Work badge */}
-        <ScrollReveal delay={0} yOffset={16} blur="6px">
+        <ScrollReveal delay={0} yOffset={16} blur="6px" className="mobile-snap-item-y">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-[#7C5CFC] bg-[#7C5CFC]/10 px-2.5 py-1 rounded-full border border-[#7C5CFC]/20">
               Available for Work
@@ -53,7 +53,7 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* Stack */}
-        <ScrollReveal delay={0.05} yOffset={20} blur="8px">
+        <ScrollReveal delay={0.05} yOffset={20} blur="8px" className="mobile-snap-item-y">
           <div style={{ height: '160px' }}>
             <div style={{ width: '160px', height: '160px' }}>
               <Stack
@@ -70,7 +70,7 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* Header with Rotating Roles */}
-        <ScrollReveal delay={0.08} yOffset={24} blur="8px">
+        <ScrollReveal delay={0.08} yOffset={24} blur="8px" className="mobile-snap-item-y">
           <div className="flex flex-col gap-3">
             <h1 className="text-4xl font-bold text-[#F0F0FF] leading-tight tracking-tight">
               Sai Charan
@@ -82,15 +82,24 @@ export default function MobileHomeTab() {
                 className="text-[#7C5CFC] font-semibold"
               />
             </p>
-            <code className="text-xs font-mono text-[#7C5CFC]/80 bg-[#7C5CFC]/5 px-3 py-2 rounded-lg border border-[#7C5CFC]/10 leading-relaxed">
-              const passion = &quot;Designing for humans, powered by craft&quot;
-            </code>
+            <div className="inline-flex items-center gap-2 bg-[#12131F] border border-white/5 rounded-lg px-4 py-2.5">
+              <span className="text-[#7C5CFC] font-mono text-xs">{'>'}</span>
+              <code className="text-[#8B8FAF] font-mono text-xs">
+                <span className="text-[#C792EA]">const</span>{' '}
+                <span className="text-[#82AAFF]">passion</span>{' '}
+                <span className="text-[#89DDFF]">=</span>{' '}
+                <span className="text-[#C3E88D]">
+                  &quot;Designing for humans, powered by craft&quot;
+                </span>
+              </code>
+              <span className="w-2 h-4 bg-[#7C5CFC] animate-pulse rounded-sm" />
+            </div>
           </div>
         </ScrollReveal>
 
         {/* Stats row */}
-        <ScrollReveal delay={0.06} yOffset={20} blur="6px">
-          <div className="grid grid-cols-4 gap-2">
+        <ScrollReveal delay={0.06} yOffset={20} blur="6px" className="mobile-snap-item-y">
+          <div className="grid grid-cols-3 gap-2">
             {STATS.map((s) => (
               <div
                 key={s.label}
@@ -104,10 +113,10 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* Bio — LinkedIn-inspired, craft-focused */}
-        <ScrollReveal delay={0.1} yOffset={24} blur="8px">
+        <ScrollReveal delay={0.1} yOffset={24} blur="8px" className="mobile-snap-item-y">
           <div className="bg-[#111218] border border-[#1E1F2C] rounded-2xl p-4">
             <p className="text-sm text-[#8B8DB0] leading-relaxed">
-              Adaptive designer with a strong passion for{' '}
+              Specialist in enterprise and SaaS products. Adaptive designer with a strong passion for{' '}
               <Highlighter color="#7C5CFC80">
                 <span className="text-white">UX Design</span>
               </Highlighter>
@@ -125,7 +134,7 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* Experience timeline */}
-        <ScrollReveal delay={0.12} yOffset={24} blur="8px">
+        <ScrollReveal delay={0.12} yOffset={24} blur="8px" className="mobile-snap-item-y">
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold tracking-widest uppercase text-[#4A4B6A]">Experience</p>
             <div className="flex flex-col gap-3">
@@ -146,7 +155,7 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* Skills */}
-        <ScrollReveal delay={0.14} yOffset={24} blur="8px">
+        <ScrollReveal delay={0.14} yOffset={24} blur="8px" className="mobile-snap-item-y">
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold tracking-widest uppercase text-[#4A4B6A]">Skills</p>
             <div className="flex flex-wrap gap-2">
@@ -163,15 +172,17 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* CTA buttons */}
-        <ScrollReveal delay={0.16} yOffset={24} blur="8px">
+        <ScrollReveal delay={0.16} yOffset={24} blur="8px" className="mobile-snap-item-y">
           <div className="flex gap-3">
             <motion.a
-              href="mailto:kc60488charan@gmail.com"
+              href={`${import.meta.env.BASE_URL}sai%20charan%20kalla_Latest%20Resume.pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
               whileTap={{ scale: 0.96 }}
               className="flex-1 flex items-center justify-center gap-2 bg-[#7C5CFC] text-white text-sm font-semibold rounded-xl py-3.5"
             >
-              <Briefcase className="w-4 h-4" />
-              Hire Me
+              <Download className="w-4 h-4" />
+              Download Resume
             </motion.a>
             <motion.a
               href="https://www.linkedin.com/in/sai-charan-92a8ab13b/"
@@ -187,7 +198,7 @@ export default function MobileHomeTab() {
         </ScrollReveal>
 
         {/* Subtle hint */}
-        <ScrollReveal delay={0.18} yOffset={16} blur="6px">
+        <ScrollReveal delay={0.18} yOffset={16} blur="6px" className="mobile-snap-item-y">
           <div className="flex items-center justify-center gap-2 py-2">
             <Sparkles className="w-3.5 h-3.5 text-[#7C5CFC]/50" />
             <p className="text-xs text-[#4A4B6A]">Tap Projects to explore case studies · Chat to ask me anything</p>

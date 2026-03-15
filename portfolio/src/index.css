@@ -447,6 +447,17 @@ input, textarea, select {
   scroll-snap-align: start;
 }
 
+/* Mobile vertical snap (section-by-section, no simple scroll) */
+.mobile-snap-y {
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-snap-item-y {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
 /* Mobile chat overlay */
 @keyframes mobileChatIn {
   from {
@@ -480,12 +491,31 @@ input, textarea, select {
   animation: mobileChatOut 0.25s ease-in forwards;
 }
 
-/* Mobile grid items — remove absolute positioning from canvas elements in mobile */
+/* ── Mobile canvas element overrides ──────────────────────────────── */
+/* Reset position:absolute from canvas-element-base in all mobile contexts */
+
+/* Fluid elements (grid-2 and full-width non-scale): full-width, auto-height */
+.mobile-el .canvas-element-base,
 .mobile-grid-item .canvas-element-base {
-  position: relative;
+  position: relative !important;
   width: 100% !important;
   height: auto !important;
-  min-height: 120px;
+  min-height: 80px;
+  border-radius: 8px !important;
+}
+
+/* Horizontal scroll cards: fixed width (set by parent), auto-height */
+.mobile-scroll-el .canvas-element-base {
+  position: relative !important;
+  height: auto !important;
+  min-height: 80px;
+  border-radius: 8px !important;
+}
+
+/* Scale elements (flow-diagram, storyboard): keep fixed dimensions, only reset position */
+.mobile-scale-el .canvas-element-base {
+  position: relative !important;
+  border-radius: 8px !important;
 }
 
 /* Line clamping */
