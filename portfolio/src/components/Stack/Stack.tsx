@@ -89,11 +89,12 @@ export default function Stack({
     if (cards.length) {
       return cards.map((content, index) => ({ id: index + 1, content }));
     }
+    const base = import.meta.env.BASE_URL;
     return [
-      { id: 1, content: <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=500&auto=format" alt="card-1" className="card-image" /> },
-      { id: 2, content: <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?q=80&w=500&auto=format" alt="card-2" className="card-image" /> },
-      { id: 3, content: <img src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=500&auto=format" alt="card-3" className="card-image" /> },
-      { id: 4, content: <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?q=80&w=500&auto=format" alt="card-4" className="card-image" /> },
+      { id: 1, content: <img src={`${base}img-cat.png`} alt="With my cat" className="card-image" /> },
+      { id: 2, content: <img src={`${base}img-teddy.png`} alt="With teddy bear" className="card-image" /> },
+      { id: 3, content: <img src={`${base}img-lego-car.png`} alt="Lego BMW M3" className="card-image" /> },
+      { id: 4, content: <img src={`${base}img-watercolor.png`} alt="Watercolor portrait" className="card-image" /> },
     ];
   });
 

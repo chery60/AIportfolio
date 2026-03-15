@@ -848,7 +848,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             <h1 className={`${isMobile ? 'text-4xl' : 'text-5xl lg:text-6xl'} font-bold text-[#F0F0FF] tracking-tight leading-none mb-2`}>
                                 {PERSONA.name}
                             </h1>
-                            <p className="text-lg text-[#7C5CFC] font-semibold mb-5 min-h-[1.75rem]">
+                            <p className="text-2xl text-[#7C5CFC] font-semibold mb-5 min-h-[1.75rem]">
                                 <RotatingText
                                     words={['Enterprise & SaaS Specialist', 'Information Architect L2', 'UX Designer', 'Interaction Designer', 'Senior Product Designer']}
                                     interval={2800}

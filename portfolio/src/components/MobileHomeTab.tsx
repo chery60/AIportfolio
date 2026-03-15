@@ -41,7 +41,10 @@ const EXPERIENCE = [
 export default function MobileHomeTab() {
   return (
     <div className="h-full overflow-y-auto overflow-x-hidden bg-[#0A0B0F] scroll-smooth mobile-snap-y mobile-no-scrollbar">
-      <div className="px-5 pt-14 flex flex-col gap-6" style={{ paddingBottom: 'calc(10rem + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="px-5 flex flex-col gap-6" style={{ paddingBottom: 'calc(10rem + env(safe-area-inset-bottom, 0px))' }}>
+
+        {/* 120px top spacer — prevents auto-scroll on load so badge has gap from top */}
+        <div className="mobile-snap-item-y flex-shrink-0" style={{ minHeight: 120 }} aria-hidden="true" />
 
         {/* Available for Work badge */}
         <ScrollReveal delay={0} yOffset={16} blur="6px" className="mobile-snap-item-y">
@@ -75,7 +78,7 @@ export default function MobileHomeTab() {
             <h1 className="text-4xl font-bold text-[#F0F0FF] leading-tight tracking-tight">
               Sai Charan
             </h1>
-            <p className="text-lg text-[#8B8DB0] font-medium min-h-[1.75rem]">
+            <p className="text-2xl text-[#8B8DB0] font-medium min-h-[1.75rem]">
               <RotatingText
                 words={ROLES}
                 interval={2800}
