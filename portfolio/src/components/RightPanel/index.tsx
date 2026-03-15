@@ -4,6 +4,8 @@ import type { Project, CanvasElement } from '../../types';
 import { useComments } from '../../hooks/useComments';
 import { useReactions } from '../../hooks/useReactions';
 import type { ActiveViewer } from '../../hooks/useRealtimeSession';
+import { ShimmerButton } from '../ui/shimmer-button';
+import { AnimatedList } from '../ui/animated-list';
 
 interface Props {
   project: Project;
@@ -167,9 +169,10 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5 pb-2 pt-1">
-                {comments.map(c => (
-                  <div key={c.id} className="bg-surface-1 p-2.5 rounded-lg border border-transparent relative group">
+              <div className="pb-2 pt-1">
+                <AnimatedList className="gap-2.5">
+                  {comments.map(c => (
+                    <div key={c.id} className="bg-surface-1 p-2.5 rounded-lg border border-transparent relative group w-full">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5">
                         <div
@@ -201,7 +204,8 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                     </div>
                     <p className="text-xs text-text-secondary leading-relaxed pl-5">{c.content}</p>
                   </div>
-                ))}
+                  ))}
+                </AnimatedList>
               </div>
             )}
           </div>
@@ -265,14 +269,16 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
           <div className="p-4">
             <SectionTitle>GET IN TOUCH</SectionTitle>
             {contactState === 'idle' && (
-              <button
+              <ShimmerButton
                 onClick={() => setContactState('form')}
-                className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold text-white transition-transform hover:scale-[1.02] shadow-md"
-                style={{ background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)' }}
+                className="w-full mt-3 py-2.5 rounded-lg transition-transform hover:scale-[1.02] shadow-md !px-0"
+                background="linear-gradient(135deg, #7C5CFC, #FF6B9D)"
               >
-                <MessageSquare className="w-4 h-4" />
-                Message Me
-              </button>
+                <span className="flex items-center justify-center gap-2 text-xs font-bold text-white relative z-10 w-full">
+                  <MessageSquare className="w-4 h-4" />
+                  Message Me
+                </span>
+              </ShimmerButton>
             )}
 
             {contactState === 'form' && (

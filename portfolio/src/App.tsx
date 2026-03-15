@@ -10,9 +10,11 @@ import LandingPage from './components/LandingPage';
 import EditToolbar from './components/EditToolbar';
 import MobileCanvasView from './components/MobileCanvasView';
 import MobileProjectList from './components/MobileProjectList';
+import MobileView from './components/MobileView';
 import { supabase } from './lib/supabase';
 import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { useIsMobile } from './hooks/useIsMobile';
+import { SmoothCursor } from "@/components/ui/smooth-cursor";
 
 const defaultControls: CanvasControlsRef = {
   zoomIn: () => { },
@@ -286,8 +288,16 @@ export default function App() {
     setCurrentView('landing');
   }, []);
 
+  // Mobile gets its own self-contained experience
+  if (isMobile) {
+    return <MobileView activeViewers={activeViewers} />;
+  }
+
   return (
     <>
+      <div className="hidden md:block">
+        <SmoothCursor />
+      </div>
       <AnimatePresence mode="wait">
         {currentView === 'landing' && (
           <motion.div

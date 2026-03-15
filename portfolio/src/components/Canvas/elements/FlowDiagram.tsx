@@ -1,4 +1,5 @@
 import type { FlowDiagramElement } from '../../../types';
+import { MagicCard } from '@/components/ui/magic-card';
 
 interface Props {
   element: FlowDiagramElement;
@@ -153,14 +154,14 @@ function JourneyMap({ data, width, height }: { data: NonNullable<FlowDiagramElem
       <rect
         x={BOX_LEFT} y={BOX_TOP}
         width={BOX_RIGHT - BOX_LEFT} height={BOX_BOTTOM - BOX_TOP}
-        fill="none" stroke="#C8E6C9" strokeWidth="1.5" strokeDasharray="6,4" rx="6"
+        fill="#C8E6C9" fillOpacity="0.15" stroke="#4CAF50" strokeOpacity="0.4" strokeWidth="1.5" strokeDasharray="6,4" rx="6"
       />
 
       {/* ── Express mode dashed inner box (bottom section) ──────────────── */}
       <rect
         x={expressXs[0] - NODE_R - 6} y={EXPRESS_Y - 10}
         width={(lastExpressX + NODE_R + 6) - (expressXs[0] - NODE_R - 6)} height={NODE_D + 20}
-        fill="none" stroke="#FFCDD2" strokeWidth="1.2" strokeDasharray="5,3" rx="6"
+        fill="#FFCDD2" fillOpacity="0.25" stroke="#F48FB1" strokeOpacity="0.5" strokeWidth="1.2" strokeDasharray="5,3" rx="6"
       />
 
       {/* ── Browsing path line (green) ───────────────────────────────────── */}
@@ -418,25 +419,26 @@ export default function FlowDiagram({ element, isSelected, onClick }: Props) {
   // ── Journey map mode ──────────────────────────────────────────────────────
   if (data.journeyMap) {
     return (
-      <div
+      <MagicCard
         onClick={onClick}
         className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm ${isSelected ? 'selected' : ''}`}
+        gradientColor={data.accentColor ? `${data.accentColor}33` : '#8B5CF633'}
         style={{ width, height }}
       >
         {/* Accent bar */}
-        <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}88)` }} />
+        <div className="h-1.5 w-full relative z-10" style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}88)` }} />
         {/* Header */}
-        <div className="px-5 py-3 border-b border-panel-border flex items-center justify-between">
+        <div className="px-5 py-3 border-b border-panel-border flex items-center justify-between relative z-10 bg-white">
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{data.title}</h3>
             {data.subtitle && <p className="text-xs text-text-secondary mt-0.5">{data.subtitle}</p>}
           </div>
         </div>
         {/* Journey map SVG */}
-        <div style={{ width, height: height - headerH, overflow: 'hidden' }}>
+        <div style={{ width, height: height - headerH, overflow: 'hidden' }} className="relative z-10 bg-white">
           <JourneyMap data={data.journeyMap} width={width} height={height - headerH} />
         </div>
-      </div>
+      </MagicCard>
     );
   }
 
@@ -446,16 +448,17 @@ export default function FlowDiagram({ element, isSelected, onClick }: Props) {
   });
 
   return (
-    <div
+    <MagicCard
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm ${isSelected ? 'selected' : ''}`}
+      className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm cursor-pointer ${isSelected ? 'selected' : ''}`}
+      gradientColor={data.accentColor ? `${data.accentColor}33` : '#8B5CF633'}
       style={{ width, height }}
     >
       {/* Accent bar */}
-      <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}88)` }} />
+      <div className="h-1.5 w-full relative z-10" style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}88)` }} />
 
       {/* Header */}
-      <div className="px-5 py-3 border-b border-panel-border flex items-center justify-between">
+      <div className="px-5 py-3 flex items-center justify-between border-b border-panel-border z-10 relative bg-white">
         <div>
           <h3 className="text-sm font-semibold text-text-primary">{data.title}</h3>
           {data.subtitle && <p className="text-xs text-text-secondary mt-0.5">{data.subtitle}</p>}
@@ -463,7 +466,7 @@ export default function FlowDiagram({ element, isSelected, onClick }: Props) {
       </div>
 
       {/* Diagram */}
-      <div style={{ position: 'relative', width, height: svgH }}>
+      <div style={{ position: 'relative', width, height: svgH }} className="z-10 bg-white">
         <svg width={width} height={svgH} style={{ position: 'absolute', top: 0, left: 0 }}>
           <defs>
             {/* Single arrow marker for all connections — end */}
@@ -608,6 +611,6 @@ export default function FlowDiagram({ element, isSelected, onClick }: Props) {
           );
         })}
       </div>
-    </div>
+    </MagicCard>
   );
 }

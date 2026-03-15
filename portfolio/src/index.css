@@ -43,6 +43,10 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #D1D5DB;
   }
+  .theme {
+    --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+    --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  }
 }
 
 @layer components {
@@ -128,8 +132,16 @@
 }
 
 /* Cursor states */
+* {
+  cursor: none !important;
+}
+
+input, textarea, select {
+  cursor: text !important;
+}
+
 .cursor-grab {
-  cursor: grab;
+  cursor: grab !important;
 }
 
 .cursor-grabbing {
@@ -330,6 +342,18 @@
   animation: amongUsBob 0.125s infinite linear;
 }
 
+@keyframes avatarFidget {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  15% { transform: translateY(-4px) scaleY(0.95); }
+  30% { transform: translateY(0) scaleY(1.05); }
+  45% { transform: translateY(-2px) scaleY(0.98); }
+  60% { transform: translateY(0) scaleY(1); }
+}
+
+.animate-avatar-fidget {
+  animation: avatarFidget 0.6s ease-in-out;
+}
+
 /* ── Mobile Utilities ───────────────────────────────────────────────── */
 
 /* Bottom Sheet */
@@ -473,15 +497,35 @@
 }
 
 /* ── Mobile Game Landscape Overlay ── */
+/* Size and rotation are handled via JS inline styles (needsRotation state) */
+/* for reliable behaviour in Chrome DevTools and real devices alike.        */
 .mobile-landscape-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vh;
-  height: 100vw;
-  transform-origin: top left;
-  transform: rotate(90deg) translateY(-100%);
   z-index: 9999;
   overflow: hidden;
   background-color: #0A0B0F;
+}
+
+@theme inline {
+  @keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+    }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+    }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+    }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+    }
+  }
 }

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Project } from '../../types';
 import { PROJECTS } from '../../data/projects';
 import { ChevronDown, PanelLeft, PanelRight, Pencil, Zap, Box, Save, Lock, X, LogOut } from 'lucide-react';
-
 // ── Vibe Coded Tools list ──────────────────────────────────────────────────────
 const VIBE_TOOLS = [
   {
@@ -460,6 +459,8 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
             </span>
           </button>
         )}
+
+
       </div>
     </div>
   );

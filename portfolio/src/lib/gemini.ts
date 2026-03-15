@@ -83,3 +83,31 @@ export async function createChatSession(intent: ChatIntent) {
         },
     });
 }
+
+const SYSTEM_PROMPT_AVATAR = `
+You are an inner-monologue or tiny cheerleader for the user (a recruiter). 
+You are a cute little Among Us crewmate who lives on Sai Charan's portfolio.
+Instead of talking directly, generate a short, punchy (max 8-15 words) *thought bubble* or *encouraging remark* about the recruiter based on the question they just asked or the response given by the main AI Assistant.
+
+Guidelines:
+1. Keep it extremely short (1 sentence, max 12 words).
+2. Be cute, positive, slightly playful, and highly encouraging to the recruiter. Example: "Ooo, great question! Our boy Sai is perfect for this! 🚀" or "Wow, you really know what you're looking for! 🤩"
+3. Use emojis.
+4. Don't mention "Among Us" directly, just act like a cute tiny cheerleader.
+`;
+
+export async function generateAvatarReaction(question: string, aiResponse: string): Promise<string> {
+    const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        systemInstruction: SYSTEM_PROMPT_AVATAR,
+    });
+
+    try {
+        const prompt = `The recruiter just asked this question: "${question}"\n\nAnd the AI Assistant replied with: "${aiResponse}"\n\nGenerate your tiny, cute reaction to the recruiter.`;
+        const result = await model.generateContent(prompt);
+        return result.response.text().trim();
+    } catch (err) {
+        console.error("Avatar reaction error", err);
+        return "Good question! 🌟";
+    }
+}

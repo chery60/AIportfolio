@@ -1,4 +1,5 @@
 import type { CaseStudyCardElement } from '../../../types';
+import { MagicCard } from '@/components/ui/magic-card';
 
 interface Props {
   element: CaseStudyCardElement;
@@ -10,9 +11,10 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
 
   return (
-    <div
+    <MagicCard
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm ${isSelected ? 'selected' : ''}`}
+      className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm cursor-pointer ${isSelected ? 'selected' : ''}`}
+      gradientColor={data.accentColor ? `${data.accentColor}33` : '#8B5CF633'}
       style={{
         width,
         height,
@@ -20,11 +22,11 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
     >
       {/* Accent top bar */}
       <div
-        className="h-1.5 w-full"
+        className="h-1.5 w-full relative z-10"
         style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}88)` }}
       />
 
-      <div className="p-5 h-full flex flex-col">
+      <div className="p-5 h-full flex flex-col relative z-10 bg-white">
         {/* Header */}
         <div className="mb-3">
           <div className="flex items-start justify-between mb-2">
@@ -69,7 +71,7 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
           </div>
         )}
       </div>
-    </div>
+    </MagicCard>
   );
 }
 

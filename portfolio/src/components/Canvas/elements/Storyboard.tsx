@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { StoryboardElement } from '../../../types';
 import Character from '../Character';
+import { MagicCard } from '@/components/ui/magic-card';
 
 interface Props {
     element: StoryboardElement;
@@ -672,15 +673,17 @@ export default function Storyboard({ element, isSelected, onClick }: Props) {
     ], []);
 
     return (
-        <div
+        <MagicCard
             onClick={onClick}
             className={`
-                bg-[#1e1e1e] rounded-[24px] shadow-2xl border-[6px] flex flex-col overflow-hidden relative
+                bg-[#1e1e1e] rounded-[24px] shadow-2xl border-[6px] overflow-hidden relative cursor-pointer
                 transform transition-all duration-200
                 ${isSelected ? 'ring-6 ring-blue-500 scale-[1.02] border-[#2a2c33]' : 'border-[#3a3c43] hover:scale-[1.01]'}
             `}
+            gradientColor="#4f46e533"
             style={{ fontFamily: 'Inter, sans-serif', width: element.width, height: element.height }}
         >
+            <div className="flex flex-col h-full w-full">
             {/* ── HEADER ── */}
             <div className="bg-[#2a2c33] px-5 py-3 flex items-center justify-between border-b-4 border-[#1a1c23] shrink-0 z-50 relative">
                 <div className="flex items-center gap-2">
@@ -873,6 +876,7 @@ export default function Storyboard({ element, isSelected, onClick }: Props) {
                     ))}
                 </div>
             </div>
-        </div>
+            </div>
+        </MagicCard>
     );
 }

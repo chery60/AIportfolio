@@ -16,8 +16,12 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Ref to cancel ongoing animations
+  const animationRef = useRef<number | null>(null);
 
   const setDefaultTransform = useCallback((t: CanvasTransform) => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setTransform(t);
   }, []);
 
@@ -170,6 +174,41 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
     setTransform(defaultTransform ?? { x: 20, y: 20, scale: 0.75 });
   }, [defaultTransform]);
 
+  const animateTo = useCallback((targetX: number, targetY: number, durationMs = 800) => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    
+    setTransform(prev => {
+      const startX = prev.x;
+      const startY = prev.y;
+      const distanceX = targetX - startX;
+      const distanceY = targetY - startY;
+      const startTime = performance.now();
+      
+      const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
+      
+      const step = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+        const easedProgress = easeOutQuart(progress);
+        
+        setTransform(current => ({
+          ...current,
+          x: startX + (distanceX * easedProgress),
+          y: startY + (distanceY * easedProgress),
+        }));
+        
+        if (progress < 1) {
+          animationRef.current = requestAnimationFrame(step);
+        } else {
+          animationRef.current = null;
+        }
+      };
+      
+      animationRef.current = requestAnimationFrame(step);
+      return prev;
+    });
+  }, []);
+
   const isGrabbing = isPanning || isSpacePanning;
 
   return {
@@ -188,5 +227,6 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
     resetZoom,
     fitToScreen,
     setDefaultTransform,
+    animateTo,
   };
 }

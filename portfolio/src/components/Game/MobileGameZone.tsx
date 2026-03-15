@@ -34,9 +34,44 @@ export default function MobileGameZone({ element }: Props) {
     const [nameInput, setNameInput] = useState('');
     const [nameError, setNameError] = useState('');
     const [isLandscape, setIsLandscape] = useState(false);
+    const [needsRotation, setNeedsRotation] = useState(false);
     const [showNameScreen, setShowNameScreen] = useState(true);
+    const [orientationLocked, setOrientationLocked] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const landscapeRef = useRef<HTMLDivElement>(null);
+
+    // Sync state when user exits fullscreen via system UI
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const doc = document as Document & { webkitFullscreenElement?: Element };
+            const isFullscreen = !!document.fullscreenElement || !!doc.webkitFullscreenElement;
+            if (!isFullscreen && isLandscape) {
+                const orient = screen.orientation as ScreenOrientation & { unlock?: () => void };
+                orient?.unlock?.();
+                setOrientationLocked(false);
+                setIsLandscape(false);
+                setShowNameScreen(true);
+                if (sessionState === 'gameover') {
+                    resetGame();
+                }
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        };
+    }, [isLandscape, sessionState, resetGame]);
+
+    // JS-based orientation detection — reliable in Chrome DevTools + real devices
+    useEffect(() => {
+        if (!isLandscape) return;
+        const check = () => setNeedsRotation(window.innerHeight > window.innerWidth);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, [isLandscape]);
 
     // Lock body scroll when landscape
     useEffect(() => {
@@ -59,13 +94,41 @@ export default function MobileGameZone({ element }: Props) {
         };
     }, [isLandscape]);
 
-    const handlePlayTap = () => {
-        setIsLandscape(true);
-        if (myName && myName.length >= 2) {
-            setShowNameScreen(false);
-        } else {
-            setShowNameScreen(true);
+    const handlePlayTap = async () => {
+        setNameError('');
+
+        // Resolve player name before fullscreen
+        const playerName = myName && myName.length >= 2 ? myName : nameInput.trim();
+        if (!playerName || playerName.length < 2) {
+            setNameError('Enter at least 2 characters');
+            inputRef.current?.focus();
+            return;
         }
+        if (playerName.length > 20) {
+            setNameError('Max 20 characters');
+            return;
+        }
+
+        // Try fullscreen + orientation lock as progressive enhancement
+        const docEl = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> };
+        const requestFs = docEl.requestFullscreen ?? docEl.webkitRequestFullscreen;
+        if (requestFs) {
+            try {
+                await requestFs.call(docEl);
+                try {
+                    const orient = screen.orientation as ScreenOrientation & { lock?: (mode: string) => Promise<void> };
+                    if (orient?.lock) {
+                        await orient.lock('landscape');
+                        setOrientationLocked(true);
+                    }
+                } catch { /* orientation lock unsupported on desktop — JS rotation handles it */ }
+            } catch { /* fullscreen unavailable — show overlay anyway */ }
+        }
+
+        // Always show the overlay regardless of fullscreen success
+        setIsLandscape(true);
+        setShowNameScreen(false);
+        startPlaying(playerName, SESSION_COLOR);
     };
 
     const handleStartGame = () => {
@@ -99,9 +162,21 @@ export default function MobileGameZone({ element }: Props) {
         startPlaying(myName, SESSION_COLOR);
     }, [resetGame, startPlaying, myName, SESSION_COLOR]);
 
-    const handleExit = useCallback(() => {
+    const handleExit = useCallback(async () => {
         if (sessionState === 'gameover') {
             resetGame();
+        }
+        try {
+            const orient = screen.orientation as ScreenOrientation & { unlock?: () => void };
+            orient?.unlock?.();
+        } catch { /* ignore */ }
+        setOrientationLocked(false);
+        const doc = document as Document & { webkitExitFullscreen?: () => Promise<void> };
+        const exitFs = doc.exitFullscreen ?? doc.webkitExitFullscreen;
+        if (exitFs && (document.fullscreenElement || (doc as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement)) {
+            try {
+                await exitFs.call(doc);
+            } catch { /* ignore */ }
         }
         setIsLandscape(false);
         setShowNameScreen(true);
@@ -167,7 +242,7 @@ export default function MobileGameZone({ element }: Props) {
                         </p>
                     </div>
                 ) : (
-                    /* Game preview + Play button */
+                    /* Game preview + Name input + Play button */
                     <div className="flex flex-col items-center gap-4">
                         <div className="flex flex-col items-center gap-1">
                             <span className="text-2xl font-black text-white">🎮 Crewmate Dash</span>
@@ -178,6 +253,40 @@ export default function MobileGameZone({ element }: Props) {
                                 Design Survival Runner
                             </span>
                         </div>
+
+                        {/* Name input — collect before fullscreen */}
+                        {!myName ? (
+                            <div className="flex flex-col gap-2 w-full max-w-xs">
+                                <label className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">
+                                    Enter your name
+                                </label>
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={nameInput}
+                                    onChange={e => { setNameInput(e.target.value); setNameError(''); }}
+                                    onKeyDown={e => e.key === 'Enter' && handlePlayTap()}
+                                    placeholder="Your name..."
+                                    maxLength={20}
+                                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 outline-none focus:border-white/30 transition-colors"
+                                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                                />
+                                {nameError && <p className="text-red-400 text-xs">{nameError}</p>}
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl w-full max-w-xs"
+                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }}>
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ background: SESSION_COLOR }} />
+                                <span className="text-white/70 text-sm flex-1">Playing as <span className="font-bold text-white">{myName}</span></span>
+                                <button
+                                    type="button"
+                                    onClick={() => { clearName(); setNameInput(''); }}
+                                    className="text-white/30 text-xs hover:text-white/60 transition-colors"
+                                >
+                                    change
+                                </button>
+                            </div>
+                        )}
 
                         {/* Rules */}
                         <div className="flex items-center justify-center gap-5">
@@ -210,7 +319,7 @@ export default function MobileGameZone({ element }: Props) {
                         </button>
 
                         <p className="text-white/20 text-[10px]">
-                            Game will open in landscape mode
+                            Game opens in landscape mode
                         </p>
                     </div>
                 )}
@@ -232,7 +341,13 @@ export default function MobileGameZone({ element }: Props) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="mobile-landscape-overlay"
-            style={{ background: 'linear-gradient(135deg, #050714, #0A0B1A)' }}
+            style={{
+                background: 'linear-gradient(135deg, #050714, #0A0B1A)',
+                width: needsRotation ? '100vh' : '100vw',
+                height: needsRotation ? '100vw' : '100vh',
+                transform: needsRotation ? 'rotate(90deg) translateY(-100%)' : 'none',
+                transformOrigin: 'top left',
+            }}
         >
             {/* Name Entry Screen */}
             {showNameScreen && sessionState !== 'playing' && sessionState !== 'gameover' && (
@@ -297,6 +412,11 @@ export default function MobileGameZone({ element }: Props) {
                         Start Game
                     </button>
 
+                    {!orientationLocked && (
+                        <p className="text-amber-400/80 text-xs text-center">
+                            Rotate your device to landscape for best experience
+                        </p>
+                    )}
                     <p className="text-white/20 text-xs text-center">
                         Tap anywhere to jump · Dodge obstacles!
                     </p>
@@ -313,7 +433,7 @@ export default function MobileGameZone({ element }: Props) {
                         <span className="text-white/30 text-xs">— playing now</span>
                     </div>
                     {/* Game Canvas */}
-                    <div className="flex-1 bg-[#050714]">
+                    <div className="flex-1 bg-[#050714] flex items-center justify-center overflow-hidden">
                         <GameEngine
                             playerColor={SESSION_COLOR}
                             onGameOver={handleGameOver}

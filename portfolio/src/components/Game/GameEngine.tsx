@@ -973,13 +973,15 @@ export default function GameEngine({ playerColor, onGameOver, isSpectator, onSta
   }, [gameLoop]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={CW}
-      height={CH}
-      className={`block w-full h-full ${isSpectator ? 'cursor-default' : 'cursor-pointer'}`}
-      style={{ objectFit: 'contain' }}
-      onClick={isSpectator ? undefined : jump}
-    />
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <canvas
+        ref={canvasRef}
+        width={CW}
+        height={CH}
+        className={isSpectator ? 'cursor-default' : 'cursor-pointer'}
+        style={{ display: 'block', maxWidth: '100%', maxHeight: '100%', aspectRatio: `${CW}/${CH}` }}
+        onClick={isSpectator ? undefined : jump}
+      />
+    </div>
   );
 }

@@ -2,16 +2,26 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { Sparkles, Download, ExternalLink, ArrowDown, Briefcase, Compass, ChevronDown, Check, X, File as FileIcon, MessageCircle, ArrowLeft } from 'lucide-react';
 import Character from './Canvas/Character';
-import { createChatSession, type ChatIntent } from '../lib/gemini';
+import Stack from './Stack/Stack';
+import { createChatSession, generateAvatarReaction, type ChatIntent } from '../lib/gemini';
 import { saveConversationLog } from '../lib/analytics';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useSabotage } from '../context/SabotageContext';
+import { type ElementBounds } from './Canvas/Character';
+import { CoolMode } from './ui/cool-mode';
+import { Highlighter } from './ui/highlighter';
+import { RotatingText } from './ui/rotating-text';
 
 // ── Persona & Local Data ────────────────────────────────────────────────────────────
 const PERSONA = {
     name: 'Sai Charan',
-    role: 'Product Designer',
-    bio: 'I design systems that make complex things simple. From enterprise kiosks to AI-powered tools — I craft experiences that delight users and drive business outcomes.',
-    codeLiner: 'const passion = "Designing for humans, powered by AI"',
+    role: 'Senior Product Designer',
+    bio: (
+        <>
+            Adaptive designer with a strong passion for <Highlighter color="#7C5CFC80"><span className="text-white">UX Design</span></Highlighter>. I help companies design efficient experiences based on <Highlighter action="underline" color="#FF6B9Dcc"><span className="text-white">user-centric strategy</span></Highlighter>, with the aim of user and customer satisfaction. On a path to become <Highlighter action="highlight" color="#87CEFA80"><span className="text-white">irreplaceable by AI</span></Highlighter> — a lifelong learner who values craft above all.
+        </>
+    ),
+    codeLiner: 'const passion = "Designing for humans, powered by craft"',
 };
 
 interface ChatMessage {
@@ -163,6 +173,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     const [isTyping, setIsTyping] = useState(false);
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { isSabotaged, toggleSabotage } = useSabotage();
 
     // AI Integration
     const [intent, setIntent] = useState<ChatIntent>('explore');
@@ -171,6 +182,12 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     // Slash commands
     const [isSlashMenuOpen, setIsSlashMenuOpen] = useState(false);
     const [slashIndex, setSlashIndex] = useState(0);
+
+    // Avatar state
+    const [avatarMessage, setAvatarMessage] = useState<string | null>(null);
+    const avatarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [panelBounds, setPanelBounds] = useState<ElementBounds[]>([]);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chatSessionRef = useRef<any>(null);
     const messagesRef = useRef<ChatMessage[]>([]); // To access latest in unmount
@@ -278,6 +295,28 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             }
         };
     }, [rawProgress, onEnterCanvas, isMobileChatOpen]);
+
+    // Measure Right Panel bounds for Avatar collision
+    useEffect(() => {
+        if (!isMobile && rightPanelRef.current) {
+            // Give layout a moment to settle
+            const measure = () => {
+                if (rightPanelRef.current) {
+                    const rect = rightPanelRef.current.getBoundingClientRect();
+                    setPanelBounds([{
+                        x: rect.left,
+                        y: rect.top,
+                        width: rect.width,
+                        height: rect.height
+                    }]);
+                }
+            };
+            
+            measure();
+            window.addEventListener('resize', measure);
+            return () => window.removeEventListener('resize', measure);
+        }
+    }, [isMobile]);
 
     // Cleanup -> Save log
     useEffect(() => {
@@ -462,6 +501,17 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     content: responseText,
                 };
                 setMessages((prev) => [...prev, aiMsg]);
+
+                // Generate avatar reaction
+                if (!isMobile) {
+                    generateAvatarReaction(text, responseText).then(reaction => {
+                        setAvatarMessage(reaction);
+                        if (avatarTimerRef.current) clearTimeout(avatarTimerRef.current);
+                        avatarTimerRef.current = setTimeout(() => {
+                            setAvatarMessage(null);
+                        }, 5000); // Hide after 5 seconds
+                    });
+                }
             } catch (err: unknown) {
                 console.error("Chat error", err);
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -690,7 +740,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     return (
         <div
             ref={landingRef}
-            className="fixed inset-0 z-50 overflow-hidden bg-[#0A0B0F]"
+            className={`fixed inset-0 z-50 overflow-hidden transition-colors duration-1000 ${isSabotaged ? 'bg-[#1a0505]' : 'bg-[#0A0B0F]'}`}
             onMouseMove={!isMobile ? handleLandingMouseMove : undefined}
         >
             {/* ── Walking Among Us Character (desktop only) ──────────── */}
@@ -699,8 +749,9 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     <Character
                         targetX={mousePos.x}
                         targetY={mousePos.y}
-                        color="#7B5CFA"
-                        elementBounds={[]}
+                        color={isSabotaged ? "#ff0000" : "#7B5CFA"}
+                        elementBounds={panelBounds}
+                        message={avatarMessage}
                     />
                 </div>
             )}
@@ -748,19 +799,46 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                         PORTFOLIO.V2
                     </span>
                 </div>
-                <div className="absolute top-6 right-6 z-10 pointer-events-none">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[11px] text-[#2A2B3C] font-mono tracking-widest">
-                            AVAILABLE FOR HIRE
+                <div className="absolute top-6 right-6 z-20 mt-[-6px] mr-[-6px]">
+                    <button
+                        onClick={toggleSabotage}
+                        className={`group flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${
+                            isSabotaged 
+                                ? 'bg-red-500/10 border-red-500/30 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:bg-red-500/20' 
+                                : 'bg-transparent border-transparent hover:bg-white/5 hover:border-white/10 cursor-pointer pointer-events-auto'
+                        }`}
+                        title={isSabotaged ? "Repair System" : "Sabotage System"}
+                    >
+                        <div className={`w-2 h-2 rounded-full animate-pulse transition-colors duration-300 ${isSabotaged ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-emerald-400 group-hover:bg-amber-400'}`} />
+                        <span className={`text-[11px] font-mono tracking-widest transition-colors duration-300 ${isSabotaged ? 'text-red-500' : 'text-[#8B8FAF] group-hover:text-amber-400'}`}>
+                            {isSabotaged ? 'SYSTEM SABOTAGED' : 'AVAILABLE FOR HIRE'}
                         </span>
-                    </div>
+                    </button>
                 </div>
 
                 {/* ── Layout — two-column desktop, single-column mobile ── */}
                 <div className={`relative z-10 flex items-stretch w-full h-screen ${isMobile ? 'flex-col' : ''}`}>
                     {/* ═══ LEFT SECTION — Creative intro ═══ */}
                     <div className={`flex flex-col justify-center ${isMobile ? 'flex-1 px-6 pt-16' : 'flex-1 px-6 lg:px-12 xl:px-24'}`}>
+                        {/* Stack */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="mb-6"
+                        >
+                            <div style={{ width: '160px', height: '160px' }}>
+                                <Stack
+                                    randomRotation
+                                    sensitivity={150}
+                                    sendToBackOnClick
+                                    autoplay
+                                    autoplayDelay={3000}
+                                    pauseOnHover
+                                />
+                            </div>
+                        </motion.div>
+
                         {/* Name */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -770,8 +848,12 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             <h1 className={`${isMobile ? 'text-4xl' : 'text-5xl lg:text-6xl'} font-bold text-[#F0F0FF] tracking-tight leading-none mb-2`}>
                                 {PERSONA.name}
                             </h1>
-                            <p className="text-lg text-[#7C5CFC] font-semibold mb-5">
-                                {PERSONA.role}
+                            <p className="text-lg text-[#7C5CFC] font-semibold mb-5 min-h-[1.75rem]">
+                                <RotatingText
+                                    words={['Information Architect L2', 'UX Designer', 'Interaction Designer', 'Senior Product Designer']}
+                                    interval={2800}
+                                    className="text-[#7C5CFC]"
+                                />
                             </p>
                         </motion.div>
 
@@ -789,7 +871,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                     <span className="text-[#82AAFF]">passion</span>{' '}
                                     <span className="text-[#89DDFF]">=</span>{' '}
                                     <span className="text-[#C3E88D]">
-                                        "Designing for humans, powered by AI"
+                                        "Designing for humans, powered by craft"
                                     </span>
                                 </code>
                                 <span className="w-2 h-4 bg-[#7C5CFC] animate-pulse rounded-sm" />
@@ -813,10 +895,12 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             transition={{ duration: 0.5, delay: 0.75 }}
                             className="flex gap-3"
                         >
-                            <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white text-sm font-semibold shadow-lg shadow-[#7C5CFC]/25 hover:shadow-xl hover:shadow-[#7C5CFC]/30 hover:scale-105 transition-all active:scale-95">
-                                <Download className="w-4 h-4" />
-                                Download Resume
-                            </button>
+                            <CoolMode>
+                                <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white text-sm font-semibold shadow-lg shadow-[#7C5CFC]/25 hover:shadow-xl hover:shadow-[#7C5CFC]/30 hover:scale-105 transition-all active:scale-95">
+                                    <Download className="w-4 h-4" />
+                                    Download Resume
+                                </button>
+                            </CoolMode>
                             <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#12131F] border border-white/10 text-[#C8CAE5] text-sm font-semibold hover:bg-[#1A1B2E] hover:border-white/20 hover:scale-105 transition-all active:scale-95">
                                 <ExternalLink className="w-4 h-4" />
                                 View Links
