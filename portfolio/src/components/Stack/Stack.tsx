@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, type PanInfo } from 'motion/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Stack.css';
 
 interface CardRotateProps {
@@ -103,6 +103,14 @@ export default function Stack({
     }
   }, [cards]);
 
+  const randomRotations = useRef<Map<number, number>>(new Map());
+  const getRandomRotation = (id: number) => {
+    if (!randomRotations.current.has(id)) {
+      randomRotations.current.set(id, Math.random() * 10 - 5);
+    }
+    return randomRotations.current.get(id)!;
+  };
+
   const sendToBack = (id: number) => {
     setStack(prev => {
       const newStack = [...prev];
@@ -130,7 +138,7 @@ export default function Stack({
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
     >
       {stack.map((card, index) => {
-        const randomRotate = randomRotation ? Math.random() * 10 - 5 : 0;
+        const randomRotate = randomRotation ? getRandomRotation(card.id) : 0;
         return (
           <CardRotate
             key={card.id}
