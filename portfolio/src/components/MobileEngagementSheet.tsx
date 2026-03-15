@@ -17,7 +17,6 @@ type Tab = 'comments' | 'viewers' | 'share';
 
 const DARK_BG = '#111218';
 const SURFACE = 'rgba(255,255,255,0.05)';
-const SURFACE_HOVER = 'rgba(255,255,255,0.09)';
 const BORDER = 'rgba(255,255,255,0.08)';
 const TEXT_PRIMARY = '#F0F0FF';
 const TEXT_SECONDARY = 'rgba(240,240,255,0.45)';
@@ -41,6 +40,13 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
         const ok = await addComment(trimmedName, trimmedText);
         setPosting(false);
         if (ok) setNewComment('');
+    };
+
+    const handleDeleteComment = async (id: string) => {
+        if (deletingId) return;
+        setDeletingId(id);
+        await deleteComment(id);
+        setDeletingId(null);
     };
 
     const canPost = authorName.trim().length > 0 && newComment.trim().length > 0 && !posting;
