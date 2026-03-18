@@ -117,7 +117,29 @@ export function useAvatarGuide({
     return () => { window.speechSynthesis.cancel(); };
   }, [narrationText, voiceEnabled]);
 
-  // Show intro prompt on mount (once per session per project)
+  // Reset all guide state when the project changes (runs before the intro effect below)
+  useEffect(() => {
+    if (comebackTimerRef.current) {
+      clearTimeout(comebackTimerRef.current);
+      comebackTimerRef.current = null;
+    }
+    window.speechSynthesis?.cancel();
+
+    setShowIntro(false);
+    setTourState('idle');
+    setGuideTarget(null);
+    setNarrationText(null);
+    setEmote(null);
+    setArrivalAnimation(null);
+    setContextualTip(null);
+    setCurrentStepIndex(0);
+    setVoiceEnabled(false);
+
+    hasSeenIntroRef.current = false;
+    comebackShownRef.current = false;
+  }, [projectId]);
+
+  // Show intro prompt once per session per project
   useEffect(() => {
     if (!tour || hasSeenIntroRef.current) return;
 

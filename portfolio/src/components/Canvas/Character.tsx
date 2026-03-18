@@ -345,6 +345,13 @@ export default function Character({
     const canvasScaleRef = useRef(canvasScale);
     useEffect(() => { canvasScaleRef.current = canvasScale; }, [canvasScale]);
 
+    // ── Cursor-freeze refs (prevent character chasing cursor while bubble buttons are visible) ──
+    const rawCursorRef = useRef({ x: targetX, y: targetY }); // always tracks raw cursor pos
+    const frozenRef = useRef(false);                          // whether cursor-follow is frozen
+    const hasInteractiveButtonsRef = useRef(false);           // synced from render each frame
+    const isGuidingRef = useRef(isGuiding);
+    useEffect(() => { isGuidingRef.current = isGuiding; }, [isGuiding]);
+
     // Typewriter for narration
     const displayMessage = isGuiding ? null : message;
     const { displayed: narrationDisplayed, done: narrationDone } = useTypewriter(
@@ -389,6 +396,16 @@ export default function Character({
         // In guide mode, use guideTarget; otherwise use cursor
         let tx = (isGuiding && guideTarget) ? guideTarget.x : targetX;
         let ty = (isGuiding && guideTarget) ? guideTarget.y : targetY;
+
+        // Always track raw cursor so freeze-distance checks stay current
+        if (!isGuiding) rawCursorRef.current = { x: targetX, y: targetY };
+
+        // Don't chase cursor while frozen (buttons visible + character is close)
+        if (frozenRef.current) {
+            resetIdleTimer();
+            return;
+        }
+
         // If target is inside any element, clamp to its border
         for (const el of boundsRef.current) {
             if (isInsideElement(tx, ty, el)) {
@@ -446,6 +463,23 @@ export default function Character({
             targetRef.current.x - posRef.current.x,
             targetRef.current.y - posRef.current.y
         );
+
+        // ── Cursor-freeze: stop chasing when bubble buttons are visible and cursor is close ──
+        const FREEZE_NEAR = 120;
+        const FREEZE_FAR  = 250;
+        if (hasInteractiveButtonsRef.current && !isGuidingRef.current) {
+            const distToCursor = Math.hypot(
+                rawCursorRef.current.x - posRef.current.x,
+                rawCursorRef.current.y - posRef.current.y
+            );
+            if (!frozenRef.current && distToCursor < FREEZE_NEAR) {
+                frozenRef.current = true;
+                targetRef.current = { x: posRef.current.x, y: posRef.current.y };
+                pathRef.current = [];
+            } else if (frozenRef.current && distToCursor > FREEZE_FAR) {
+                frozenRef.current = false;
+            }
+        }
 
         // ── Path recompute: trigger when target drifts >30px or no path yet ──
         const pt = pathTargetRef.current;
@@ -629,6 +663,12 @@ export default function Character({
     }
 
     const showNextButton = isGuiding && narrationDone && message && !isIntroBubble && !isComplete;
+
+    // Sync interactive-button state to ref so the rAF game loop can read it
+    const hasInteractiveButtons = !!(showNextButton || isIntroBubble);
+    hasInteractiveButtonsRef.current = hasInteractiveButtons;
+    // When buttons disappear (user acted or tour moved on), always unfreeze
+    if (!hasInteractiveButtons) frozenRef.current = false;
 
     return (
         <div
