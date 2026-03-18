@@ -2,37 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Project } from '../../types';
 import { PROJECTS } from '../../data/projects';
 import { ChevronDown, PanelLeft, PanelRight, Pencil, Zap, Box, Save, Lock, X, LogOut } from 'lucide-react';
-// ── Vibe Coded Tools list ──────────────────────────────────────────────────────
-const VIBE_TOOLS = [
-  {
-    id: 'vt-1',
-    title: 'Oracle Kiosk Story',
-    description: 'Among Us storytelling canvas',
-    icon: '🎮',
-    accentColor: '#C74B18',
-  },
-  {
-    id: 'vt-2',
-    title: 'Canvas Portfolio',
-    description: 'This very site — Figma-style UX',
-    icon: '🖼️',
-    accentColor: '#7C5CFC',
-  },
-  {
-    id: 'vt-3',
-    title: 'Design Audit Bot',
-    description: 'AI-powered heuristic checker',
-    icon: '🤖',
-    accentColor: '#10B981',
-  },
-  {
-    id: 'vt-4',
-    title: 'Color Contrast Lab',
-    description: 'WCAG contrast ratio tester',
-    icon: '🎨',
-    accentColor: '#F59E0B',
-  },
-];
+// ── Vibe Coded Tools list (Write Code section) ─────────────────────────────────
+const VIBE_TOOLS: Array<{ id: string; title: string; description: string; icon: string; accentColor: string }> = [];
 
 interface Props {
   selectedProject: Project;
@@ -216,25 +187,31 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                     <div className="px-3 py-1.5 flex items-center justify-between">
                       <span className="text-xs font-semibold text-text-primary">Vibe Coded</span>
                     </div>
-                    {VIBE_TOOLS.map((tool) => (
-                      <button
-                        key={tool.id}
-                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-surface-1 transition-colors"
-                        onClick={() => {
-                          setShowProjectMenu(false);
-                        }}
-                      >
-                        <div
-                          className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 text-xs"
-                          style={{ background: `${tool.accentColor}18` }}
+                    {VIBE_TOOLS.length === 0 ? (
+                      <div className="px-3 py-2 text-[10px] text-text-secondary">
+                        Projects will be added soon.
+                      </div>
+                    ) : (
+                      VIBE_TOOLS.map((tool) => (
+                        <button
+                          key={tool.id}
+                          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-surface-1 transition-colors"
+                          onClick={() => {
+                            setShowProjectMenu(false);
+                          }}
                         >
-                          {tool.icon}
-                        </div>
-                        <span className="text-sm text-text-secondary truncate">
-                          {tool.title}
-                        </span>
-                      </button>
-                    ))}
+                          <div
+                            className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 text-xs"
+                            style={{ background: `${tool.accentColor}18` }}
+                          >
+                            {tool.icon}
+                          </div>
+                          <span className="text-sm text-text-secondary truncate">
+                            {tool.title}
+                          </span>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               </>
@@ -346,42 +323,49 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
             })}
           </div>
         ) : (
-          /* ── Vibe Coded Tools list ── */
-          <div className="space-y-1">
-            {VIBE_TOOLS.map((tool) => (
-              <div
-                key={tool.id}
-                className="flex items-center gap-2.5 py-2 px-2.5 rounded-lg border border-transparent hover:bg-surface-1 hover:border-panel-border cursor-pointer transition-all group"
-              >
-                <div
-                  className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-sm"
-                  style={{ background: `${tool.accentColor}18` }}
-                >
-                  {tool.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold truncate text-text-secondary group-hover:text-text-primary transition-colors">
-                    {tool.title}
-                  </p>
-                  <p className="text-[10px] truncate text-text-secondary opacity-70 mt-0.5">
-                    {tool.description}
-                  </p>
-                </div>
-                <div
-                  className="w-4 h-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ color: tool.accentColor }}
-                >
-                  <Box className="w-4 h-4" />
-                </div>
-              </div>
-            ))}
-
-            {/* Coming soon hint */}
-            <div className="mt-4 px-2.5 py-3 rounded-lg border border-dashed border-panel-border flex items-center gap-2 opacity-60">
-              <Zap className="w-3.5 h-3.5 text-accent-purple flex-shrink-0" />
-              <p className="text-[10px] text-text-secondary">More tools coming soon…</p>
+          /* ── Vibe Coded / Write Code section ── */
+          VIBE_TOOLS.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 px-4 rounded-lg border border-dashed border-panel-border bg-surface-1/50 min-h-[140px]">
+              <Zap className="w-8 h-8 text-accent-purple/70 flex-shrink-0 mb-3" />
+              <p className="text-xs font-medium text-text-secondary text-center">
+                Projects will be added soon.
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-1">
+              {VIBE_TOOLS.map((tool) => (
+                <div
+                  key={tool.id}
+                  className="flex items-center gap-2.5 py-2 px-2.5 rounded-lg border border-transparent hover:bg-surface-1 hover:border-panel-border cursor-pointer transition-all group"
+                >
+                  <div
+                    className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-sm"
+                    style={{ background: `${tool.accentColor}18` }}
+                  >
+                    {tool.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold truncate text-text-secondary group-hover:text-text-primary transition-colors">
+                      {tool.title}
+                    </p>
+                    <p className="text-[10px] truncate text-text-secondary opacity-70 mt-0.5">
+                      {tool.description}
+                    </p>
+                  </div>
+                  <div
+                    className="w-4 h-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: tool.accentColor }}
+                  >
+                    <Box className="w-4 h-4" />
+                  </div>
+                </div>
+              ))}
+              <div className="mt-4 px-2.5 py-3 rounded-lg border border-dashed border-panel-border flex items-center gap-2 opacity-60">
+                <Zap className="w-3.5 h-3.5 text-accent-purple flex-shrink-0" />
+                <p className="text-[10px] text-text-secondary">More tools coming soon…</p>
+              </div>
+            </div>
+          )
         )}
       </div>
 
