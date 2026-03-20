@@ -26,7 +26,7 @@ export default function MobileProjectList({ onSelectProject, onExit }: Props) {
             </div>
 
             {/* Project Cards */}
-            <div className="flex-1 overflow-y-auto px-5 pb-10 mobile-no-scrollbar">
+            <div className="flex-1 overflow-y-scroll px-5 pb-10 min-h-0 mobile-no-scrollbar mobile-smooth-scroll">
                 <div className="flex flex-col gap-4 pt-2">
                     {PROJECTS.map((project, idx) => (
                         <motion.button

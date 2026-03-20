@@ -52,9 +52,10 @@ function ChatBubble({ message, isLatest }: { message: ChatMessage; isLatest: boo
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={isLatest ? { opacity: 0, y: 8 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.2 }}
+      layout={false}
       className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}
     >
       {isUser && message.attachments && message.attachments.length > 0 && (
@@ -195,8 +196,10 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-      className="fixed inset-x-0 top-0 z-40 flex flex-col bg-[#0A0B0F]"
-      style={{ bottom: `calc(${dockHeight}px + env(safe-area-inset-bottom, 0px) + 8px)` }}
+      className="fixed inset-0 z-[45] flex flex-col bg-[#0A0B0F]"
+      style={{
+        paddingBottom: `calc(${dockHeight}px + env(safe-area-inset-bottom, 0px) + 8px)`,
+      }}
     >
       {/* Handle + header */}
       <div className="flex items-center justify-between px-5 py-4 flex-shrink-0">
@@ -236,7 +239,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-scroll px-4 py-4 flex flex-col gap-3 min-h-0 mobile-smooth-scroll">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full gap-6 px-4">
             <div className="text-center">
@@ -286,7 +289,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="flex gap-2 px-4 py-2 border-t border-[#1E1F2C] overflow-x-auto"
+            className="flex gap-2 px-4 py-2 border-t border-[#1E1F2C] overflow-x-auto mobile-smooth-scroll-x"
           >
             {attachments.map((att, idx) => (
               <div key={idx} className="relative flex-shrink-0">

@@ -179,7 +179,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                         </div>
 
                         {/* Tab Content */}
-                        <div className="overflow-y-auto flex-1">
+                        <div className="overflow-y-scroll flex-1 min-h-0 mobile-smooth-scroll">
 
                             {/* Comments Tab */}
                             {activeTab === 'comments' && (

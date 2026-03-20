@@ -387,7 +387,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
             </div>
 
             {/* ── Main Scrollable Content ─────────────────────────── */}
-            <div className="flex-1 overflow-y-auto mobile-no-scrollbar">
+            <div className="flex-1 overflow-y-scroll mobile-no-scrollbar min-h-0 mobile-smooth-scroll">
                 {/* Hero Header */}
                 <MobileProjectHero project={project} />
 

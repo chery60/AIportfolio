@@ -40,7 +40,7 @@ const EXPERIENCE = [
 
 export default function MobileHomeTab() {
   return (
-    <div className="h-full overflow-y-auto overflow-x-hidden bg-[#0A0B0F] scroll-smooth mobile-snap-y mobile-no-scrollbar">
+    <div className="h-full overflow-y-scroll overflow-x-hidden bg-[#0A0B0F] min-h-0 scroll-smooth mobile-snap-y mobile-no-scrollbar mobile-smooth-scroll">
       <div className="px-5 flex flex-col gap-6" style={{ paddingBottom: 'calc(10rem + env(safe-area-inset-bottom, 0px))' }}>
 
         {/* 120px top spacer — prevents auto-scroll on load so badge has gap from top */}

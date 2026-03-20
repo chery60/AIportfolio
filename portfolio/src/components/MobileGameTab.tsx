@@ -18,7 +18,7 @@ const DEFAULT_GAME_ELEMENT: GameZoneElement = {
 
 export default function MobileGameTab() {
   return (
-    <div className="h-full overflow-y-auto bg-[#0A0B0F]">
+    <div className="h-full overflow-y-scroll bg-[#0A0B0F] min-h-0 mobile-smooth-scroll">
       <div className="px-5 pt-14" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
         <MobileGameZone element={DEFAULT_GAME_ELEMENT} />
       </div>
