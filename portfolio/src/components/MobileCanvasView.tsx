@@ -291,8 +291,9 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
         <div className="fixed inset-0 flex flex-col" style={{ background: '#0A0B0F', color: '#F0F0FF' }}>
             {/* ── Top Navigation Bar ─────────────────────────────── */}
             <div
-                className="flex items-center justify-between px-4 py-3 z-30 mobile-safe-top flex-shrink-0"
+                className="flex items-center justify-between px-4 pb-3 z-30 flex-shrink-0"
                 style={{
+                    paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
                     background: 'rgba(10,11,15,0.85)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
@@ -512,20 +513,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                         border: '1px solid rgba(255,255,255,0.10)',
                         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                     }}
-                >
-                    {/* Author dot */}
-                    <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black text-white shadow-lg"
-                        style={{
-                            background: `linear-gradient(135deg, ${project.accentColor}, ${project.accentColor}aa)`,
-                            border: '2px solid rgba(255,255,255,0.15)',
-                        }}
                     >
-                        {project.title.charAt(0)}
-                    </div>
-
-                    <div className="w-full h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
-
                     {/* Like */}
                     <div className="flex flex-col items-center gap-1">
                         <button
@@ -564,7 +552,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                             className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                             style={{ background: 'rgba(255,255,255,0.07)' }}
                         >
-                            <Send className="w-4.5 h-4.5" style={{ color: 'rgba(240,240,255,0.7)', transform: 'rotate(-40deg) translateY(-1px)' }} />
+                            <Send className="w-4.5 h-4.5" style={{ color: 'rgba(240,240,255,0.7)' }} />
                         </button>
                         <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.5)' }}>
                             Share
