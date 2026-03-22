@@ -427,6 +427,21 @@ export default function Canvas({
         ))}
       </div>
 
+      {/* Tour guide HUD hint — visible when character is narrating or waiting */}
+      {(guideState.tourState === 'narrating' || guideState.tourState === 'waiting') && (
+        <div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[90] pointer-events-none"
+          style={{ animation: 'fadeInUp 0.4s ease both' }}
+        >
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A1B2E]/90 border border-[#7C5CFC]/40 shadow-lg backdrop-blur-sm text-[11px] font-semibold text-[#C4B5FD] whitespace-nowrap">
+            <span className="text-base leading-none">👆</span>
+            {guideState.tourState === 'narrating'
+              ? 'Guide is speaking…'
+              : "Click 'Next →' in the guide's bubble to continue"}
+          </div>
+        </div>
+      )}
+
       {/* Keyboard hint */}
       <div className="absolute top-4 left-4 flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
         <span className="text-xs text-text-secondary">

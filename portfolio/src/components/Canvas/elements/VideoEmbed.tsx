@@ -27,6 +27,12 @@ export default function VideoEmbed({ element, isSelected, onClick }: Props) {
     ? `${data.videoUrl}${data.videoUrl.includes('?') ? '&' : '?'}autoplay=1&rel=0&modestbranding=1`
     : data.videoUrl;
 
+  const resolvedVideoUrl = isYouTube 
+    ? data.videoUrl 
+    : data.videoUrl.startsWith('/') 
+      ? `${import.meta.env.BASE_URL}${data.videoUrl.slice(1)}` 
+      : data.videoUrl;
+
   return (
     <div
       onClick={onClick}
@@ -128,7 +134,7 @@ export default function VideoEmbed({ element, isSelected, onClick }: Props) {
           // Native video player
           <video
             className="absolute inset-0 w-full h-full object-cover"
-            src={data.videoUrl}
+            src={resolvedVideoUrl}
             controls
             autoPlay
             onClick={(e) => e.stopPropagation()}

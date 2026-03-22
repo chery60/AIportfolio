@@ -367,7 +367,7 @@ export const PROJECTS: Project[] = [
         data: {
           title: 'Kiosk Prototype · Walk-through 1',
           description: 'Full order flow — start to payment. Portrait mode. Redwood Cafe theme.',
-          videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          videoUrl: '/videos/kioskrecording1.webm',
           accentColor: '#C74B18',
         }
       },
@@ -376,7 +376,7 @@ export const PROJECTS: Project[] = [
         data: {
           title: 'Kiosk Prototype · Walk-through 2',
           description: 'Bilingual flow with Spanish support. Landscape mode walkthrough.',
-          videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          videoUrl: '/videos/kioskrec2.webm',
           accentColor: '#6366F1',
         }
       },

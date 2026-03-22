@@ -17,7 +17,38 @@ interface Props {
 export default function RightPanel({ project, isEditMode = false, activeViewers = [] }: Props) {
 
   const { reactions, incrementReaction } = useReactions(project.id);
-  const [contactState, setContactState] = useState<'idle' | 'form' | 'sent'>('idle');
+  const [contactState, setContactState] = useState<'idle' | 'form' | 'sent' | 'sending'>('idle');
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+
+  const handleSendContact = async () => {
+    setContactState('sending');
+    try {
+      await fetch("https://formsubmit.co/ajax/kc60488charan@gmail.com", {
+        method: "POST",
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `New Portfolio Message from ${contactName}`,
+          name: contactName,
+          email: contactEmail,
+          message: contactMessage,
+          _template: 'box'
+        })
+      });
+      setContactState('sent');
+      setContactName('');
+      setContactEmail('');
+      setContactMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setContactState('form');
+      alert('Failed to send message. Please try again later.');
+    }
+  };
 
   // Comment state
   const [authorName, setAuthorName] = useState('');
@@ -281,11 +312,11 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
               </ShimmerButton>
             )}
 
-            {contactState === 'form' && (
+            {(contactState === 'form' || contactState === 'sending') && (
               <div className="mt-3 space-y-2.5 bg-surface-1 p-3 rounded-xl border border-panel-border shadow-sm">
-                <input type="text" placeholder="Your name" className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple" />
-                <input type="email" placeholder="Email address" className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple" />
-                <textarea placeholder="What's on your mind?" rows={3} className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple resize-none" />
+                <input value={contactName} onChange={e => setContactName(e.target.value)} type="text" placeholder="Your name" className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple" />
+                <input value={contactEmail} onChange={e => setContactEmail(e.target.value)} type="email" placeholder="Email address" className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple" />
+                <textarea value={contactMessage} onChange={e => setContactMessage(e.target.value)} placeholder="What's on your mind?" rows={3} className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple resize-none" />
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => setContactState('idle')}
@@ -294,11 +325,12 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                     Cancel
                   </button>
                   <button
-                    onClick={() => setContactState('sent')}
-                    className="flex-1 py-2 rounded-md text-white text-xs font-semibold flex flex-col justify-center items-center shadow-sm"
+                    onClick={handleSendContact}
+                    disabled={!contactName.trim() || !contactMessage.trim() || contactState === 'sending'}
+                    className="flex-1 py-2 rounded-md text-white text-xs font-semibold flex flex-col justify-center items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)' }}
                   >
-                    Send
+                    {contactState === 'sending' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send'}
                   </button>
                 </div>
               </div>

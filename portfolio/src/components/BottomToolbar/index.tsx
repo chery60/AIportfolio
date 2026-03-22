@@ -48,6 +48,16 @@ export default function BottomToolbar({
             View Prototype
           </button>
         );
+      case 'alchemy-design-system':
+        return (
+          <button 
+            onClick={() => window.open('https://www.figma.com/proto/o3nHV47UkzxHDz7OMfDrn2/Kiosk?node-id=5470-288291&p=f&viewport=2438%2C-10732%2C0.21&t=gpdCCMT32mQ0KWFu-0&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=5480%3A352033&show-proto-sidebar=1', '_blank')}
+            className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full bg-surface-1 hover:bg-panel-border text-sm font-semibold text-text-primary transition-colors"
+          >
+            View Live
+            <ExternalLink className="w-4 h-4 text-text-secondary" />
+          </button>
+        );
       default:
         return (
           <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full bg-surface-1 hover:bg-panel-border text-sm font-semibold text-text-primary transition-colors">
@@ -171,9 +181,6 @@ export default function BottomToolbar({
       {/* Navigation & Interaction */}
       <ToolBtn active title="Pan Tool (Space + Drag)">
         <Hand className="w-5 h-5" />
-      </ToolBtn>
-      <ToolBtn onClick={onAddNote} title="Leave a Sticky Note (N)">
-        <StickyNote className="w-5 h-5" />
       </ToolBtn>
 
       <div className="h-8 w-px bg-panel-border self-center mx-2" />

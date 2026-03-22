@@ -352,6 +352,12 @@ export default function Character({
     const isGuidingRef = useRef(isGuiding);
     useEffect(() => { isGuidingRef.current = isGuiding; }, [isGuiding]);
 
+    // Refs for rAF loop to access latest prop values without stale closures
+    const guideTargetRef = useRef(guideTarget);
+    useEffect(() => { guideTargetRef.current = guideTarget; }, [guideTarget]);
+    const onArrivedRef = useRef(onArrived);
+    useEffect(() => { onArrivedRef.current = onArrived; }, [onArrived]);
+
     // Typewriter for narration
     const displayMessage = isGuiding ? null : message;
     const { displayed: narrationDisplayed, done: narrationDone } = useTypewriter(
@@ -382,7 +388,7 @@ export default function Character({
     // Movement tuning
     const maxSpeed = 7.0;       // Max pixels per frame at 60fps
     const lerpFactor = 0.08;    // Smooth interpolation factor (0-1), lower = smoother
-    const arrivalThreshold = 1; // Snap when within this distance
+    const arrivalThreshold = 20; // Snap when within this distance
 
     // Update target when props change — clamp to element borders
     useEffect(() => {
@@ -621,9 +627,10 @@ export default function Character({
             }
 
             // Fire arrival callback in guide mode — only when at the FINAL destination
-            if (distToFinalTarget <= arrivalThreshold && isGuiding && guideTarget && onArrived && !arrivedRef.current) {
+            // Use refs (not closure values) to avoid stale captures in the rAF loop
+            if (distToFinalTarget <= arrivalThreshold && isGuidingRef.current && guideTargetRef.current && onArrivedRef.current && !arrivedRef.current) {
                 arrivedRef.current = true;
-                onArrived();
+                onArrivedRef.current();
             }
         }
 
@@ -708,6 +715,16 @@ export default function Character({
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* ── Waiting Pulse Ring (draws attention to bubble) ── */}
+            {isGuiding && narrationDone && !isWalking && !isComplete && (
+                <motion.div
+                    initial={{ opacity: 0.5, scale: 1 }}
+                    animate={{ opacity: 0, scale: 2.8 }}
+                    transition={{ duration: 1.4, ease: 'easeOut', repeat: Infinity, repeatDelay: 0.4 }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full border-2 border-[#7C5CFC] pointer-events-none"
+                />
+            )}
 
             {/* ── Arrival Animation: Glow Ring ── */}
             <AnimatePresence>
