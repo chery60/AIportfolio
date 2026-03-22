@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Send, Link2, Twitter, Linkedin, MessageSquare, CheckCircle2, Trash2, Loader2, MessageSquareDashed } from 'lucide-react';
 import type { Project, CanvasElement } from '../../types';
+import { PROJECTS } from '../../data/projects';
 import { useComments } from '../../hooks/useComments';
 import { useReactions } from '../../hooks/useReactions';
 import type { ActiveViewer } from '../../hooks/useRealtimeSession';
@@ -12,9 +13,11 @@ interface Props {
   selectedElement: CanvasElement | null;
   isEditMode?: boolean;
   activeViewers?: ActiveViewer[];
+  onViewerClick?: (viewer: ActiveViewer) => void;
+  localIdentity?: ActiveViewer | null;
 }
 
-export default function RightPanel({ project, isEditMode = false, activeViewers = [] }: Props) {
+export default function RightPanel({ project, isEditMode = false, activeViewers = [], onViewerClick, localIdentity }: Props) {
 
   const { reactions, incrementReaction } = useReactions(project.id);
   const [contactState, setContactState] = useState<'idle' | 'form' | 'sent' | 'sending'>('idle');
@@ -117,28 +120,62 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
             <SectionTitle>VIEWING NOW</SectionTitle>
             <div className="flex items-center gap-2 mb-3 mt-2">
               <div className="flex -space-x-1.5">
-                {activeViewers.slice(0, 5).map(v => (
-                  <div key={v.id} className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold text-white shadow-sm" style={{ backgroundColor: v.color }}>
-                    {v.initials}
-                  </div>
-                ))}
+                {activeViewers.slice(0, 5).map(v => {
+                  const isMe = v.id === localIdentity?.id;
+                  return (
+                    <div
+                      key={v.id}
+                      title={isMe ? 'You' : `${v.name} — click to follow`}
+                      onClick={() => !isMe && onViewerClick?.(v)}
+                      className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold text-white shadow-sm transition-transform ${isMe ? 'cursor-default' : 'cursor-pointer hover:scale-110'}`}
+                      style={{ backgroundColor: v.color }}
+                    >
+                      {v.initials}
+                    </div>
+                  );
+                })}
               </div>
               <span className="text-xs text-text-secondary font-medium pl-1">
                 {activeViewers.length} {activeViewers.length === 1 ? 'viewing right now' : 'viewing right now'}
               </span>
             </div>
             <div className="space-y-1.5 mt-2">
-              {activeViewers.slice(0, 3).map(v => (
-                <div key={v.id} className="flex items-center gap-2 bg-surface-1 px-2.5 py-1.5 rounded-md border border-transparent">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm" style={{ backgroundColor: v.color }}>
-                    {v.initials}
+              {activeViewers.slice(0, 3).map(v => {
+                const isMe = v.id === localIdentity?.id;
+                const viewerProject = PROJECTS.find(p => p.id === v.projectId);
+                const isOnSameProject = v.projectId === project.id;
+                return (
+                  <div
+                    key={v.id}
+                    onClick={() => !isMe && onViewerClick?.(v)}
+                    title={isMe ? 'This is you' : 'Click to follow'}
+                    className={`flex items-center gap-2 bg-surface-1 px-2.5 py-1.5 rounded-md border border-transparent transition-all ${isMe ? 'cursor-default' : 'cursor-pointer hover:bg-surface-2 hover:border-panel-border'}`}
+                  >
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm flex-shrink-0" style={{ backgroundColor: v.color }}>
+                      {v.initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-text-primary truncate leading-tight">
+                        {isMe ? 'You' : v.name}
+                      </p>
+                      {!isMe && (
+                        <p className="text-[10px] text-text-secondary truncate leading-tight mt-0.5">{v.location}</p>
+                      )}
+                    </div>
+                    {viewerProject && (
+                      <span
+                        className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap"
+                        style={{
+                          backgroundColor: isOnSameProject ? `${viewerProject.accentColor}22` : '#1E1F2C',
+                          color: isOnSameProject ? viewerProject.accentColor : '#8B8DB0',
+                        }}
+                      >
+                        {viewerProject.title.split(' ').slice(0, 2).join(' ')}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-text-primary truncate leading-tight">{v.name}</p>
-                    <p className="text-[10px] text-text-secondary truncate leading-tight mt-0.5">{v.location}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

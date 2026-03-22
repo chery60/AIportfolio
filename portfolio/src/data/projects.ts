@@ -538,12 +538,13 @@ export const PROJECTS: Project[] = [
     gradientFrom: '#1E40AF',
     gradientTo: '#3B82F6',
     defaultView: { x: 290, y: 42, scale: 0.72 },
-    canvasSize: { width: 2700, height: 12500 },
+    canvasSize: { width: 2700, height: 12800 },
     files: [
-      { id: 'f1', label: 'Figma Master File', type: 'figma' },
-      { id: 'f2', label: 'User Flows', type: 'figma' },
+      { id: 'f1', label: 'Legacy UI', type: 'figma' },
+      { id: 'f2', label: 'User Flows & IA', type: 'figma' },
       { id: 'f3', label: 'Information Architecture', type: 'figma' },
-      { id: 'f4', label: 'View Summary', type: 'figma' },
+      { id: 'f4', label: 'Low Fidelity Wireframes', type: 'figma' },
+      { id: 'f5', label: 'High Fidelity Wireframes', type: 'figma' },
     ],
     assets: [
       { id: 'a1', label: 'User Management UI', thumbnailColor: '#1E3A8A', type: 'image' },
@@ -592,7 +593,7 @@ export const PROJECTS: Project[] = [
 
       // ── PROBLEM STATEMENT ──────────────────────────────────────────────
       {
-        id: 'q-prob', type: 'quote-block', x: 720, y: 300, width: 510, height: 140,
+        id: 'q-prob', type: 'quote-block', x: 720, y: 300, width: 510, height: 240,
         data: {
           quote: 'How might we help an administrator add and manage user access of all employees across the Back Office, EMC, and POS from a single unified platform?',
           author: 'Problem Statement',
@@ -606,43 +607,43 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // cs bottom = 116+320 = 436 → sl y = 436+80 = 516
       {
-        id: 'sl-prob', type: 'section-label', x: 80, y: 516, width: 440, height: 40,
+        id: 'sl-prob', type: 'section-label', x: 80, y: 616, width: 440, height: 40,
         data: { title: 'IDENTIFICATION OF PROBLEMS — KNOWN', color: '#EF4444' }
       },
       // sn y = 516+40+16 = 572
       {
-        id: 'sn-p1', type: 'sticky-note', x: 80, y: 572, width: 300, height: 145,
+        id: 'sn-p1', type: 'sticky-note', x: 80, y: 672, width: 300, height: 145,
         data: { content: '1. Building a Unified platform supporting both the architectures (i.e. OJET 6 and OJET 12 level architectural components should be collaborated)', color: 'pink', rotation: -1 }
       },
       {
-        id: 'sn-p2', type: 'sticky-note', x: 410, y: 572, width: 300, height: 145,
+        id: 'sn-p2', type: 'sticky-note', x: 410, y: 672, width: 300, height: 145,
         data: { content: '2. Unifying the data flows (defining data points and saving triggers) for both the respective product\'s onboarding journeys was different and the data got saved to their respective database tables.', color: 'yellow', rotation: 1.2 }
       },
       {
-        id: 'sn-p3', type: 'sticky-note', x: 740, y: 572, width: 300, height: 145,
+        id: 'sn-p3', type: 'sticky-note', x: 740, y: 672, width: 300, height: 145,
         data: { content: '3. Filtering of Users as the users for both the plates will be migrated to a new unified platform.', color: 'cyan', rotation: -0.5 }
       },
       // sn row 2: y = 572+145+80 = 797
       {
-        id: 'sn-p4', type: 'sticky-note', x: 80, y: 797, width: 300, height: 145,
+        id: 'sn-p4', type: 'sticky-note', x: 80, y: 897, width: 300, height: 145,
         data: { content: '4. Building two different workflows one which supports labor management products and one which doesn\'t support.', color: 'green', rotation: 0.8 }
       },
       {
-        id: 'sn-p5', type: 'sticky-note', x: 410, y: 797, width: 300, height: 145,
+        id: 'sn-p5', type: 'sticky-note', x: 410, y: 897, width: 300, height: 145,
         data: { content: '5. Managing access of common employees present on both platforms which includes deletion of users, and managing permission among zones, revenue centers, and locations.', color: 'yellow', rotation: -1.2 }
       },
 
       // ── UNKNOWN PROBLEMS ───────────────────────────────────────────────
       {
-        id: 'sl-unk', type: 'section-label', x: 740, y: 797, width: 340, height: 40,
+        id: 'sl-unk', type: 'section-label', x: 740, y: 897, width: 340, height: 40,
         data: { title: 'UNKNOWN PROBLEMS', color: '#A855F7' }
       },
       {
-        id: 'sn-up1', type: 'sticky-note', x: 740, y: 853, width: 290, height: 130,
+        id: 'sn-up1', type: 'sticky-note', x: 740, y: 953, width: 290, height: 130,
         data: { content: '🔍 Unknown Problem 1\nImproving the information architecture. To build the right workflows.', color: 'purple', rotation: 1 }
       },
       {
-        id: 'sn-up2', type: 'sticky-note', x: 1060, y: 853, width: 290, height: 130,
+        id: 'sn-up2', type: 'sticky-note', x: 1060, y: 953, width: 290, height: 130,
         data: { content: '🧩 Unknown Problem 2\nImproving the overall product experience by handling the component mismatch and screen responsiveness.', color: 'pink', rotation: -0.5 }
       },
 
@@ -651,21 +652,21 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // sn row2 bottom = 797+145 = 942 → sl y = 942+100 = 1062
       {
-        id: 'sl-goals', type: 'section-label', x: 80, y: 1062, width: 340, height: 40,
+        id: 'sl-goals', type: 'section-label', x: 80, y: 1162, width: 340, height: 40,
         data: { title: 'DEFINING THE USER GOALS', color: '#10B981' }
       },
       {
-        id: 'ps-goals', type: 'process-step', x: 80, y: 1118, width: 300, height: 170,
+        id: 'ps-goals', type: 'process-step', x: 80, y: 1218, width: 300, height: 170,
         data: { stepNumber: 1, title: 'Stakeholder Alignment', description: 'Connected with the respective PMs and stakeholders and defined all the user goals so that the system could be built. Authors: Sai Charan Kalla, Meha Gupta, LutZ.', color: '#10B981' }
       },
 
       // USER GOAL 1 — Add User
       {
-        id: 'sl-ug1', type: 'section-label', x: 80, y: 1318, width: 560, height: 36,
+        id: 'sl-ug1', type: 'section-label', x: 80, y: 1418, width: 560, height: 36,
         data: { title: 'USER GOAL 1 — ADD USER · System Administrator', color: '#1E3A8A' }
       },
       {
-        id: 'cs-ug1', type: 'case-study-card', x: 80, y: 1370, width: 1240, height: 240,
+        id: 'cs-ug1', type: 'case-study-card', x: 80, y: 1470, width: 1240, height: 240,
         data: {
           title: 'As a System administrator, I need to add User, so that I can assign roles, locations, Revenue Centers.',
           subtitle: 'Add User · System Administrator — Mike Rose',
@@ -682,11 +683,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 2 — Add User/Edit User (Onboard from EBO)
       {
-        id: 'sl-ug2', type: 'section-label', x: 80, y: 1638, width: 560, height: 36,
+        id: 'sl-ug2', type: 'section-label', x: 80, y: 1738, width: 560, height: 36,
         data: { title: 'USER GOAL 2 — ADD/EDIT USER FROM EBO · System Administrator', color: '#6366F1' }
       },
       {
-        id: 'cs-ug2', type: 'case-study-card', x: 80, y: 1690, width: 1240, height: 270,
+        id: 'cs-ug2', type: 'case-study-card', x: 80, y: 1790, width: 1240, height: 270,
         data: {
           title: 'As a System administrator, I need to onboard all users from EBO, so that I can manage all our application users (R&A, EMC G2, POS,) from a single user interface and workflow if HR is not in use.',
           subtitle: 'Add User/Edit User · System Administrator — Mike Rose',
@@ -703,11 +704,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 3 — Add User Using User Template
       {
-        id: 'sl-ug3', type: 'section-label', x: 80, y: 1988, width: 560, height: 36,
+        id: 'sl-ug3', type: 'section-label', x: 80, y: 2088, width: 560, height: 36,
         data: { title: 'USER GOAL 3 — ADD USER USING USER TEMPLATE', color: '#F59E0B' }
       },
       {
-        id: 'cs-ug3', type: 'case-study-card', x: 80, y: 2040, width: 1240, height: 290,
+        id: 'cs-ug3', type: 'case-study-card', x: 80, y: 2140, width: 1240, height: 290,
         data: {
           title: 'As a System administrator/IT Admin / HR rep / store manager, I need to create a new user/employee from a template, so that I do not need to complete common attributes, permissions, and privileges again and can create the user/employee much faster.',
           subtitle: 'Add User Using User Template · System Administrator — Mike Rose',
@@ -724,11 +725,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 4 — Hire POS User
       {
-        id: 'sl-ug4', type: 'section-label', x: 80, y: 2358, width: 560, height: 36,
+        id: 'sl-ug4', type: 'section-label', x: 80, y: 2458, width: 560, height: 36,
         data: { title: 'USER GOAL 4 — HIRE POS USER · HR Representative', color: '#EC4899' }
       },
       {
-        id: 'cs-ug4', type: 'case-study-card', x: 80, y: 2410, width: 1240, height: 260,
+        id: 'cs-ug4', type: 'case-study-card', x: 80, y: 2510, width: 1240, height: 260,
         data: {
           title: 'As an HR representative, I need to specify appropriate details and roles, so that I can hire them with all necessary details.',
           subtitle: 'Hire POS User · System Administrator — Mike Rose',
@@ -745,11 +746,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 5 — Assign Location Access to POS User
       {
-        id: 'sl-ug5', type: 'section-label', x: 80, y: 2698, width: 560, height: 36,
+        id: 'sl-ug5', type: 'section-label', x: 80, y: 2798, width: 560, height: 36,
         data: { title: 'USER GOAL 5 — ASSIGN LOCATION ACCESS TO POS USER', color: '#22D3EE' }
       },
       {
-        id: 'cs-ug5', type: 'case-study-card', x: 80, y: 2750, width: 1240, height: 270,
+        id: 'cs-ug5', type: 'case-study-card', x: 80, y: 2850, width: 1240, height: 270,
         data: {
           title: 'As an HR Representative/system administrator working in a chain restaurant, I need to provide the access to specific locations to POS user and specify the details, so that I can enable a POS user to access the same.',
           subtitle: 'Assign Location access to POS User · System Administrator — Mike Rose',
@@ -766,11 +767,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 6 — Assign Revenue Center Access to POS User
       {
-        id: 'sl-ug6', type: 'section-label', x: 80, y: 3070, width: 620, height: 36,
+        id: 'sl-ug6', type: 'section-label', x: 80, y: 3170, width: 620, height: 36,
         data: { title: 'USER GOAL 6 — ASSIGN REVENUE CENTER ACCESS TO POS USER', color: '#EF4444' }
       },
       {
-        id: 'cs-ug6', type: 'case-study-card', x: 80, y: 3122, width: 1240, height: 290,
+        id: 'cs-ug6', type: 'case-study-card', x: 80, y: 3222, width: 1240, height: 290,
         data: {
           title: 'As an HR Representative/system administrator working in a chain restaurant, I need to provide the access to revenue centers under a location to a POS user and specify the details, so that I can enable a POS user to work in a revenue center.',
           subtitle: 'Assign Revenue center access to POS User · System Administrator — Mike Rose',
@@ -787,11 +788,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 7 — Add Locations Access via Location Template
       {
-        id: 'sl-ug7', type: 'section-label', x: 80, y: 3462, width: 620, height: 36,
+        id: 'sl-ug7', type: 'section-label', x: 80, y: 3562, width: 620, height: 36,
         data: { title: 'USER GOAL 7 — ADD LOCATION ACCESS VIA LOCATION TEMPLATE', color: '#10B981' }
       },
       {
-        id: 'cs-ug7', type: 'case-study-card', x: 80, y: 3514, width: 1240, height: 270,
+        id: 'cs-ug7', type: 'case-study-card', x: 80, y: 3614, width: 1240, height: 270,
         data: {
           title: 'As an HR Representative/store manager, I want to be able to provide other location access to user/employee from a location template, so that I do not need to specify all the attributes again and can provide the access much faster.',
           subtitle: 'Add Locations access through location template (only the location for which employee is having the access) · System Administrator — Mike Rose',
@@ -808,11 +809,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 8 — Add Revenue Center Access via Revenue Center Template
       {
-        id: 'sl-ug8', type: 'section-label', x: 80, y: 3834, width: 620, height: 36,
+        id: 'sl-ug8', type: 'section-label', x: 80, y: 3934, width: 620, height: 36,
         data: { title: 'USER GOAL 8 — ADD REVENUE CENTER ACCESS VIA RC TEMPLATE', color: '#A855F7' }
       },
       {
-        id: 'cs-ug8', type: 'case-study-card', x: 80, y: 3886, width: 1240, height: 270,
+        id: 'cs-ug8', type: 'case-study-card', x: 80, y: 3986, width: 1240, height: 270,
         data: {
           title: 'As an HR Representative/store manager, I want to be able to provide other revenue center access to user/employee from a revenue center template, so that I do not need to specify all the attributes again and can provide the access much faster.',
           subtitle: 'Add Revenue center access through Revenue center template (Same location different revenue center) · System Administrator — Mike Rose',
@@ -829,11 +830,11 @@ export const PROJECTS: Project[] = [
 
       // USER GOAL 9 — Override Class Settings
       {
-        id: 'sl-ug9', type: 'section-label', x: 80, y: 4206, width: 620, height: 36,
+        id: 'sl-ug9', type: 'section-label', x: 80, y: 4306, width: 620, height: 36,
         data: { title: 'USER GOAL 9 — OVERRIDE CLASS SETTINGS AT REVENUE CENTER LEVEL', color: '#F59E0B' }
       },
       {
-        id: 'cs-ug9', type: 'case-study-card', x: 80, y: 4258, width: 1240, height: 250,
+        id: 'cs-ug9', type: 'case-study-card', x: 80, y: 4358, width: 1240, height: 250,
         data: {
           title: 'As an HR Representative/store manager, I need to review and override the employee class options at revenue center level, so that I can control transaction related behavior for POS user at revenue center level.',
           subtitle: 'Override Class Settings · System Administrator — Mike Rose',
@@ -853,27 +854,27 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ug9 bottom = 4258+250 = 4508 → sl y = 4508+80 = 4588
       {
-        id: 'sl-approach', type: 'section-label', x: 80, y: 4588, width: 440, height: 40,
+        id: 'sl-approach', type: 'section-label', x: 80, y: 4688, width: 440, height: 40,
         data: { title: 'APPROACH TO PROBLEMS', color: '#F59E0B' }
       },
 
       // approach sub-section 1: Unified platform
       {
-        id: 'ps-app1', type: 'process-step', x: 80, y: 4644, width: 350, height: 200,
+        id: 'ps-app1', type: 'process-step', x: 80, y: 4744, width: 350, height: 300,
         data: { stepNumber: 1, title: 'Unified Platform Architecture', description: 'The entire product of the back office was built on OJET 6, so uplifting the entire product to OJET 12 to build using the new redwood design system would take a lot of time. The team decided to build the user management using the ALTA 5C component library (an intermediate component stack used to upgrade the very old Oracle products before the full all-new redwood design system build).', color: '#EF4444' }
       },
       {
-        id: 'ps-app1b', type: 'process-step', x: 460, y: 4644, width: 350, height: 200,
+        id: 'ps-app1b', type: 'process-step', x: 460, y: 4744, width: 350, height: 300,
         data: { stepNumber: 2, title: 'Component Framework', description: 'Made a list of all the components that could support the framework and build a low-fidelity workflow to conduct the first-level user interviews.', color: '#F59E0B' }
       },
 
       // approach sub-section 2: Unifying the data flows
       {
-        id: 'ps-app2', type: 'process-step', x: 840, y: 4644, width: 350, height: 200,
+        id: 'ps-app2', type: 'process-step', x: 840, y: 4744, width: 350, height: 300,
         data: { stepNumber: 3, title: 'Unifying Data Flows', description: 'The process of user creation and copying users from the platforms was different for the two respective products so built a UI that supported setting the save triggers and fetching data in the workflow.', color: '#6366F1' }
       },
       {
-        id: 'ps-app2b', type: 'process-step', x: 80, y: 4864, width: 350, height: 200,
+        id: 'ps-app2b', type: 'process-step', x: 80, y: 5064, width: 350, height: 300,
         data: { stepNumber: 4, title: 'Shape of the Data', description: 'After talking to the stakeholders and understanding the current system built the shape of the data so that I could use that data to build the layout.', color: '#A855F7' }
       },
 
@@ -883,46 +884,46 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps-app2b bottom = 4864+200 = 5064 → sl y = 5064+100 = 5164
       {
-        id: 'sl-data', type: 'section-label', x: 80, y: 5144, width: 400, height: 40,
+        id: 'sl-data', type: 'section-label', x: 80, y: 5444, width: 400, height: 40,
         data: { title: 'SHAPE OF DATA — UI CONSTRAINTS', color: '#A855F7' }
       },
       // dd row 1: y = 5144+40+16 = 5200
       {
-        id: 'dd-1', type: 'data-dimension', x: 80, y: 5200, width: 270, height: 190,
+        id: 'dd-1', type: 'data-dimension', x: 80, y: 5500, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of users added at a time', highlight: 'users added', min: '1', max: '3-4', typical: '2', accentColor: '#EF4444' }
       },
       {
-        id: 'dd-2', type: 'data-dimension', x: 380, y: 5200, width: 270, height: 190,
+        id: 'dd-2', type: 'data-dimension', x: 380, y: 5500, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of locations assigned to a user', highlight: 'locations', min: '0', max: '1-3', typical: '1', accentColor: '#F59E0B' }
       },
       {
-        id: 'dd-3', type: 'data-dimension', x: 680, y: 5200, width: 270, height: 190,
+        id: 'dd-3', type: 'data-dimension', x: 680, y: 5500, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of revenue centers assigned to a user', highlight: 'revenue centers', min: '0', max: '3-3', typical: '1', accentColor: '#10B981' }
       },
       {
-        id: 'dd-4', type: 'data-dimension', x: 980, y: 5200, width: 270, height: 190,
+        id: 'dd-4', type: 'data-dimension', x: 980, y: 5500, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of job Roles can be assigned to a user', highlight: 'job Roles', min: '0', max: '5', typical: '1', accentColor: '#6366F1' }
       },
       // dd row 2: y = 5200+190+30 = 5420
       {
-        id: 'dd-5', type: 'data-dimension', x: 80, y: 5420, width: 270, height: 190,
+        id: 'dd-5', type: 'data-dimension', x: 80, y: 5720, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of revenue centers under a location', highlight: 'revenue centers', min: '1', max: '2-3', typical: '1', accentColor: '#EC4899' }
       },
       {
-        id: 'dd-6', type: 'data-dimension', x: 380, y: 5420, width: 270, height: 190,
+        id: 'dd-6', type: 'data-dimension', x: 380, y: 5720, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Report Roles can be assigned to a user', highlight: 'Report Roles', min: '0', max: '5+', typical: '1', accentColor: '#A855F7' }
       },
       {
-        id: 'dd-7', type: 'data-dimension', x: 680, y: 5420, width: 270, height: 190,
+        id: 'dd-7', type: 'data-dimension', x: 680, y: 5720, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Payment Roles can be assigned to a user', highlight: 'Payment Roles', min: '0', max: '1', typical: '1', accentColor: '#22D3EE' }
       },
       {
-        id: 'dd-8', type: 'data-dimension', x: 980, y: 5420, width: 270, height: 190,
+        id: 'dd-8', type: 'data-dimension', x: 980, y: 5720, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Enterprise locations can be assigned to a user', highlight: 'Enterprise locations', min: '0', max: '5+', typical: '1', accentColor: '#F59E0B' }
       },
       // dd row 3: y = 5420+190+30 = 5640
       {
-        id: 'dd-9', type: 'data-dimension', x: 80, y: 5640, width: 270, height: 190,
+        id: 'dd-9', type: 'data-dimension', x: 80, y: 5940, width: 270, height: 190,
         data: { dimension: 'Dimension + Objectives', title: 'Number of Revenue Center Restrictions can be assigned to a user', highlight: 'Revenue Center Restrictions', min: '0', max: '3-20', typical: '2000', note: 'Some statistics: Typical 200 with', accentColor: '#EF4444' }
       },
 
@@ -931,15 +932,15 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // dd bottom = 5640+190 = 5830 → sl y = 5830+100 = 5930
       {
-        id: 'sl-filter', type: 'section-label', x: 80, y: 5910, width: 500, height: 40,
+        id: 'sl-filter', type: 'section-label', x: 80, y: 6210, width: 500, height: 40,
         data: { title: 'FILTERING OF USERS — ADVANCED SEARCH', color: '#22D3EE' }
       },
       {
-        id: 'ps-filt1', type: 'process-step', x: 80, y: 5966, width: 350, height: 180,
+        id: 'ps-filt1', type: 'process-step', x: 80, y: 6266, width: 350, height: 180,
         data: { stepNumber: 1, title: 'Admin Table Design', description: 'As the user persona was an administrator based on the persona I designed the table and added an advanced search bar using which the administrator could easily filter out the users.', color: '#22D3EE' }
       },
       {
-        id: 'ps-filt2', type: 'process-step', x: 460, y: 5966, width: 350, height: 180,
+        id: 'ps-filt2', type: 'process-step', x: 460, y: 6266, width: 350, height: 180,
         data: { stepNumber: 2, title: 'Column Selection', description: 'I talked to the users and understood what columns they would require which they came across on the landing page.', color: '#3B82F6' }
       },
 
@@ -948,15 +949,15 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps bottom = 5966+180 = 6146 → sl y = 6146+100 = 6246
       {
-        id: 'sl-wf', type: 'section-label', x: 80, y: 6226, width: 560, height: 40,
+        id: 'sl-wf', type: 'section-label', x: 80, y: 6526, width: 560, height: 40,
         data: { title: 'BUILDING TWO DIFFERENT WORKFLOWS', color: '#EC4899' }
       },
       {
-        id: 'sn-wf1', type: 'sticky-note', x: 80, y: 6282, width: 300, height: 145,
+        id: 'sn-wf1', type: 'sticky-note', x: 80, y: 6582, width: 300, height: 145,
         data: { content: '⚙️ Workflow A: With Labor Management\nFor a user if the labor management is enabled some of the settings were changed for the user in the entire workflow.', color: 'pink', rotation: -0.5 }
       },
       {
-        id: 'sn-wf2', type: 'sticky-note', x: 410, y: 6282, width: 300, height: 145,
+        id: 'sn-wf2', type: 'sticky-note', x: 410, y: 6582, width: 300, height: 145,
         data: { content: '🔧 Workflow B: Without Labor Management\nConnected with the stakeholders and understood the behavior of the system.', color: 'cyan', rotation: 0.8 }
       },
 
@@ -965,15 +966,15 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // sn bottom = 6282+145 = 6427 → sl y = 6427+100 = 6527
       {
-        id: 'sl-unk-app', type: 'section-label', x: 80, y: 6507, width: 500, height: 40,
+        id: 'sl-unk-app', type: 'section-label', x: 80, y: 6807, width: 500, height: 40,
         data: { title: 'UNKNOWN PROBLEMS — APPROACH', color: '#A855F7' }
       },
       {
-        id: 'ps-unk1', type: 'process-step', x: 80, y: 6563, width: 350, height: 200,
+        id: 'ps-unk1', type: 'process-step', x: 80, y: 6863, width: 350, height: 200,
         data: { stepNumber: 1, title: 'Information Architecture', description: 'After building the initial low-fidelity workflow and testing with the real users, I got some observations and re-iterated the designs based on the developer\'s feedback and the user\'s feedback.', color: '#A855F7' }
       },
       {
-        id: 'ps-unk2', type: 'process-step', x: 460, y: 6563, width: 350, height: 200,
+        id: 'ps-unk2', type: 'process-step', x: 460, y: 6863, width: 350, height: 200,
         data: { stepNumber: 2, title: 'Component Mismatch', description: 'Improving the overall product experience by handling the component mismatch and screen responsiveness.', color: '#6366F1' }
       },
 
@@ -982,24 +983,33 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps bottom = 6563+200 = 6763 → sl y = 6763+100 = 6863
       {
-        id: 'sl-figma1', type: 'section-label', x: 80, y: 6843, width: 560, height: 40,
-        data: { title: 'LIVE FIGMA FILES — USER FLOW & INFORMATION ARCHITECTURE', color: '#A855F7' }
+        id: 'sl-figma1', type: 'section-label', x: 80, y: 7143, width: 800, height: 40,
+        data: { title: 'LIVE FIGMA FILES — LEGACY UI, USER FLOWS & IA', color: '#A855F7' }
       },
       {
-        id: 'fe-1', type: 'figma-embed', x: 80, y: 6899, width: 720, height: 540,
+        id: 'fe-0', type: 'figma-embed', x: 80, y: 7199, width: 720, height: 540,
+        data: {
+          title: 'User Management · Legacy UI',
+          description: 'Legacy User Interface',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A//www.figma.com/file/ZpKVod4tqUXzSMQJqA9nQx%3Ftype%3Ddesign%26node-id%3D110%253A91492%26mode%3Ddesign',
+          accentColor: '#EC4899',
+        }
+      },
+      {
+        id: 'fe-1', type: 'figma-embed', x: 880, y: 7199, width: 720, height: 540,
         data: {
           title: 'User Management · User Flows',
           description: 'User flow and information level — complete user journey mapped out',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D2436-101059',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A//www.figma.com/file/ZpKVod4tqUXzSMQJqA9nQx%3Ftype%3Ddesign%26node-id%3D85%253A90424%26mode%3Ddesign',
           accentColor: '#6366F1',
         }
       },
       {
-        id: 'fe-2', type: 'figma-embed', x: 880, y: 6899, width: 720, height: 540,
+        id: 'fe-2', type: 'figma-embed', x: 1680, y: 7199, width: 720, height: 540,
         data: {
           title: 'User Management · Information Architecture',
           description: 'Information architecture — structural organization of the platform',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D65860-7363',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A//www.figma.com/file/ZpKVod4tqUXzSMQJqA9nQx%3Ftype%3Ddesign%26node-id%3D85%253A91313%26mode%3Ddesign',
           accentColor: '#A855F7',
         }
       },
@@ -1009,24 +1019,24 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // fe bottom = 6899+540 = 7439 → sl y = 7439+80 = 7519
       {
-        id: 'sl-figma2', type: 'section-label', x: 80, y: 7519, width: 560, height: 40,
+        id: 'sl-figma2', type: 'section-label', x: 80, y: 7819, width: 560, height: 40,
         data: { title: 'WIREFRAMES — LOW FIDELITY & HIGH FIDELITY', color: '#10B981' }
       },
       {
-        id: 'fe-3', type: 'figma-embed', x: 80, y: 7575, width: 720, height: 540,
+        id: 'fe-3', type: 'figma-embed', x: 80, y: 7875, width: 720, height: 540,
         data: {
           title: 'User Management · Lo-fi Wireframes',
           description: 'Low-fidelity wireframes — initial explorations and layout decisions',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D5470-288291',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A//www.figma.com/file/ZpKVod4tqUXzSMQJqA9nQx%3Ftype%3Ddesign%26node-id%3D129%253A258280%26mode%3Ddesign',
           accentColor: '#10B981',
         }
       },
       {
-        id: 'fe-4', type: 'figma-embed', x: 880, y: 7575, width: 720, height: 540,
+        id: 'fe-4', type: 'figma-embed', x: 880, y: 7875, width: 720, height: 540,
         data: {
-          title: 'User Management · Happy Paths',
+          title: 'User Management · High Fidelity',
           description: 'High-fidelity wireframes — happy paths and polished flows',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D2436-101059',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A//www.figma.com/file/ZpKVod4tqUXzSMQJqA9nQx%3Ftype%3Ddesign%26node-id%3D129%253A167288%26mode%3Ddesign',
           accentColor: '#EC4899',
         }
       },
@@ -1036,23 +1046,23 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // fe-4 bottom = 7575+540 = 8115 → sl y = 8115+80 = 8195
       {
-        id: 'sl-hifi', type: 'section-label', x: 80, y: 8195, width: 560, height: 40,
+        id: 'sl-hifi', type: 'section-label', x: 80, y: 8495, width: 560, height: 40,
         data: { title: 'BUILDING THE HIGH-FIDELITY WIREFRAMES IN OJET 16', color: '#EF4444' }
       },
       {
-        id: 'ps-hf1', type: 'process-step', x: 80, y: 8251, width: 260, height: 190,
+        id: 'ps-hf1', type: 'process-step', x: 80, y: 8551, width: 260, height: 190,
         data: { stepNumber: 1, title: 'User Interviews & Iteration', description: 'After conducting the user interviews and talking to developers, iterated the workflows and built the high-fidelity wireframes.', color: '#EF4444' }
       },
       {
-        id: 'ps-hf2', type: 'process-step', x: 370, y: 8251, width: 260, height: 190,
+        id: 'ps-hf2', type: 'process-step', x: 370, y: 8551, width: 260, height: 190,
         data: { stepNumber: 2, title: 'Responsive Screens', description: 'Based on the requirements build responsive screens.', color: '#F59E0B' }
       },
       {
-        id: 'ps-hf3', type: 'process-step', x: 660, y: 8251, width: 260, height: 190,
+        id: 'ps-hf3', type: 'process-step', x: 660, y: 8551, width: 260, height: 190,
         data: { stepNumber: 3, title: 'Error Cases', description: 'Worked on all the error cases and handled them.', color: '#10B981' }
       },
       {
-        id: 'ps-hf4', type: 'process-step', x: 950, y: 8251, width: 260, height: 190,
+        id: 'ps-hf4', type: 'process-step', x: 950, y: 8551, width: 260, height: 190,
         data: { stepNumber: 4, title: 'A11Y Specs', description: 'Worked on the A11Y specs.', color: '#6366F1' }
       },
 
@@ -1061,11 +1071,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps-hf bottom = 8251+190 = 8441 → sl y = 8441+100 = 8541
       {
-        id: 'sl-skills', type: 'section-label', x: 80, y: 8541, width: 340, height: 40,
+        id: 'sl-skills', type: 'section-label', x: 80, y: 8841, width: 340, height: 40,
         data: { title: 'SKILLS APPLIED', color: '#1E3A8A' }
       },
       {
-        id: 'tc-1', type: 'tag-cluster', x: 80, y: 8597, width: 820, height: 110,
+        id: 'tc-1', type: 'tag-cluster', x: 80, y: 8897, width: 820, height: 150,
         data: {
           title: 'SKILLS APPLIED',
           tags: [
@@ -1086,11 +1096,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // tc bottom = 8597+110 = 8707 → sl y = 8707+100 = 8807
       {
-        id: 'sl-thanks', type: 'section-label', x: 80, y: 8807, width: 480, height: 40,
+        id: 'sl-thanks', type: 'section-label', x: 80, y: 9107, width: 480, height: 40,
         data: { title: '👋 THAT\'S A WRAP — THANKS FOR READING!', color: '#F59E0B' }
       },
       {
-        id: 'cs-thanks', type: 'case-study-card', x: 80, y: 8863, width: 1080, height: 300,
+        id: 'cs-thanks', type: 'case-study-card', x: 80, y: 9163, width: 1080, height: 300,
         data: {
           title: 'That\'s how the product workflow was built and handed off to the developers.',
           subtitle: 'I learned a lot from the senior designers and stakeholders during this journey.',
@@ -1105,7 +1115,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-thanks-1', type: 'sticky-note', x: 80, y: 9243, width: 280, height: 130,
+        id: 'sn-thanks-1', type: 'sticky-note', x: 80, y: 9543, width: 280, height: 130,
         data: {
           content: '🧠 You now know as much about this user management system as the team that built it.',
           color: 'cyan',
@@ -1113,7 +1123,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-thanks-2', type: 'sticky-note', x: 400, y: 9228, width: 280, height: 130,
+        id: 'sn-thanks-2', type: 'sticky-note', x: 400, y: 9528, width: 280, height: 130,
         data: {
           content: '🏆 From OJET 6 to OJET 16 — a complete platform evolution.',
           color: 'green',
@@ -1121,7 +1131,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-thanks-3', type: 'sticky-note', x: 720, y: 9238, width: 280, height: 130,
+        id: 'sn-thanks-3', type: 'sticky-note', x: 720, y: 9538, width: 280, height: 130,
         data: {
           content: '💌 Liked what you saw? Hit "Message Me" on the right panel — let\'s talk!',
           color: 'purple',
@@ -1131,11 +1141,11 @@ export const PROJECTS: Project[] = [
 
       // ── GAME ZONE ─────────────────────────────────────────────────────────
       {
-        id: 'sl-game', type: 'section-label', x: 80, y: 9468, width: 480, height: 40,
+        id: 'sl-game', type: 'section-label', x: 80, y: 9768, width: 480, height: 40,
         data: { title: '🎮 CREWMATE DASH — PLAY & HIRE ME', color: '#1E3A8A' }
       },
       {
-        id: 'gz-1', type: 'game-zone', x: 80, y: 9524, width: 1160, height: 680,
+        id: 'gz-1', type: 'game-zone', x: 80, y: 9824, width: 1160, height: 680,
         data: {
           title: 'Crewmate Dash',
           accentColor: '#1E3A8A',
@@ -1144,7 +1154,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 10264, width: 280, height: 120,
+        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 10564, width: 280, height: 120,
         data: {
           content: '🕹️ Dodge obstacles & get on the leaderboard. Space or tap to jump!',
           color: 'yellow',
@@ -1152,7 +1162,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 10279, width: 260, height: 110,
+        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 10579, width: 260, height: 110,
         data: {
           content: '⚠️ Only 1 player at a time — queue up if someone is already playing!',
           color: 'pink',
@@ -1237,33 +1247,33 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // cs bottom = 116+320 = 436, sn bottom = 300+160 = 460 → sl y = 460+80 = 540
       {
-        id: 'sl-prob', type: 'section-label', x: 80, y: 540, width: 440, height: 40,
+        id: 'sl-prob', type: 'section-label', x: 80, y: 640, width: 440, height: 40,
         data: { title: 'PROBLEM IDENTIFICATION', color: '#EF4444' }
       },
       {
-        id: 'sn-p1', type: 'sticky-note', x: 80, y: 596, width: 300, height: 145,
+        id: 'sn-p1', type: 'sticky-note', x: 80, y: 696, width: 300, height: 145,
         data: { content: '🧭 Navigation Confusion\nUsers struggled to find key features due to unclear information hierarchy and inconsistent navigation patterns across the platform.', color: 'pink', rotation: -1 }
       },
       {
-        id: 'sn-p2', type: 'sticky-note', x: 410, y: 596, width: 300, height: 145,
+        id: 'sn-p2', type: 'sticky-note', x: 410, y: 696, width: 300, height: 145,
         data: { content: '📊 Data Overload\nDashboard presented too much information at once without proper prioritization, making it hard for users to focus on what matters.', color: 'yellow', rotation: 1.2 }
       },
       {
-        id: 'sn-p3', type: 'sticky-note', x: 740, y: 596, width: 300, height: 145,
+        id: 'sn-p3', type: 'sticky-note', x: 740, y: 696, width: 300, height: 145,
         data: { content: '🔍 Drop-off Points\nHigh user drop-off at critical points: Invoices (10.5%) and Downloads (2.7%), indicating serious usability issues in those flows.', color: 'cyan', rotation: -0.5 }
       },
       {
-        id: 'sn-p4', type: 'sticky-note', x: 80, y: 821, width: 300, height: 145,
+        id: 'sn-p4', type: 'sticky-note', x: 80, y: 921, width: 300, height: 145,
         data: { content: '⚡ Onboarding Friction\nNew companies found the signup and onboarding process confusing, leading to delays in accessing financing options.', color: 'green', rotation: 0.8 }
       },
       {
-        id: 'sn-p5', type: 'sticky-note', x: 410, y: 821, width: 300, height: 145,
+        id: 'sn-p5', type: 'sticky-note', x: 410, y: 921, width: 300, height: 145,
         data: { content: '📱 Repayment Tracking\nUsers had difficulty tracking repayments and understanding their current financial status at a glance.', color: 'purple', rotation: -1.2 }
       },
 
       // ── PROBLEM STATEMENT ──────────────────────────────────────────────
       {
-        id: 'q-prob', type: 'quote-block', x: 740, y: 821, width: 510, height: 140,
+        id: 'q-prob', type: 'quote-block', x: 740, y: 921, width: 510, height: 220,
         data: {
           quote: 'How might we create a clear information architecture for easier user navigation in the companies platform?',
           author: 'Problem Statement',
@@ -1277,11 +1287,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // sn bottom = 821+145 = 966 → sl y = 966+100 = 1066
       {
-        id: 'sl-persona', type: 'section-label', x: 80, y: 1066, width: 500, height: 40,
+        id: 'sl-persona', type: 'section-label', x: 80, y: 1166, width: 500, height: 40,
         data: { title: 'USER PERSONA — PLATFORM ENGAGEMENT', color: '#6366F1' }
       },
       {
-        id: 'q-persona', type: 'quote-block', x: 80, y: 1122, width: 1200, height: 100,
+        id: 'q-persona', type: 'quote-block', x: 80, y: 1222, width: 1200, height: 180,
         data: {
           quote: 'User personas visiting the product in different phases of the entire journey of raising debt capital and followed by repayments.',
           author: 'Research Insight',
@@ -1292,119 +1302,119 @@ export const PROJECTS: Project[] = [
       // Persona engagement data as metric cards — Average sign-in before vs after listing
       // Row 1: CEO
       {
-        id: 'mc-ceo-label', type: 'metric-card', x: 80, y: 1252, width: 160, height: 100,
+        id: 'mc-ceo-label', type: 'metric-card', x: 80, y: 1432, width: 160, height: 130,
         data: { label: 'CEO', value: 'CEO', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-ceo-before', type: 'metric-card', x: 260, y: 1252, width: 190, height: 100,
+        id: 'mc-ceo-before', type: 'metric-card', x: 260, y: 1432, width: 190, height: 130,
         data: { label: 'Before Listing', value: '6.47', change: 'Avg sign-ins', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-ceo-after', type: 'metric-card', x: 470, y: 1252, width: 190, height: 100,
+        id: 'mc-ceo-after', type: 'metric-card', x: 470, y: 1432, width: 190, height: 130,
         data: { label: 'After Listing', value: '3', change: 'Avg sign-ins', changePositive: false, accentColor: '#9CA3AF' }
       },
       // Row 2: CFO & FM
       {
-        id: 'mc-cfo-label', type: 'metric-card', x: 80, y: 1372, width: 160, height: 100,
+        id: 'mc-cfo-label', type: 'metric-card', x: 80, y: 1582, width: 160, height: 130,
         data: { label: 'CFO', value: 'CFO', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-cfo-before', type: 'metric-card', x: 260, y: 1372, width: 190, height: 100,
+        id: 'mc-cfo-before', type: 'metric-card', x: 260, y: 1582, width: 190, height: 130,
         data: { label: 'Before Listing', value: '2.73', change: 'Avg sign-ins', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-cfo-after', type: 'metric-card', x: 470, y: 1372, width: 190, height: 100,
+        id: 'mc-cfo-after', type: 'metric-card', x: 470, y: 1582, width: 190, height: 130,
         data: { label: 'After Listing', value: '1.83', change: 'Avg sign-ins', changePositive: false, accentColor: '#9CA3AF' }
       },
       {
-        id: 'mc-fm-label', type: 'metric-card', x: 700, y: 1372, width: 160, height: 100,
+        id: 'mc-fm-label', type: 'metric-card', x: 700, y: 1582, width: 160, height: 130,
         data: { label: 'FM', value: 'FM', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-fm-before', type: 'metric-card', x: 880, y: 1372, width: 190, height: 100,
+        id: 'mc-fm-before', type: 'metric-card', x: 880, y: 1582, width: 190, height: 130,
         data: { label: 'Before Listing', value: '3.63', change: 'Avg sign-ins', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-fm-after', type: 'metric-card', x: 1090, y: 1372, width: 190, height: 100,
+        id: 'mc-fm-after', type: 'metric-card', x: 1090, y: 1582, width: 190, height: 130,
         data: { label: 'After Listing', value: '2.13', change: 'Avg sign-ins', changePositive: false, accentColor: '#9CA3AF' }
       },
       // Row 3: Director & Others
       {
-        id: 'mc-dir-label', type: 'metric-card', x: 80, y: 1492, width: 160, height: 100,
+        id: 'mc-dir-label', type: 'metric-card', x: 80, y: 1732, width: 160, height: 130,
         data: { label: 'Director', value: 'DIR', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-dir-before', type: 'metric-card', x: 260, y: 1492, width: 190, height: 100,
+        id: 'mc-dir-before', type: 'metric-card', x: 260, y: 1732, width: 190, height: 130,
         data: { label: 'Before Listing', value: '0.7', change: 'Avg sign-ins', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-dir-after', type: 'metric-card', x: 470, y: 1492, width: 190, height: 100,
+        id: 'mc-dir-after', type: 'metric-card', x: 470, y: 1732, width: 190, height: 130,
         data: { label: 'After Listing', value: '1.1', change: 'Avg sign-ins', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-oth-label', type: 'metric-card', x: 700, y: 1492, width: 160, height: 100,
+        id: 'mc-oth-label', type: 'metric-card', x: 700, y: 1732, width: 160, height: 130,
         data: { label: 'Others', value: 'Others', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-oth-before', type: 'metric-card', x: 880, y: 1492, width: 190, height: 100,
+        id: 'mc-oth-before', type: 'metric-card', x: 880, y: 1732, width: 190, height: 130,
         data: { label: 'Before Listing', value: '8.3', change: 'Avg sign-ins', changePositive: true, accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-oth-after', type: 'metric-card', x: 1090, y: 1492, width: 190, height: 100,
+        id: 'mc-oth-after', type: 'metric-card', x: 1090, y: 1732, width: 190, height: 130,
         data: { label: 'After Listing', value: '5.8', change: 'Avg sign-ins', changePositive: true, accentColor: '#9CA3AF' }
       },
 
       // ── Task level visits subtitle ─────────────────────────────────────
       {
-        id: 'sl-task', type: 'section-label', x: 80, y: 1622, width: 560, height: 40,
+        id: 'sl-task', type: 'section-label', x: 80, y: 1902, width: 560, height: 40,
         data: { title: 'TASK LEVEL VISITS BY PERSONA PER PHASE', color: '#A855F7' }
       },
       // Task visit data per persona — condensed into metric cards
       // Row: CEO metrics
       {
-        id: 'mc-t-ceo', type: 'metric-card', x: 80, y: 1678, width: 190, height: 100,
+        id: 'mc-t-ceo', type: 'metric-card', x: 80, y: 1962, width: 190, height: 130,
         data: { label: 'CEO · Signup', value: '0', change: 'Task visits', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-t-cfo', type: 'metric-card', x: 290, y: 1678, width: 190, height: 100,
+        id: 'mc-t-cfo', type: 'metric-card', x: 290, y: 1962, width: 190, height: 130,
         data: { label: 'CFO · Signup', value: '0.7', change: 'Task visits', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-t-fm', type: 'metric-card', x: 500, y: 1678, width: 190, height: 100,
+        id: 'mc-t-fm', type: 'metric-card', x: 500, y: 1962, width: 190, height: 130,
         data: { label: 'FM · Signup', value: '2.46', change: 'Task visits', accentColor: '#F59E0B' }
       },
       {
-        id: 'mc-t-oth', type: 'metric-card', x: 710, y: 1678, width: 190, height: 100,
+        id: 'mc-t-oth', type: 'metric-card', x: 710, y: 1962, width: 190, height: 130,
         data: { label: 'Others · Signup', value: '3.29', change: 'Task visits', accentColor: '#F59E0B' }
       },
       // Row: Onboarding metrics
       {
-        id: 'mc-t-ceo2', type: 'metric-card', x: 80, y: 1798, width: 190, height: 100,
+        id: 'mc-t-ceo2', type: 'metric-card', x: 80, y: 2112, width: 190, height: 130,
         data: { label: 'CEO · Onboard', value: '0', change: 'Task visits', accentColor: '#6366F1' }
       },
       {
-        id: 'mc-t-cfo2', type: 'metric-card', x: 290, y: 1798, width: 190, height: 100,
+        id: 'mc-t-cfo2', type: 'metric-card', x: 290, y: 2112, width: 190, height: 130,
         data: { label: 'CFO · Onboard', value: '3', change: 'Task visits', accentColor: '#6366F1' }
       },
       {
-        id: 'mc-t-fm2', type: 'metric-card', x: 500, y: 1798, width: 190, height: 100,
+        id: 'mc-t-fm2', type: 'metric-card', x: 500, y: 2112, width: 190, height: 130,
         data: { label: 'FM · Onboard', value: '6', change: 'Task visits', accentColor: '#6366F1' }
       },
       // Row: Repayment metrics
       {
-        id: 'mc-t-ceo3', type: 'metric-card', x: 80, y: 1918, width: 190, height: 100,
+        id: 'mc-t-ceo3', type: 'metric-card', x: 80, y: 2262, width: 190, height: 130,
         data: { label: 'CEO · Repayment', value: '0', change: 'Task visits', accentColor: '#10B981' }
       },
       {
-        id: 'mc-t-cfo3', type: 'metric-card', x: 290, y: 1918, width: 190, height: 100,
+        id: 'mc-t-cfo3', type: 'metric-card', x: 290, y: 2262, width: 190, height: 130,
         data: { label: 'CFO · Repayment', value: '1', change: 'Task visits', accentColor: '#10B981' }
       },
       {
-        id: 'mc-t-fm3', type: 'metric-card', x: 500, y: 1918, width: 190, height: 100,
+        id: 'mc-t-fm3', type: 'metric-card', x: 500, y: 2262, width: 190, height: 130,
         data: { label: 'FM · Repayment', value: '1.67', change: 'Task visits', accentColor: '#10B981' }
       },
       {
-        id: 'mc-t-oth3', type: 'metric-card', x: 710, y: 1918, width: 190, height: 100,
+        id: 'mc-t-oth3', type: 'metric-card', x: 710, y: 2262, width: 190, height: 130,
         data: { label: 'Others · Repay', value: '2.67', change: 'Task visits', accentColor: '#10B981' }
       },
 
@@ -1413,22 +1423,22 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // mc bottom = 1918+100 = 2018 → sl y = 2018+100 = 2118
       {
-        id: 'sl-nav', type: 'section-label', x: 80, y: 2118, width: 560, height: 40,
+        id: 'sl-nav', type: 'section-label', x: 80, y: 2472, width: 560, height: 40,
         data: { title: 'NAVIGATION FLOW — DROP-OFF ANALYSIS', color: '#EF4444' }
       },
       {
-        id: 'fd-dropoff', type: 'flow-diagram', x: 80, y: 2174, width: 1200, height: 400,
+        id: 'fd-dropoff', type: 'flow-diagram', x: 80, y: 2528, width: 1200, height: 400,
         data: {
           title: 'User Navigation Drop-off Rates',
           subtitle: 'Dashboard 100% → Trade 83% → Tradebook 61% → Finances 42% → Invoices 10.5% → Download 2.7%',
           accentColor: '#EF4444',
           nodes: [
-            { id: 'dash', label: 'Dashboard\n100%', color: '#1E3A5F', x: 20, y: 80, width: 130, height: 90 },
-            { id: 'trade', label: 'Trade\n83%', color: '#F59E0B', x: 190, y: 80, width: 130, height: 90 },
-            { id: 'tradebook', label: 'Tradebook\n61%', color: '#10B981', x: 360, y: 80, width: 130, height: 90 },
-            { id: 'finances', label: 'Finances\n42%', color: '#6366F1', x: 530, y: 80, width: 130, height: 90 },
-            { id: 'invoices', label: 'Invoices\n10.5%', color: '#EF4444', x: 700, y: 80, width: 130, height: 90 },
-            { id: 'download', label: 'Download\n2.7%', color: '#EF4444', x: 870, y: 80, width: 130, height: 90 },
+            { id: 'dash', label: 'Dashboard\n100%', color: '#1E3A5F', x: 20, y: 160, width: 130, height: 90 },
+            { id: 'trade', label: 'Trade\n83%', color: '#F59E0B', x: 190, y: 160, width: 130, height: 90 },
+            { id: 'tradebook', label: 'Tradebook\n61%', color: '#10B981', x: 360, y: 160, width: 130, height: 90 },
+            { id: 'finances', label: 'Finances\n42%', color: '#6366F1', x: 530, y: 160, width: 130, height: 90 },
+            { id: 'invoices', label: 'Invoices\n10.5%', color: '#EF4444', x: 700, y: 160, width: 130, height: 90 },
+            { id: 'download', label: 'Download\n2.7%', color: '#EF4444', x: 870, y: 160, width: 130, height: 90 },
           ],
           connections: [
             { from: 'dash', to: 'trade' },
@@ -1445,19 +1455,19 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // fd bottom = 2174+400 = 2574 → sl y = 2574+80 = 2654
       {
-        id: 'sl-qual', type: 'section-label', x: 80, y: 2654, width: 500, height: 40,
+        id: 'sl-qual', type: 'section-label', x: 80, y: 3014, width: 500, height: 40,
         data: { title: 'USING QUALITATIVE METHODS', color: '#10B981' }
       },
       {
-        id: 'ps-qual1', type: 'process-step', x: 80, y: 2710, width: 350, height: 200,
+        id: 'ps-qual1', type: 'process-step', x: 80, y: 3070, width: 350, height: 200,
         data: { stepNumber: 1, title: 'Company Feedback Process', description: 'There was a process set by the organization to talk to companies regularly and take timely feedback on the product\'s journey. After going through the hot jar recording and the mix panel user flow analysis, prepared a list of questions.', color: '#10B981' }
       },
       {
-        id: 'ps-qual2', type: 'process-step', x: 460, y: 2710, width: 350, height: 200,
+        id: 'ps-qual2', type: 'process-step', x: 460, y: 3070, width: 350, height: 200,
         data: { stepNumber: 2, title: 'User Pain Points', description: 'Made a couple of questions to be asked along with understanding the user pain points. Focused on understanding the signup process, onboarding, file requirements, and repayment tracking behaviors.', color: '#22D3EE' }
       },
       {
-        id: 'ps-qual3', type: 'process-step', x: 840, y: 2710, width: 350, height: 200,
+        id: 'ps-qual3', type: 'process-step', x: 840, y: 3070, width: 350, height: 200,
         data: { stepNumber: 3, title: 'User Interviews', description: 'Conducted user interviews and found all the pain points and understood user expectations. This helped shape the redesigned information architecture.', color: '#6366F1' }
       },
 
@@ -1466,11 +1476,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps bottom = 2710+200 = 2910 → sl y = 2910+80 = 2990
       {
-        id: 'sl-questions', type: 'section-label', x: 80, y: 2990, width: 500, height: 40,
+        id: 'sl-questions', type: 'section-label', x: 80, y: 3350, width: 500, height: 40,
         data: { title: 'EXAMPLE LIST OF QUESTIONS', color: '#F59E0B' }
       },
       {
-        id: 'cs-questions', type: 'case-study-card', x: 80, y: 3046, width: 1200, height: 340,
+        id: 'cs-questions', type: 'case-study-card', x: 80, y: 3406, width: 1200, height: 340,
         data: {
           title: 'Research Questions Asked During User Interviews',
           subtitle: 'Understanding the complete user journey — from signup to repayment',
@@ -1490,19 +1500,19 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // cs bottom = 3046+340 = 3386 → sl y = 3386+80 = 3466
       {
-        id: 'sl-ux', type: 'section-label', x: 80, y: 3466, width: 500, height: 40,
+        id: 'sl-ux', type: 'section-label', x: 80, y: 3826, width: 500, height: 40,
         data: { title: 'CONDUCTED THE UX REVIEW', color: '#A855F7' }
       },
       {
-        id: 'ps-ux1', type: 'process-step', x: 80, y: 3522, width: 350, height: 200,
+        id: 'ps-ux1', type: 'process-step', x: 80, y: 3882, width: 350, height: 200,
         data: { stepNumber: 1, title: 'Jakob Nielsen\'s Heuristics', description: 'After understanding the current user behavior and all the pain points, did a UX review on all the pages by using Jakob Nielsen\'s heuristics to identify usability issues systematically.', color: '#A855F7' }
       },
       {
-        id: 'ps-ux2', type: 'process-step', x: 460, y: 3522, width: 350, height: 200,
+        id: 'ps-ux2', type: 'process-step', x: 460, y: 3882, width: 350, height: 200,
         data: { stepNumber: 2, title: 'Heuristic Findings', description: 'Identified visibility of system status issues, match between system and real world gaps, user control and freedom problems, and consistency and standards violations across the platform.', color: '#6366F1' }
       },
       {
-        id: 'ps-ux3', type: 'process-step', x: 840, y: 3522, width: 350, height: 200,
+        id: 'ps-ux3', type: 'process-step', x: 840, y: 3882, width: 350, height: 200,
         data: { stepNumber: 3, title: 'Restructuring IA', description: 'Based on the UX review findings, restructured the information architecture to provide clearer navigation paths and reduce cognitive load for all user personas.', color: '#EC4899' }
       },
 
@@ -1511,24 +1521,24 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps bottom = 3522+200 = 3722 → sl y = 3722+80 = 3802
       {
-        id: 'sl-figma1', type: 'section-label', x: 80, y: 3802, width: 560, height: 40,
+        id: 'sl-figma1', type: 'section-label', x: 80, y: 4162, width: 560, height: 40,
         data: { title: 'LIVE FIGMA — DESIGN REVIEW & INFORMATION ARCHITECTURE', color: '#A855F7' }
       },
       {
-        id: 'fe-1', type: 'figma-embed', x: 80, y: 3858, width: 720, height: 540,
+        id: 'fe-1', type: 'figma-embed', x: 80, y: 4218, width: 720, height: 540,
         data: {
           title: 'Design Review · Companies',
           description: 'Design review of the companies platform — UX audit and findings',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D2436-101059',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FiaWsezudd8M9zrCVE7tCN2%2FDesign-Review%3Fnode-id%3D0-1%26p%3Df%26t%3D7xOBhchM5YBl1Bs7-0',
           accentColor: '#6366F1',
         }
       },
       {
-        id: 'fe-2', type: 'figma-embed', x: 880, y: 3858, width: 720, height: 540,
+        id: 'fe-2', type: 'figma-embed', x: 880, y: 4218, width: 720, height: 540,
         data: {
           title: 'Design Review · Information Architecture',
           description: 'Restructured information architecture — navigation redesign',
-          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D65860-7363',
+          figmaUrl: 'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FiaWsezudd8M9zrCVE7tCN2%2FDesign-Review%3Fnode-id%3D1207-20%26t%3DzCFok9E6C98ItZE0-0',
           accentColor: '#A855F7',
         }
       },
@@ -1538,11 +1548,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // fe bottom = 3858+540 = 4398 → sl y = 4398+80 = 4478
       {
-        id: 'sl-visual', type: 'section-label', x: 80, y: 4478, width: 620, height: 40,
+        id: 'sl-visual', type: 'section-label', x: 80, y: 4838, width: 620, height: 40,
         data: { title: 'AFTER ALL FINDINGS — BUILD THE NEW NAVIGATIONAL FLOW', color: '#1E3A5F' }
       },
       {
-        id: 'cs-visual', type: 'case-study-card', x: 80, y: 4534, width: 1200, height: 260,
+        id: 'cs-visual', type: 'case-study-card', x: 80, y: 4894, width: 1200, height: 260,
         data: {
           title: 'After restructuring the product, the number of queries was reduced, and we received positive feedback from customers.',
           subtitle: 'Visual Design for the New Navigational Flow',
@@ -1562,87 +1572,59 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // cs bottom = 4534+260 = 4794 → sl y = 4794+80 = 4874
       {
-        id: 'sl-video', type: 'section-label', x: 80, y: 4874, width: 560, height: 40,
+        id: 'sl-video', type: 'section-label', x: 80, y: 5234, width: 560, height: 40,
         data: { title: 'VIDEO WALKTHROUGH — RECUR COMPANIES DESIGN', color: '#EC4899' }
       },
       {
-        id: 've-1', type: 'video-embed', x: 80, y: 4930, width: 720, height: 540,
+        id: 've-1', type: 'video-embed', x: 80, y: 5290, width: 720, height: 540,
         data: {
           title: 'Recur Companies · Design Walkthrough',
           description: 'Signup flow and financing options — complete design team walkthrough (3:14)',
-          videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          videoUrl: '/videos/recur-companies.webm',
           accentColor: '#1E3A5F',
         }
       },
       {
-        id: 've-2', type: 'video-embed', x: 880, y: 4930, width: 720, height: 540,
+        id: 've-2', type: 'video-embed', x: 880, y: 5290, width: 720, height: 540,
         data: {
           title: 'Companies Portal · Navigation Flow',
           description: 'Redesigned companies portal navigation — high-fidelity screen walkthrough',
-          videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          videoUrl: '/videos/recur.webm',
           accentColor: '#F59E0B',
         }
       },
 
-      // ══════════════════════════════════════════════════════════════════════
-      // SECTION 11: DASHBOARD COMPONENTS
-      // ══════════════════════════════════════════════════════════════════════
-      // ve bottom = 4930+540 = 5470 → sl y = 5470+80 = 5550
-      {
-        id: 'sl-dash', type: 'section-label', x: 80, y: 5550, width: 560, height: 40,
-        data: { title: 'DASHBOARD COMPONENTS — REDESIGNED', color: '#F59E0B' }
-      },
-      {
-        id: 'mc-d1', type: 'metric-card', x: 80, y: 5606, width: 190, height: 120,
-        data: { label: 'Trade Limit', value: '$48.2Cr', change: 'Available: $962.39', changePositive: true, accentColor: '#1E3A5F' }
-      },
-      {
-        id: 'mc-d2', type: 'metric-card', x: 290, y: 5606, width: 190, height: 120,
-        data: { label: 'Trade Price', value: '89.85%', change: 'For 12 months', changePositive: true, accentColor: '#F59E0B' }
-      },
-      {
-        id: 'mc-d3', type: 'metric-card', x: 500, y: 5606, width: 190, height: 120,
-        data: { label: 'Total Capital', value: '10,00,000', change: 'Capital raised', changePositive: true, accentColor: '#10B981' }
-      },
-      {
-        id: 'mc-d4', type: 'metric-card', x: 710, y: 5606, width: 190, height: 120,
-        data: { label: 'Collections', value: 'NACH', change: 'Applied via Razorpay', changePositive: true, accentColor: '#6366F1' }
-      },
-      {
-        id: 'mc-d5', type: 'metric-card', x: 920, y: 5606, width: 190, height: 120,
-        data: { label: 'Payments Due', value: '$70.4L', change: 'NACH Applied', changePositive: false, accentColor: '#EF4444' }
-      },
 
       // ══════════════════════════════════════════════════════════════════════
       // SECTION 12: MY PROCESS
       // ══════════════════════════════════════════════════════════════════════
       // mc bottom = 5606+120 = 5726 → sl y = 5726+80 = 5806
       {
-        id: 'sl-process', type: 'section-label', x: 80, y: 5806, width: 340, height: 40,
+        id: 'sl-process', type: 'section-label', x: 80, y: 6366, width: 340, height: 40,
         data: { title: 'MY PROCESS', color: '#F59E0B' }
       },
       {
-        id: 'ps-p1', type: 'process-step', x: 80, y: 5862, width: 210, height: 190,
+        id: 'ps-p1', type: 'process-step', x: 80, y: 6422, width: 210, height: 190,
         data: { stepNumber: 1, title: 'User Research', description: 'Analyzed hot jar recordings and Mixpanel user flows. Identified key drop-off points and pain areas.', color: '#1E3A5F' }
       },
       {
-        id: 'ps-p2', type: 'process-step', x: 370, y: 5862, width: 210, height: 190,
+        id: 'ps-p2', type: 'process-step', x: 370, y: 6422, width: 210, height: 190,
         data: { stepNumber: 2, title: 'Qualitative Methods', description: 'Conducted structured interviews with companies to understand their journey and pain points.', color: '#F59E0B' }
       },
       {
-        id: 'ps-p3', type: 'process-step', x: 660, y: 5862, width: 210, height: 190,
+        id: 'ps-p3', type: 'process-step', x: 660, y: 6422, width: 210, height: 190,
         data: { stepNumber: 3, title: 'UX Heuristic Review', description: 'Applied Jakob Nielsen\'s 10 heuristics to audit every page of the platform systematically.', color: '#10B981' }
       },
       {
-        id: 'ps-p4', type: 'process-step', x: 950, y: 5862, width: 210, height: 190,
+        id: 'ps-p4', type: 'process-step', x: 950, y: 6422, width: 210, height: 190,
         data: { stepNumber: 4, title: 'IA Restructuring', description: 'Rebuilt the information architecture to create clear, intuitive navigation paths for all personas.', color: '#6366F1' }
       },
       {
-        id: 'ps-p5', type: 'process-step', x: 1240, y: 5862, width: 210, height: 190,
+        id: 'ps-p5', type: 'process-step', x: 1240, y: 6422, width: 210, height: 190,
         data: { stepNumber: 5, title: 'Visual Design', description: 'Created high-fidelity designs for the new navigational flow with the redesigned dashboard and components.', color: '#A855F7' }
       },
       {
-        id: 'ps-p6', type: 'process-step', x: 1530, y: 5862, width: 210, height: 190,
+        id: 'ps-p6', type: 'process-step', x: 1530, y: 6422, width: 210, height: 190,
         data: { stepNumber: 6, title: 'Validation & Ship', description: 'Validated with users, received positive feedback, reduced queries, and began new feature work.', color: '#EC4899' }
       },
 
@@ -1651,35 +1633,35 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // ps bottom = 5862+190 = 6052 → sl y = 6052+80 = 6132
       {
-        id: 'sl-sidenav', type: 'section-label', x: 80, y: 6132, width: 560, height: 40,
+        id: 'sl-sidenav', type: 'section-label', x: 80, y: 6692, width: 560, height: 40,
         data: { title: 'COMPANIES PORTAL — SIDE NAVIGATION STRUCTURE', color: '#1E3A5F' }
       },
       {
-        id: 'sn-nav1', type: 'sticky-note', x: 80, y: 6188, width: 220, height: 120,
+        id: 'sn-nav1', type: 'sticky-note', x: 80, y: 6748, width: 220, height: 120,
         data: { content: '📊 Dashboard\nMain overview with Trade Limit, Collections, and Payments widgets.', color: 'yellow', rotation: -0.5 }
       },
       {
-        id: 'sn-nav2', type: 'sticky-note', x: 330, y: 6188, width: 220, height: 120,
+        id: 'sn-nav2', type: 'sticky-note', x: 330, y: 6748, width: 220, height: 120,
         data: { content: '💱 Trade\nTrade management and limit overview with circular progress indicators.', color: 'cyan', rotation: 0.8 }
       },
       {
-        id: 'sn-nav3', type: 'sticky-note', x: 580, y: 6188, width: 220, height: 120,
+        id: 'sn-nav3', type: 'sticky-note', x: 580, y: 6748, width: 220, height: 120,
         data: { content: '📋 Tradebook\nSearchable table with filters, status indicators, and "View Trade Book" actions.', color: 'green', rotation: -1 }
       },
       {
-        id: 'sn-nav4', type: 'sticky-note', x: 830, y: 6188, width: 220, height: 120,
+        id: 'sn-nav4', type: 'sticky-note', x: 830, y: 6748, width: 220, height: 120,
         data: { content: '💰 Finances\nDropdown: Transactions, Reports, Invoices, Data Vault.', color: 'purple', rotation: 1.2 }
       },
       {
-        id: 'sn-nav5', type: 'sticky-note', x: 80, y: 6338, width: 220, height: 120,
+        id: 'sn-nav5', type: 'sticky-note', x: 80, y: 6898, width: 220, height: 120,
         data: { content: '📝 Reports\nFinancial reports generated via the platform for company use.', color: 'pink', rotation: 0.5 }
       },
       {
-        id: 'sn-nav6', type: 'sticky-note', x: 330, y: 6338, width: 220, height: 120,
+        id: 'sn-nav6', type: 'sticky-note', x: 330, y: 6898, width: 220, height: 120,
         data: { content: '🧾 Invoices\nInvoice management — a key drop-off area addressed in redesign.', color: 'yellow', rotation: -0.8 }
       },
       {
-        id: 'sn-nav7', type: 'sticky-note', x: 580, y: 6338, width: 220, height: 120,
+        id: 'sn-nav7', type: 'sticky-note', x: 580, y: 6898, width: 220, height: 120,
         data: { content: '🔒 Data Vault\nSecure document storage for company files and downloads.', color: 'cyan', rotation: 1 }
       },
 
@@ -1688,11 +1670,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // sn bottom = 6338+120 = 6458 → sl y = 6458+100 = 6558
       {
-        id: 'sl-skills', type: 'section-label', x: 80, y: 6558, width: 340, height: 40,
+        id: 'sl-skills', type: 'section-label', x: 80, y: 7118, width: 340, height: 40,
         data: { title: 'SKILLS APPLIED', color: '#1E3A5F' }
       },
       {
-        id: 'tc-1', type: 'tag-cluster', x: 80, y: 6614, width: 820, height: 110,
+        id: 'tc-1', type: 'tag-cluster', x: 80, y: 7174, width: 820, height: 150,
         data: {
           title: 'SKILLS APPLIED',
           tags: [
@@ -1713,11 +1695,11 @@ export const PROJECTS: Project[] = [
       // ══════════════════════════════════════════════════════════════════════
       // tc bottom = 6614+110 = 6724 → sl y = 6724+100 = 6824
       {
-        id: 'sl-thanks', type: 'section-label', x: 80, y: 6824, width: 480, height: 40,
+        id: 'sl-thanks', type: 'section-label', x: 80, y: 7384, width: 480, height: 40,
         data: { title: '👋 THAT\'S A WRAP — THANKS FOR READING!', color: '#F59E0B' }
       },
       {
-        id: 'cs-thanks', type: 'case-study-card', x: 80, y: 6880, width: 1080, height: 300,
+        id: 'cs-thanks', type: 'case-study-card', x: 80, y: 7440, width: 1080, height: 300,
         data: {
           title: 'From cluttered navigation to clear information architecture — that\'s the Companies Platform redesign.',
           subtitle: 'The entire journey from research to visual design, captured.',
@@ -1732,7 +1714,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-thanks-1', type: 'sticky-note', x: 80, y: 7260, width: 280, height: 130,
+        id: 'sn-thanks-1', type: 'sticky-note', x: 80, y: 7820, width: 280, height: 130,
         data: {
           content: '🧠 You now understand the full journey of restructuring a fintech platform\'s navigation.',
           color: 'cyan',
@@ -1740,7 +1722,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-thanks-2', type: 'sticky-note', x: 400, y: 7245, width: 280, height: 130,
+        id: 'sn-thanks-2', type: 'sticky-note', x: 400, y: 7805, width: 280, height: 130,
         data: {
           content: '🏆 From confused users to clear paths — that\'s the power of good IA.',
           color: 'green',
@@ -1748,7 +1730,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-thanks-3', type: 'sticky-note', x: 720, y: 7255, width: 280, height: 130,
+        id: 'sn-thanks-3', type: 'sticky-note', x: 720, y: 7815, width: 280, height: 130,
         data: {
           content: '💌 Liked what you saw? Hit "Message Me" on the right panel — let\'s talk!',
           color: 'purple',
@@ -1758,11 +1740,11 @@ export const PROJECTS: Project[] = [
 
       // ── GAME ZONE ─────────────────────────────────────────────────────────
       {
-        id: 'sl-game', type: 'section-label', x: 80, y: 7485, width: 480, height: 40,
+        id: 'sl-game', type: 'section-label', x: 80, y: 8045, width: 480, height: 40,
         data: { title: '🎮 CREWMATE DASH — PLAY & HIRE ME', color: '#1E3A5F' }
       },
       {
-        id: 'gz-1', type: 'game-zone', x: 80, y: 7541, width: 1160, height: 680,
+        id: 'gz-1', type: 'game-zone', x: 80, y: 8101, width: 1160, height: 680,
         data: {
           title: 'Crewmate Dash',
           accentColor: '#1E3A5F',
@@ -1771,7 +1753,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 8281, width: 280, height: 120,
+        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 8841, width: 280, height: 120,
         data: {
           content: '🕹️ Dodge obstacles & get on the leaderboard. Space or tap to jump!',
           color: 'yellow',
@@ -1779,7 +1761,7 @@ export const PROJECTS: Project[] = [
         }
       },
       {
-        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 8296, width: 260, height: 110,
+        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 8856, width: 260, height: 110,
         data: {
           content: '⚠️ Only 1 player at a time — queue up if someone is already playing!',
           color: 'pink',

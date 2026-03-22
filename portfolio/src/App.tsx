@@ -23,6 +23,7 @@ const defaultControls: CanvasControlsRef = {
   fitToScreen: () => { },
   getScale: () => 1,
   getCenterPos: () => ({ x: 0, y: 0 }),
+  navigateTo: () => { },
 };
 
 export default function App() {
@@ -35,7 +36,8 @@ export default function App() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isCommentMode, setIsCommentMode] = useState(false);
   const canvasControls = useRef<CanvasControlsRef>(defaultControls);
-  const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession();
+  const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession(selectedProject.id);
+  const pendingNavRef = useRef<{ x: number, y: number } | null>(null);
   const isMobile = useIsMobile();
 
   const selectedElement = selectedProject.canvasElements.find(
@@ -120,6 +122,36 @@ export default function App() {
     setSelectedProject(project);
     setSelectedElementId(null);
   }, []);
+
+  // Navigate to a viewer's project and position (Figma-style click-to-follow)
+  const handleViewerClick = useCallback((viewer: import('./hooks/useRealtimeSession').ActiveViewer) => {
+    const pos = cursors[viewer.id];
+    if (pos) {
+      pendingNavRef.current = { x: pos.x, y: pos.y };
+    }
+    const target = PROJECTS.find(p => p.id === viewer.projectId);
+    if (target && target.id !== selectedProject.id) {
+      setSelectedProject(target);
+      setSelectedElementId(null);
+    } else if (pos) {
+      // Same project — navigate immediately
+      canvasControls.current.navigateTo(pos.x, pos.y);
+      pendingNavRef.current = null;
+    }
+  }, [cursors, selectedProject.id]);
+
+  // After a project switch triggered by handleViewerClick, execute deferred navigation
+  useEffect(() => {
+    if (!pendingNavRef.current) return;
+    const { x, y } = pendingNavRef.current;
+    pendingNavRef.current = null;
+    // Small delay to let canvas initialize to the new project's default view first
+    const id = setTimeout(() => {
+      canvasControls.current.navigateTo(x, y);
+    }, 50);
+    return () => clearTimeout(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProject.id]);
 
   // Mobile: select a project and go to detail view
   const handleMobileSelectProject = useCallback((project: Project) => {
@@ -380,6 +412,8 @@ export default function App() {
                         project={selectedProject}
                         selectedElement={selectedElement}
                         activeViewers={activeViewers}
+                        onViewerClick={handleViewerClick}
+                        localIdentity={localIdentity}
                       />
                     )}
                   </div>

@@ -19,7 +19,7 @@ interface Props {
   onUpdateElementPosition?: (id: string, x: number, y: number) => void;
   onCanvasClick?: (x: number, y: number) => void;
   activeViewers?: ActiveViewer[];
-  cursors?: Record<string, { x: number, y: number }>;
+  cursors?: Record<string, { x: number, y: number, projectId: string }>;
   localIdentity?: ActiveViewer | null;
   broadcastCursor?: (x: number, y: number) => void;
 }
@@ -31,6 +31,7 @@ export interface CanvasControlsRef {
   fitToScreen: () => void;
   getScale: () => number;
   getCenterPos: () => { x: number; y: number };
+  navigateTo: (canvasX: number, canvasY: number) => void;
 }
 
 export default function Canvas({
@@ -86,9 +87,17 @@ export default function Canvas({
           x: (width / 2 - transform.x) / transform.scale,
           y: (height / 2 - transform.y) / transform.scale
         };
-      }
+      },
+      navigateTo: (canvasX: number, canvasY: number) => {
+        if (!containerRef.current) return;
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+        const targetTx = width / 2 - canvasX * transform.scale;
+        const targetTy = height / 2 - canvasY * transform.scale;
+        animateTo(targetTx, targetTy);
+      },
     };
-  }, [canvasControlsRef, zoomIn, zoomOut, resetZoom, fitToScreen, transform.scale, containerRef, transform.x, transform.y]);
+  }, [canvasControlsRef, zoomIn, zoomOut, resetZoom, fitToScreen, transform.scale, containerRef, transform.x, transform.y, animateTo]);
 
   // Notify parent of scale changes
   useEffect(() => {
@@ -377,6 +386,8 @@ export default function Canvas({
           if (localIdentity && viewer.id === localIdentity.id) return null;
           const pos = cursors[viewer.id];
           if (!pos) return null;
+          // Only show characters who are on the same project
+          if (pos.projectId && pos.projectId !== project.id) return null;
 
           return (
             <div key={viewer.id}>
