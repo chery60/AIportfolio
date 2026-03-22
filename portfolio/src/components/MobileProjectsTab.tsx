@@ -10,7 +10,7 @@ interface Props {
 
 export default function MobileProjectsTab({ onSelectProject }: Props) {
   return (
-    <div className="h-full overflow-y-scroll bg-[#0A0B0F] min-h-0 mobile-smooth-scroll">
+    <div className="h-full overflow-y-scroll overflow-x-hidden bg-[#0A0B0F] min-h-0 mobile-smooth-scroll">
       <div className="px-5 pt-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
 
         {/* Header — same padding as Chat tab (px-5 py-4) */}
@@ -80,8 +80,7 @@ function ProjectTile({ project, index, onSelect }: { project: Project; index: nu
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col gap-1">
         <span
-          className="text-[9px] font-semibold tracking-widest uppercase"
-          style={{ color: project.gradientFrom }}
+          className="text-[9px] font-semibold tracking-widest uppercase text-white/70"
         >
           {project.category}
         </span>

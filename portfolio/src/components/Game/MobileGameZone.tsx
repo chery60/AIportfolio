@@ -70,7 +70,14 @@ export default function MobileGameZone({ element }: Props) {
         const check = () => setNeedsRotation(window.innerHeight > window.innerWidth);
         check();
         window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
+        window.addEventListener('orientationchange', check);
+        // Re-check after a short delay for iOS which updates innerWidth/Height late
+        const t = setTimeout(check, 300);
+        return () => {
+            window.removeEventListener('resize', check);
+            window.removeEventListener('orientationchange', check);
+            clearTimeout(t);
+        };
     }, [isLandscape]);
 
     // Lock body scroll when landscape
@@ -343,10 +350,11 @@ export default function MobileGameZone({ element }: Props) {
             className="mobile-landscape-overlay"
             style={{
                 background: 'linear-gradient(135deg, #050714, #0A0B1A)',
-                width: needsRotation ? '100vh' : '100vw',
-                height: needsRotation ? '100vw' : '100vh',
+                width: needsRotation ? '100dvh' : '100dvw',
+                height: needsRotation ? '100dvw' : '100dvh',
                 transform: needsRotation ? 'rotate(90deg) translateY(-100%)' : 'none',
                 transformOrigin: 'top left',
+                overflow: 'hidden',
             }}
         >
             {/* Name Entry Screen */}
@@ -431,9 +439,27 @@ export default function MobileGameZone({ element }: Props) {
                         <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: SESSION_COLOR }} />
                         <span className="text-xs font-semibold" style={{ color: SESSION_COLOR }}>{myName}</span>
                         <span className="text-white/30 text-xs">— playing now</span>
+                        {/* Exit button in playing state */}
+                        <button
+                            onClick={handleExit}
+                            className="ml-auto w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                     </div>
-                    {/* Game Canvas */}
-                    <div className="flex-1 bg-[#050714] flex items-center justify-center overflow-hidden">
+                    {/* Game Canvas — explicit dimensions so canvas can scale via CSS */}
+                    <div
+                        style={{
+                            flex: 1,
+                            width: '100%',
+                            minHeight: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#050714',
+                            overflow: 'hidden',
+                        }}
+                    >
                         <GameEngine
                             playerColor={SESSION_COLOR}
                             onGameOver={handleGameOver}

@@ -388,7 +388,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
             </div>
 
             {/* ── Main Scrollable Content ─────────────────────────── */}
-            <div className="flex-1 overflow-y-scroll mobile-no-scrollbar min-h-0 mobile-smooth-scroll">
+            <div className="flex-1 overflow-y-scroll overflow-x-hidden mobile-no-scrollbar min-h-0 mobile-smooth-scroll">
                 {/* Hero Header */}
                 <MobileProjectHero project={project} />
 
@@ -425,8 +425,8 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                         </div>
                                     ) : group.layout === 'horizontal-scroll' ? (
                                         // ── Horizontal snap scroll (process-step, user-flow-step)
-                                        <div className="overflow-x-auto mobile-snap-x mobile-no-scrollbar -mx-4 px-4">
-                                            <div className="flex gap-3 pb-1" style={{ width: 'max-content' }}>
+                                        <div className="overflow-x-auto mobile-snap-x mobile-no-scrollbar -mx-4">
+                                            <div className="flex gap-3 pb-1 pl-4 pr-4" style={{ width: 'max-content' }}>
                                                 {group.elements.map(el => {
                                                     const cardW = Math.min(Math.max(el.width, 200), window.innerWidth * 0.75);
                                                     return (
