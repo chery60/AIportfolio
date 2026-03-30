@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { Project } from '../../types';
 import { useCanvas } from '../../hooks/useCanvas';
 import CanvasElementRenderer from './CanvasElement';
@@ -157,47 +157,11 @@ export default function Canvas({
     [project.canvasElements]
   );
 
-  // Auto-pan helper for the guided tour
-  const handlePanToSection = useCallback((x: number, y: number) => {
-    if (!containerRef.current) return;
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
-    // Target position minus half viewport (to center it), accounting for scale
-    const targetX = (width / 2) - (x * transform.scale);
-    const targetY = (height / 2) - (y * transform.scale);
-    
-    // We update the transform manually since useCanvas doesn't expose an animateTo method directly
-    const event = new CustomEvent('canvas-pan-to', {
-        detail: { x: targetX, y: targetY }
-    });
-    window.dispatchEvent(event);
-    
-    // Fallback direct mutation if event listener isn't set up yet
-    if (!Reflect.has(window, 'canvasAnimateSetup')) {
-        // Direct mutation is hacky but ensures the pan happens if hook doesn't support it yet
-        // In a real refactor, we'd add `animateTo` to `useCanvas`
-        // We'll rely on the existing setTransform behavior in useCanvas
-    }
-  }, [containerRef, transform.scale]);
-
-  // Guided Tour Hook
-  const [guideState, guideActions] = useAvatarGuide({
+  // Contextual tip hook — shows small messages when cursor is near a section
+  const { contextualTip, checkProximity } = useAvatarGuide({
     projectId: project.id,
     sectionPositions: elementBounds,
-    onPanToSection: handlePanToSection,
   });
-
-  // Effect to handle panning
-  useEffect(() => {
-    const handlePan = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail && typeof customEvent.detail.x === 'number') {
-        animateTo(customEvent.detail.x, customEvent.detail.y, 1000);
-      }
-    };
-    window.addEventListener('canvas-pan-to', handlePan);
-    return () => window.removeEventListener('canvas-pan-to', handlePan);
-  }, [animateTo]);
 
   const handleWrapperMouseMove = (e: React.MouseEvent) => {
     handleMouseMove(e);
@@ -214,8 +178,7 @@ export default function Canvas({
       setMouseGridPos({ x: gridX, y: gridY });
       if (broadcastCursor) broadcastCursor(gridX, gridY);
       
-      // Update proxy for contextual tips if not touring
-      guideActions.checkProximity(gridX, gridY);
+      checkProximity(gridX, gridY);
     }
   };
 
@@ -403,27 +366,8 @@ export default function Canvas({
             targetY={mouseGridPos.y}
             color={localColor}
             elementBounds={elementBounds}
-            // Guide mode props
-            guideTarget={guideState.guideTarget}
-            isGuiding={guideState.isGuiding}
-            isComplete={guideState.tourState === 'complete'}
-            emote={guideState.emote}
-            message={guideState.narrationText || guideState.contextualTip}
-            arrivalAnimation={guideState.arrivalAnimation}
+            message={contextualTip}
             canvasScale={transform.scale}
-            tourProgress={guideState.isGuiding ? {
-              current: guideState.currentStepIndex,
-              total: guideState.totalSteps,
-              label: guideState.progressLabel
-            } : null}
-            onArrived={guideActions.onAvatarArrived}
-            onNextStep={guideActions.nextStep}
-            onSkipTour={guideActions.skipTour}
-            showIntro={guideState.showIntro}
-            introGreeting={PROJECT_TOURS[project.id]?.introGreeting || "Want me to walk you through this project?"}
-            onStartTour={guideActions.startTour}
-            onStartTourWithVoice={guideActions.startTourWithVoice}
-            onDismissTour={guideActions.dismissTour}
           />
         )}
 
@@ -487,21 +431,6 @@ export default function Canvas({
         ))}
       </div>
 
-      {/* Tour guide HUD hint — visible when character is narrating or waiting */}
-      {(guideState.tourState === 'narrating' || guideState.tourState === 'waiting') && (
-        <div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[90] pointer-events-none"
-          style={{ animation: 'fadeInUp 0.4s ease both' }}
-        >
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A1B2E]/90 border border-[#7C5CFC]/40 shadow-lg backdrop-blur-sm text-[11px] font-semibold text-[#C4B5FD] whitespace-nowrap">
-            <span className="text-base leading-none">👆</span>
-            {guideState.tourState === 'narrating'
-              ? 'Guide is speaking…'
-              : "Click 'Next →' in the guide's bubble to continue"}
-          </div>
-        </div>
-      )}
-
       {/* Keyboard hint */}
       <div className="absolute top-4 left-4 flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
         <span className="text-xs text-text-secondary">
@@ -513,8 +442,6 @@ export default function Canvas({
   );
 }
 
-// Need to import PROJECT_TOURS
-import { PROJECT_TOURS } from '../../data/tourScripts';
 
 function projectAccent(project: Project): string {
   const hex = project.accentColor;
