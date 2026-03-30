@@ -10,10 +10,12 @@ interface Props {
   onSelectProject: (project: Project) => void;
   isEditing?: boolean;
   onToggleEdit?: (edit: boolean) => void;
+  onSaveAndExit?: () => void;
+  isDirty?: boolean;
   onExit?: () => void;
 }
 
-export default function LeftPanel({ selectedProject, onSelectProject, isEditing = false, onToggleEdit = () => { }, onExit }: Props) {
+export default function LeftPanel({ selectedProject, onSelectProject, isEditing = false, onToggleEdit = () => { }, onSaveAndExit, isDirty = false, onExit }: Props) {
   const [activeTab, setActiveTab] = useState<'projects' | 'vibe-tools'>('projects');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showMainMenu, setShowMainMenu] = useState(false);
@@ -24,13 +26,18 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
 
   const handleEditClick = useCallback(() => {
     if (isEditing) {
-      onToggleEdit(false);
+      // If editing, "Save & Exit"
+      if (onSaveAndExit) {
+        onSaveAndExit();
+      } else {
+        onToggleEdit(false);
+      }
     } else {
       setShowPassword(true);
       setError(false);
       setPassword('');
     }
-  }, [isEditing, onToggleEdit]);
+  }, [isEditing, onToggleEdit, onSaveAndExit]);
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -408,6 +415,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                 <>
                   <Save className="w-3.5 h-3.5" />
                   <span className="text-xs font-semibold">Save & Exit</span>
+                  {isDirty && <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
                 </>
               ) : (
                 <>

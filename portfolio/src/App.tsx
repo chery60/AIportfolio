@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Project } from './types';
+import type { Project, CanvasElement } from './types';
 import { PROJECTS } from './data/projects';
 import LeftPanel from './components/LeftPanel';
 import Canvas, { type CanvasControlsRef } from './components/Canvas';
@@ -8,6 +8,8 @@ import RightPanel from './components/RightPanel';
 import BottomToolbar from './components/BottomToolbar';
 import LandingPage from './components/LandingPage';
 import EditToolbar from './components/EditToolbar';
+import PropertiesPanel from './components/PropertiesPanel';
+import UnsavedChangesModal from './components/UnsavedChangesModal';
 import MobileCanvasView from './components/MobileCanvasView';
 import MobileProjectList from './components/MobileProjectList';
 import MobileView from './components/MobileView';
@@ -35,10 +37,19 @@ export default function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isCommentMode, setIsCommentMode] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ type: 'switch-project'; project: Project } | { type: 'exit-edit' } | { type: 'exit-canvas' } | null>(null);
   const canvasControls = useRef<CanvasControlsRef>(defaultControls);
+  const editSnapshotRef = useRef<CanvasElement[] | null>(null);
   const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession(selectedProject.id);
   const pendingNavRef = useRef<{ x: number, y: number } | null>(null);
   const isMobile = useIsMobile();
+
+  // Dirty tracking — compare current elements to snapshot
+  const isDirty = (() => {
+    if (!editSnapshotRef.current) return false;
+    return JSON.stringify(selectedProject.canvasElements) !== JSON.stringify(editSnapshotRef.current);
+  })();
 
   const selectedElement = selectedProject.canvasElements.find(
     el => el.id === selectedElementId
@@ -59,27 +70,98 @@ export default function App() {
           ...prev,
           canvasElements: data.canvas_elements
         }));
+        
+        // If we currently have an edit snapshot active, update it to the fetched baseline
+        if (editSnapshotRef.current !== null) {
+          editSnapshotRef.current = JSON.parse(JSON.stringify(data.canvas_elements));
+        }
       }
     }
     loadProject();
   }, [selectedProject.id]);
 
-  // Auto-save canvas elements when editing
-  useEffect(() => {
-    if (!isEditing || !supabase) return;
+  // Save to Supabase helper
+  const saveToSupabase = useCallback(async () => {
+    if (!supabase) return;
+    await supabase
+      .from('projects')
+      .upsert({
+        id: selectedProject.id,
+        canvas_elements: selectedProject.canvasElements
+      }, { onConflict: 'id' });
+  }, [selectedProject.id, selectedProject.canvasElements]);
 
-    const sb = supabase;
-    const timer = setTimeout(async () => {
-      await sb
-        .from('projects')
-        .upsert({
-          id: selectedProject.id,
-          canvas_elements: selectedProject.canvasElements
-        }, { onConflict: 'id' });
-    }, 1000);
+  // Enter edit mode: snapshot current state
+  const handleToggleEdit = useCallback((editing: boolean) => {
+    if (editing) {
+      // Entering edit mode — take snapshot
+      editSnapshotRef.current = JSON.parse(JSON.stringify(selectedProject.canvasElements));
+      setIsEditing(true);
+    } else {
+      // "Save & Exit" via the LeftPanel button
+      handleSaveAndExit();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProject.canvasElements]);
 
-    return () => clearTimeout(timer);
-  }, [selectedProject.canvasElements, selectedProject.id, isEditing]);
+  // Save & Exit: persist and leave edit mode (or switch project)
+  const handleSaveAndExit = useCallback(async () => {
+    await saveToSupabase();
+    
+    const isSwitching = pendingAction?.type === 'switch-project';
+    if (!isSwitching) {
+      editSnapshotRef.current = null;
+      setIsEditing(false);
+      setIsPreviewMode(false);
+    }
+    
+    setShowUnsavedModal(false);
+
+    if (pendingAction?.type === 'switch-project') {
+      setSelectedProject(pendingAction.project);
+      setSelectedElementId(null);
+      editSnapshotRef.current = JSON.parse(JSON.stringify(pendingAction.project.canvasElements));
+    } else if (pendingAction?.type === 'exit-canvas') {
+      setCurrentView('landing');
+    }
+    
+    setPendingAction(null);
+  }, [saveToSupabase, pendingAction]);
+
+  // Discard & Exit: restore snapshot and leave edit mode (or switch project)
+  const handleDiscardAndExit = useCallback(() => {
+    if (editSnapshotRef.current) {
+      setSelectedProject(prev => ({
+        ...prev,
+        canvasElements: editSnapshotRef.current!,
+      }));
+    }
+    
+    const isSwitching = pendingAction?.type === 'switch-project';
+    if (!isSwitching) {
+      editSnapshotRef.current = null;
+      setIsEditing(false);
+      setIsPreviewMode(false);
+    }
+    
+    setShowUnsavedModal(false);
+
+    // Execute pending action
+    if (pendingAction?.type === 'switch-project') {
+      setSelectedProject(pendingAction.project);
+      setSelectedElementId(null);
+      editSnapshotRef.current = JSON.parse(JSON.stringify(pendingAction.project.canvasElements));
+    } else if (pendingAction?.type === 'exit-canvas') {
+      setCurrentView('landing');
+    }
+    setPendingAction(null);
+  }, [pendingAction]);
+
+  // Cancel modal — close it, keep editing
+  const handleCancelModal = useCallback(() => {
+    setShowUnsavedModal(false);
+    setPendingAction(null);
+  }, []);
 
   // Keyboard controls for moving selected elements
   useEffect(() => {
@@ -97,7 +179,12 @@ export default function App() {
         case 'ArrowDown': dy = increment; break;
         case 'ArrowLeft': dx = -increment; break;
         case 'ArrowRight': dx = increment; break;
-        default: return; // Not an arrow key
+        case 'Delete':
+        case 'Backspace':
+          e.preventDefault();
+          handleDeleteElement(selectedElementId);
+          return;
+        default: return; // Not a handled key
       }
 
       e.preventDefault(); // Stop page scrolling
@@ -119,9 +206,23 @@ export default function App() {
   }, [isEditing, selectedElementId]);
 
   const handleSelectProject = useCallback((project: Project) => {
+    if (isEditing && isDirty) {
+      // Guard: show unsaved changes modal
+      setPendingAction({ type: 'switch-project', project });
+      setShowUnsavedModal(true);
+      return;
+    }
+    
     setSelectedProject(project);
     setSelectedElementId(null);
-  }, []);
+    
+    if (isEditing) {
+      // Maintain edit mode for new project
+      editSnapshotRef.current = JSON.parse(JSON.stringify(project.canvasElements));
+      setIsPreviewMode(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, isDirty]);
 
   // Navigate to a viewer's project and position (Figma-style click-to-follow)
   const handleViewerClick = useCallback((viewer: import('./hooks/useRealtimeSession').ActiveViewer) => {
@@ -175,10 +276,27 @@ export default function App() {
     setSelectedElementId(id);
   }, []);
 
-  const handleAddElement = useCallback((element: import('./types').CanvasElement) => {
+  const handleAddElement = useCallback((element: CanvasElement) => {
     setSelectedProject(prev => ({
       ...prev,
       canvasElements: [...prev.canvasElements, element]
+    }));
+  }, []);
+
+  const handleDeleteElement = useCallback((id: string) => {
+    setSelectedProject(prev => ({
+      ...prev,
+      canvasElements: prev.canvasElements.filter(el => el.id !== id)
+    }));
+    setSelectedElementId(prev => prev === id ? null : prev);
+  }, []);
+
+  const handleUpdateElement = useCallback((updated: CanvasElement) => {
+    setSelectedProject(prev => ({
+      ...prev,
+      canvasElements: prev.canvasElements.map(el =>
+        el.id === updated.id ? updated : el
+      )
     }));
   }, []);
 
@@ -315,10 +433,21 @@ export default function App() {
     setCurrentView('canvas');
   }, []);
 
-  // Handle exiting canvas back to landing
+  // Handle exiting canvas back to landing (with unsaved changes guard)
   const handleExitCanvas = useCallback(() => {
+    if (isEditing && isDirty) {
+      setPendingAction({ type: 'exit-canvas' });
+      setShowUnsavedModal(true);
+      return;
+    }
+    if (isEditing) {
+      editSnapshotRef.current = null;
+      setIsEditing(false);
+      setIsPreviewMode(false);
+    }
     setCurrentView('landing');
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, isDirty]);
 
   // Mobile gets its own self-contained experience
   if (isMobile) {
@@ -382,6 +511,8 @@ export default function App() {
                       canvasControlsRef={canvasControls}
                       isEditing={isEditing && !isPreviewMode}
                       isCommentMode={isCommentMode}
+                      onDeleteElement={handleDeleteElement}
+                      onUpdateElement={handleUpdateElement}
                       onAddElement={handleAddElement}
                       onUpdateElementPosition={handleUpdateElementPosition}
                       onCanvasClick={handleCanvasClick}
@@ -398,7 +529,9 @@ export default function App() {
                       selectedProject={selectedProject}
                       onSelectProject={handleSelectProject}
                       isEditing={isEditing}
-                      onToggleEdit={setIsEditing}
+                      onToggleEdit={handleToggleEdit}
+                      onSaveAndExit={handleSaveAndExit}
+                      isDirty={isDirty}
                       onExit={handleExitCanvas}
                     />
                   </div>
@@ -406,7 +539,15 @@ export default function App() {
                   {/* Floating Right Panel or Edit Toolbar */}
                   <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
                     {isEditing && !isPreviewMode ? (
-                      <EditToolbar projectId={selectedProject.id} />
+                      selectedElement ? (
+                        <PropertiesPanel
+                          element={selectedElement}
+                          onUpdate={handleUpdateElement}
+                          onDelete={handleDeleteElement}
+                        />
+                      ) : (
+                        <EditToolbar project={selectedProject} />
+                      )
                     ) : (
                       <RightPanel
                         project={selectedProject}
@@ -433,6 +574,15 @@ export default function App() {
                   onAddNote={handleAddNote}
                 />
               </>
+            )}
+
+            {/* Unsaved Changes Modal */}
+            {showUnsavedModal && (
+              <UnsavedChangesModal
+                onSave={handleSaveAndExit}
+                onDiscard={handleDiscardAndExit}
+                onCancel={handleCancelModal}
+              />
             )}
           </motion.div>
         )}

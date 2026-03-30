@@ -199,6 +199,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       className="fixed inset-0 z-[45] flex flex-col bg-[#0A0B0F]"
       style={{
         paddingBottom: `calc(${dockHeight}px + env(safe-area-inset-bottom, 0px) + 8px)`,
+        overflowX: 'hidden',
       }}
     >
       {/* Handle + header */}
@@ -332,7 +333,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
             placeholder="Ask me anything…"
             rows={1}
             className="flex-1 bg-transparent text-sm text-[#F0F0FF] placeholder-[#4A4B6A] resize-none outline-none leading-5 max-h-24"
-            style={{ minHeight: 20 }}
+            style={{ minHeight: 20, overflowX: 'hidden' }}
           />
         </div>
 

@@ -17,6 +17,8 @@ interface Props {
   isCommentMode?: boolean;
   onAddElement?: (element: import('../../types').CanvasElement) => void;
   onUpdateElementPosition?: (id: string, x: number, y: number) => void;
+  onDeleteElement?: (id: string) => void;
+  onUpdateElement?: (element: import('../../types').CanvasElement) => void;
   onCanvasClick?: (x: number, y: number) => void;
   activeViewers?: ActiveViewer[];
   cursors?: Record<string, { x: number, y: number, projectId: string }>;
@@ -44,6 +46,8 @@ export default function Canvas({
   isCommentMode = false,
   onAddElement,
   onUpdateElementPosition,
+  onDeleteElement,
+  onUpdateElement,
   onCanvasClick,
   activeViewers = [],
   cursors = {},
@@ -148,6 +152,7 @@ export default function Canvas({
       y: el.y,
       width: el.width,
       height: el.height,
+      aiDescription: (el.data as any).aiDescription || null,
     })),
     [project.canvasElements]
   );
@@ -278,8 +283,49 @@ export default function Canvas({
       case 'prototype-embed':
         newElement = { id, type, x: gridX, y: gridY, width: 800, height: 600, data: { title: 'Prototype', description: '', thumbnailColor: '#FF6B9D' } };
         break;
+      case 'case-study-card':
+        newElement = { id, type, x: gridX, y: gridY, width: 560, height: 320, data: { title: 'New Case Study', subtitle: 'Subtitle', description: 'Description of the case study.', tags: ['Tag 1', 'Tag 2'], accentColor: '#3B82F6', metrics: [{ label: 'Metric', value: '—' }] } };
+        break;
+      case 'section-label':
+        newElement = { id, type, x: gridX, y: gridY, width: 340, height: 40, data: { title: 'NEW SECTION', color: '#6366F1' } };
+        break;
+      case 'metric-card':
+        newElement = { id, type, x: gridX, y: gridY, width: 190, height: 120, data: { label: 'Metric', value: '—', change: 'Description', changePositive: true, accentColor: '#10B981' } };
+        break;
+      case 'process-step':
+        newElement = { id, type, x: gridX, y: gridY, width: 210, height: 190, data: { stepNumber: 1, title: 'New Step', description: 'Describe this step.', color: '#F59E0B' } };
+        break;
+      case 'user-flow-step':
+        newElement = { id, type, x: gridX, y: gridY, width: 260, height: 190, data: { label: 'New Flow Step', description: 'Step description', shape: 'rectangle', color: '#6366F1', stepNumber: 1 } };
+        break;
+      case 'tag-cluster':
+        newElement = { id, type, x: gridX, y: gridY, width: 600, height: 110, data: { title: 'Tags', tags: [{ label: 'Tag 1', color: '#3B82F6' }, { label: 'Tag 2', color: '#10B981' }] } };
+        break;
+      case 'video-embed':
+        newElement = { id, type, x: gridX, y: gridY, width: 720, height: 540, data: { title: 'New Video', description: 'Video description', videoUrl: '', accentColor: '#EF4444' } };
+        break;
+      case 'figma-embed':
+        newElement = { id, type, x: gridX, y: gridY, width: 720, height: 540, data: { title: 'Figma Embed', description: 'Paste your Figma embed URL', figmaUrl: '', accentColor: '#A855F7' } };
+        break;
+      case 'flow-diagram':
+        newElement = { id, type, x: gridX, y: gridY, width: 620, height: 520, data: { title: 'New Flow Diagram', subtitle: '', accentColor: '#0EA5E9', nodes: [{ id: 'n1', label: 'Start', color: '#3B82F6', x: 50, y: 50, width: 140, height: 110 }, { id: 'n2', label: 'End', color: '#10B981', x: 350, y: 50, width: 140, height: 110 }], connections: [{ from: 'n1', to: 'n2' }] } };
+        break;
+      case 'data-dimension':
+        newElement = { id, type, x: gridX, y: gridY, width: 270, height: 190, data: { dimension: 'Dimension', title: 'Data dimension title', highlight: 'Key Value', min: '0', max: '100', typical: '50', accentColor: '#8B5CF6' } };
+        break;
+      case 'storyboard':
+        newElement = { id, type, x: gridX, y: gridY, width: 1000, height: 900, zIndex: 10, data: { boardType: 'problem', dialogues: [{ characterName: 'Character', text: 'Add dialogue here', color: '#3B82F6' }] } };
+        break;
+      case 'connector':
+        newElement = { id, type, x: gridX, y: gridY, width: 200, height: 50, data: { fromId: '', toId: '', style: 'solid', label: '' } };
+        break;
+      case 'game-zone':
+        newElement = { id, type, x: gridX, y: gridY, width: 1160, height: 680, data: { title: 'Game Zone', accentColor: '#EF4444' } };
+        break;
+      case 'comment-board':
+        newElement = { id, type, x: gridX, y: gridY, width: 1000, height: 1000, data: { title: 'Comment Board' } };
+        break;
       default:
-        // Fallback for unknown types (shouldn't happen with our toolbar but just in case)
         newElement = { id, type: 'text-block', x: gridX, y: gridY, width: 200, height: 100, data: { content: `Unsupported type: ${type}`, variant: 'body' } } as any;
     }
 
@@ -351,7 +397,7 @@ export default function Canvas({
         }}
       >
         {/* The walking character (Local instance) */}
-        {!isPlayingGame && (
+        {!isPlayingGame && !isEditing && (
           <Character
             targetX={mouseGridPos.x}
             targetY={mouseGridPos.y}
@@ -434,6 +480,9 @@ export default function Canvas({
             onSelect={onSelectElement}
             localColor={localColor}
             isEditing={isEditing}
+            canvasScale={transform.scale}
+            onDeleteElement={onDeleteElement}
+            onUpdateElement={onUpdateElement}
           />
         ))}
       </div>

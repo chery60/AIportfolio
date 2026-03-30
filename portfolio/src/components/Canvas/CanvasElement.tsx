@@ -1,6 +1,7 @@
 import type { CanvasElement } from '../../types';
 import CaseStudyCard from './elements/CaseStudyCard';
 import StickyNote from './elements/StickyNote';
+import ImageFrame from './elements/ImageFrame';
 import MetricCard from './elements/MetricCard';
 import ProcessStep from './elements/ProcessStep';
 import QuoteBlock from './elements/QuoteBlock';
@@ -14,6 +15,7 @@ import FlowDiagram from './elements/FlowDiagram';
 import DataDimension from './elements/DataDimension';
 import GameZone from '../Game/GameZone';
 import CommentBoard from './elements/CommentBoard';
+import InlineEditToolbar from './InlineEditToolbar';
 
 interface Props {
   element: CanvasElement;
@@ -21,9 +23,21 @@ interface Props {
   onSelect: (id: string) => void;
   localColor?: string;
   isEditing?: boolean;
+  canvasScale?: number;
+  onDeleteElement?: (id: string) => void;
+  onUpdateElement?: (element: CanvasElement) => void;
 }
 
-export default function CanvasElementRenderer({ element, isSelected, onSelect, localColor, isEditing = false }: Props) {
+export default function CanvasElementRenderer({
+  element,
+  isSelected,
+  onSelect,
+  localColor,
+  isEditing = false,
+  canvasScale = 1,
+  onDeleteElement,
+  onUpdateElement,
+}: Props) {
   const onClick = () => onSelect(element.id);
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -50,6 +64,8 @@ export default function CanvasElementRenderer({ element, isSelected, onSelect, l
         return <CaseStudyCard element={element} {...commonProps} />;
       case 'sticky-note':
         return <StickyNote element={element} {...commonProps} />;
+      case 'image-frame':
+        return <ImageFrame element={element} {...commonProps} />;
       case 'metric-card':
         return <MetricCard element={element} {...commonProps} />;
       case 'process-step':
@@ -91,11 +107,27 @@ export default function CanvasElementRenderer({ element, isSelected, onSelect, l
       draggable={isEditing}
       onDragStart={handleDragStart}
     >
-      <div style={{ pointerEvents: isEditing ? 'none' : 'auto' }}>
+      {/* Inline Edit Toolbar — above the element */}
+      {isEditing && isSelected && onDeleteElement && onUpdateElement && (
+        <InlineEditToolbar
+          element={element}
+          canvasScale={canvasScale}
+          onUpdate={onUpdateElement}
+          onDelete={onDeleteElement}
+        />
+      )}
+
+      <div style={{ pointerEvents: 'auto' }}>
         {content}
       </div>
+      
+      {/* Invisible overlay for capturing clicks and drags while editing */}
+      {isEditing && (
+        <div className="absolute inset-0 z-10 bg-transparent" />
+      )}
+
       {isEditing && isSelected && (
-        <div className="absolute inset-0 border-2 border-accent-purple pointer-events-none z-10 rounded-lg shadow-lg" />
+        <div className="absolute inset-0 border-2 border-accent-purple pointer-events-none z-20 rounded-lg shadow-lg" />
       )}
     </div>
   );

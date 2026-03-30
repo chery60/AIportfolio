@@ -1,26 +1,64 @@
-import React, { useState } from 'react';
-import { Type, Image as ImageIcon, StickyNote, MessageSquareQuote, MonitorPlay, Key, Check, Trash2, Loader2, MessageSquareDashed } from 'lucide-react';
-import type { CanvasElementType } from '../../types';
+import React, { useState, useMemo } from 'react';
+import {
+    Type, Image as ImageIcon, StickyNote, MessageSquareQuote, MonitorPlay,
+    Key, Check, Trash2, Loader2, MessageSquareDashed,
+    LayoutDashboard, GitBranch, BarChart3, ListOrdered, Tag, Tags,
+    Film, Video, Figma, Network, Database, Gamepad2, MessageCircle, ArrowRight
+} from 'lucide-react';
+import type { CanvasElementType, Project } from '../../types';
 import { useComments } from '../../hooks/useComments';
 
-const DRAGGABLE_ELEMENTS: { type: CanvasElementType; label: string; icon: React.ElementType; color: string }[] = [
-    { type: 'text-block', label: 'Text Block', icon: Type, color: '#3B82F6' },
-    { type: 'image-frame', label: 'Image Frame', icon: ImageIcon, color: '#10B981' },
-    { type: 'sticky-note', label: 'Sticky Note', icon: StickyNote, color: '#F59E0B' },
-    { type: 'quote-block', label: 'Quote', icon: MessageSquareQuote, color: '#8B5CF6' },
-    { type: 'prototype-embed', label: 'Prototype', icon: MonitorPlay, color: '#EC4899' },
+/* ── Master registry: every CanvasElementType → icon + label + accent color ── */
+const ELEMENT_REGISTRY: Record<CanvasElementType, { label: string; icon: React.ElementType; color: string }> = {
+    'case-study-card':   { label: 'Case Study',    icon: LayoutDashboard,   color: '#3B82F6' },
+    'sticky-note':       { label: 'Sticky Note',   icon: StickyNote,        color: '#F59E0B' },
+    'image-frame':       { label: 'Image Frame',   icon: ImageIcon,         color: '#10B981' },
+    'text-block':        { label: 'Text Block',     icon: Type,              color: '#3B82F6' },
+    'user-flow-step':    { label: 'Flow Step',      icon: GitBranch,         color: '#6366F1' },
+    'connector':         { label: 'Connector',      icon: ArrowRight,        color: '#94A3B8' },
+    'metric-card':       { label: 'Metric Card',    icon: BarChart3,         color: '#10B981' },
+    'process-step':      { label: 'Process Step',   icon: ListOrdered,       color: '#F59E0B' },
+    'quote-block':       { label: 'Quote Block',    icon: MessageSquareQuote,color: '#8B5CF6' },
+    'section-label':     { label: 'Section Label',  icon: Tag,               color: '#EF4444' },
+    'tag-cluster':       { label: 'Tag Cluster',    icon: Tags,              color: '#EC4899' },
+    'prototype-embed':   { label: 'Prototype',      icon: MonitorPlay,       color: '#EC4899' },
+    'storyboard':        { label: 'Storyboard',     icon: Film,              color: '#F97316' },
+    'video-embed':       { label: 'Video Embed',    icon: Video,             color: '#EF4444' },
+    'figma-embed':       { label: 'Figma Embed',    icon: Figma,             color: '#A855F7' },
+    'flow-diagram':      { label: 'Flow Diagram',   icon: Network,           color: '#0EA5E9' },
+    'data-dimension':    { label: 'Data Card',      icon: Database,          color: '#8B5CF6' },
+    'game-zone':         { label: 'Game Zone',      icon: Gamepad2,          color: '#EF4444' },
+    'comment-board':     { label: 'Comment Board',  icon: MessageCircle,     color: '#6366F1' },
+};
+
+/* ── Always-available generic components (unchanged from before) ── */
+const GENERIC_ELEMENTS: CanvasElementType[] = [
+    'text-block', 'image-frame', 'sticky-note', 'quote-block', 'video-embed',
 ];
 
 interface EditToolbarProps {
-    projectId: string;
+    project: Project;
 }
 
-export default function EditToolbar({ projectId }: EditToolbarProps) {
+export default function EditToolbar({ project }: EditToolbarProps) {
     const [apiKey, setApiKey] = useState('');
     const [showSavedMsg, setShowSavedMsg] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const { comments, loading, error, deleteComment, timeAgo } = useComments(projectId);
+    const { comments, loading, error, deleteComment, timeAgo } = useComments(project.id);
+
+    /* ── Derive unique component types + counts from the project ── */
+    const projectComponents = useMemo(() => {
+        const counts = new Map<CanvasElementType, number>();
+        for (const el of project.canvasElements) {
+            if (el.type === 'game-zone') continue;
+            counts.set(el.type, (counts.get(el.type) || 0) + 1);
+        }
+        // Sort by count descending for nice visual priority
+        return Array.from(counts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([type, count]) => ({ type, count, ...ELEMENT_REGISTRY[type] }));
+    }, [project.canvasElements]);
 
     const handleDragStart = (e: React.DragEvent, type: CanvasElementType) => {
         e.dataTransfer.setData('canvas/element-type', type);
@@ -28,7 +66,6 @@ export default function EditToolbar({ projectId }: EditToolbarProps) {
     };
 
     const handleSaveToken = () => {
-        // Save to localStorage or just local state for now
         if (apiKey) {
             localStorage.setItem('ai_api_key', apiKey);
             setShowSavedMsg(true);
@@ -55,29 +92,76 @@ export default function EditToolbar({ projectId }: EditToolbarProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto pb-6">
-                {/* Components Section */}
-                <div className="p-4 border-b border-panel-border">
-                    <SectionTitle>DRAGGABLE COMPONENTS</SectionTitle>
-                    <div className="grid grid-cols-2 gap-2 mt-3">
-                        {DRAGGABLE_ELEMENTS.map((el) => (
-                            <div
-                                key={el.type}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, el.type)}
-                                className="flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02]"
-                            >
+
+                {/* ── PROJECT COMPONENTS — dynamically detected ── */}
+                {projectComponents.length > 0 && (
+                    <div className="p-4 border-b border-panel-border">
+                        <div className="flex items-center justify-between mb-1">
+                            <SectionTitle>PROJECT COMPONENTS</SectionTitle>
+                            <span className="text-[9px] font-bold text-text-secondary bg-surface-2 px-1.5 py-0.5 rounded-full">
+                                {projectComponents.length} types
+                            </span>
+                        </div>
+                        <p className="text-[10px] text-text-secondary leading-relaxed mb-3">
+                            Components used in this project. Drag to add a new instance.
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                            {projectComponents.map((comp) => (
                                 <div
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm"
-                                    style={{ backgroundColor: `${el.color}15`, color: el.color }}
+                                    key={comp.type}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, comp.type)}
+                                    className="group relative flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02] hover:shadow-sm"
                                 >
-                                    <el.icon className="w-4 h-4" />
+                                    {/* Count badge */}
+                                    <span
+                                        className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full"
+                                        style={{ backgroundColor: `${comp.color}18`, color: comp.color }}
+                                    >
+                                        ×{comp.count}
+                                    </span>
+                                    <div
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm transition-transform group-hover:scale-110"
+                                        style={{ backgroundColor: `${comp.color}15`, color: comp.color }}
+                                    >
+                                        <comp.icon className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[10px] font-semibold text-text-primary text-center leading-tight">
+                                        {comp.label}
+                                    </span>
+                                    <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
                                 </div>
-                                <span className="text-[10px] font-semibold text-text-primary text-center">
-                                    {el.label}
-                                </span>
-                                <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── GENERIC COMPONENTS — always available ── */}
+                <div className="p-4 border-b border-panel-border">
+                    <SectionTitle>GENERIC COMPONENTS</SectionTitle>
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                        {GENERIC_ELEMENTS.map((type) => {
+                            const el = ELEMENT_REGISTRY[type];
+                            return (
+                                <div
+                                    key={type}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, type)}
+                                    className="flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02]"
+                                >
+                                    <div
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm"
+                                        style={{ backgroundColor: `${el.color}15`, color: el.color }}
+                                    >
+                                        <el.icon className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[10px] font-semibold text-text-primary text-center">
+                                        {el.label}
+                                    </span>
+                                    <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 

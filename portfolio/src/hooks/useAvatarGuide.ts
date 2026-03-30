@@ -52,6 +52,7 @@ interface SectionPosition {
   y: number;
   width: number;
   height: number;
+  aiDescription?: string | null;
 }
 
 interface UseAvatarGuideOptions {
@@ -359,9 +360,12 @@ export function useAvatarGuide({
 
       const PROXIMITY_THRESHOLD = 200;
 
-      for (const tip of tips) {
-        const section = sectionPositions.find((s) => s.id === tip.sectionId);
-        if (!section) continue;
+      for (const section of sectionPositions) {
+        const dynamicTip = section.aiDescription;
+        const staticTip = tips.find(t => t.sectionId === section.id)?.tip;
+        const tipText = dynamicTip || staticTip;
+
+        if (!tipText) continue;
 
         const centerX = section.x + section.width / 2;
         const centerY = section.y + section.height / 2;
@@ -369,9 +373,9 @@ export function useAvatarGuide({
           (cursorX - centerX) ** 2 + (cursorY - centerY) ** 2
         );
 
-        if (dist < PROXIMITY_THRESHOLD && lastTipRef.current !== tip.sectionId) {
-          lastTipRef.current = tip.sectionId;
-          setContextualTip(tip.tip);
+        if (dist < PROXIMITY_THRESHOLD && lastTipRef.current !== section.id) {
+          lastTipRef.current = section.id;
+          setContextualTip(tipText);
           tipCooldownRef.current = true;
 
           setTimeout(() => {
