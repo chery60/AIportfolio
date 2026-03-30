@@ -83,6 +83,7 @@ export function useAvatarGuide({
 
   const tour = PROJECT_TOURS[projectId];
   const tips = CONTEXTUAL_TIPS[projectId] || [];
+  const autoStartRef = useRef<(() => void) | null>(null);
   const comebackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTipRef = useRef<string | null>(null);
@@ -140,7 +141,7 @@ export function useAvatarGuide({
     comebackShownRef.current = false;
   }, [projectId]);
 
-  // Show intro prompt once per session per project
+  // Auto-start tour once per session per project (skip intro prompt)
   useEffect(() => {
     if (!tour || hasSeenIntroRef.current) return;
 
@@ -149,8 +150,7 @@ export function useAvatarGuide({
 
     if (!hasSeen) {
       const timer = setTimeout(() => {
-        setShowIntro(true);
-        setTourState('intro');
+        autoStartRef.current?.();
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -198,6 +198,8 @@ export function useAvatarGuide({
       panToStep(steps[0]);
     }
   }, [tour, steps, projectId, getSectionTarget, panToStep]);
+
+  autoStartRef.current = () => startTourInternal(false);
 
   const startTour = useCallback(() => startTourInternal(false), [startTourInternal]);
   const startTourWithVoice = useCallback(() => startTourInternal(true), [startTourInternal]);
@@ -306,6 +308,10 @@ export function useAvatarGuide({
     setArrivalAnimation(step.animationOnArrival || 'none');
 
     setTimeout(() => {
+      // Guard: only transition to 'waiting' if still in narrating state.
+      // If the user clicked Next early, tourState would be 'walking' and we
+      // must not stomp it back to 'waiting' (which would break onAvatarArrived).
+      if (tourStateRef.current !== 'narrating') return;
       setArrivalAnimation(null);
       setTourState('waiting');
     }, 1500);

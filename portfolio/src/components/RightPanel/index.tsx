@@ -7,6 +7,7 @@ import { useReactions } from '../../hooks/useReactions';
 import type { ActiveViewer } from '../../hooks/useRealtimeSession';
 import { ShimmerButton } from '../ui/shimmer-button';
 import { AnimatedList } from '../ui/animated-list';
+import { useWebHaptics } from 'web-haptics/react';
 
 interface Props {
   project: Project;
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export default function RightPanel({ project, isEditMode = false, activeViewers = [], onViewerClick, localIdentity }: Props) {
-
+  const { trigger } = useWebHaptics({ debug: true });
   const { reactions, incrementReaction } = useReactions(project.id);
   const [contactState, setContactState] = useState<'idle' | 'form' | 'sent' | 'sending'>('idle');
   const [contactName, setContactName] = useState('');
@@ -338,7 +339,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
             <SectionTitle>GET IN TOUCH</SectionTitle>
             {contactState === 'idle' && (
               <ShimmerButton
-                onClick={() => setContactState('form')}
+                onClick={() => { trigger('light'); setContactState('form'); }}
                 className="w-full mt-3 py-2.5 rounded-lg transition-transform hover:scale-[1.02] shadow-md !px-0"
                 background="linear-gradient(135deg, #7C5CFC, #FF6B9D)"
               >
@@ -362,7 +363,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                     Cancel
                   </button>
                   <button
-                    onClick={handleSendContact}
+                    onClick={() => { trigger('success'); handleSendContact(); }}
                     disabled={!contactName.trim() || !contactMessage.trim() || contactState === 'sending'}
                     className="flex-1 py-2 rounded-md text-white text-xs font-semibold flex flex-col justify-center items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)' }}

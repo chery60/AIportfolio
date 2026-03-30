@@ -4,6 +4,7 @@ import { ScrollReveal } from './ui/scroll-reveal';
 import { RotatingText } from './ui/rotating-text';
 import { Highlighter } from './ui/highlighter';
 import Stack from './Stack/Stack';
+import { useWebHaptics } from 'web-haptics/react';
 
 const ROLES = [
   'Enterprise & SaaS Specialist',
@@ -39,6 +40,7 @@ const EXPERIENCE = [
 ];
 
 export default function MobileHomeTab() {
+  const { trigger } = useWebHaptics({ debug: true });
   return (
     <div className="h-full overflow-y-scroll overflow-x-hidden bg-[#0A0B0F] min-h-0 scroll-smooth mobile-snap-y mobile-no-scrollbar mobile-smooth-scroll">
       <div className="px-5 flex flex-col gap-6" style={{ paddingBottom: 'calc(10rem + env(safe-area-inset-bottom, 0px))' }}>
@@ -178,6 +180,7 @@ export default function MobileHomeTab() {
         <ScrollReveal delay={0.16} yOffset={24} blur="8px" className="mobile-snap-item-y">
           <div className="flex gap-3">
             <motion.a
+              onPointerDown={() => trigger('light')}
               href={`${import.meta.env.BASE_URL}sai%20charan%20kalla_Latest%20Resume.pdf`}
               target="_blank"
               rel="noopener noreferrer"
@@ -188,6 +191,7 @@ export default function MobileHomeTab() {
               Download Resume
             </motion.a>
             <motion.a
+              onPointerDown={() => trigger('light')}
               href="https://www.linkedin.com/in/sai-charan-92a8ab13b/"
               target="_blank"
               rel="noopener noreferrer"

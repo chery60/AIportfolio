@@ -11,6 +11,7 @@ import { type ElementBounds } from './Canvas/Character';
 import { CoolMode } from './ui/cool-mode';
 import { Highlighter } from './ui/highlighter';
 import { RotatingText } from './ui/rotating-text';
+import { useWebHaptics } from 'web-haptics/react';
 
 // ── Persona & Local Data ────────────────────────────────────────────────────────────
 const PERSONA = {
@@ -166,6 +167,7 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
+    const { trigger } = useWebHaptics({ debug: true });
     const isMobile = useIsMobile();
     const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -896,12 +898,12 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             className="flex gap-3"
                         >
                             <CoolMode>
-                                <a href={`${import.meta.env.BASE_URL}sai%20charan%20kalla_Latest%20Resume.pdf`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white text-sm font-semibold shadow-lg shadow-[#7C5CFC]/25 hover:shadow-xl hover:shadow-[#7C5CFC]/30 hover:scale-105 transition-all active:scale-95">
+                                <a onPointerDown={() => trigger('light')} href={`${import.meta.env.BASE_URL}sai%20charan%20kalla_Latest%20Resume.pdf`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white text-sm font-semibold shadow-lg shadow-[#7C5CFC]/25 hover:shadow-xl hover:shadow-[#7C5CFC]/30 hover:scale-105 transition-all active:scale-95">
                                     <Download className="w-4 h-4" />
                                     Download Resume
                                 </a>
                             </CoolMode>
-                            <a href="https://www.linkedin.com/in/sai-charan-92a8ab13b/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#12131F] border border-white/10 text-[#C8CAE5] text-sm font-semibold hover:bg-[#1A1B2E] hover:border-white/20 hover:scale-105 transition-all active:scale-95">
+                            <a onPointerDown={() => trigger('light')} href="https://www.linkedin.com/in/sai-charan-92a8ab13b/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#12131F] border border-white/10 text-[#C8CAE5] text-sm font-semibold hover:bg-[#1A1B2E] hover:border-white/20 hover:scale-105 transition-all active:scale-95">
                                 <ExternalLink className="w-4 h-4" />
                                 LinkedIn
                             </a>
