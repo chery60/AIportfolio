@@ -238,7 +238,7 @@ function MobileProjectHero({ project }: { project: Project }) {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-black leading-tight mb-2" style={{ color: '#F0F0FF' }}>
+            <h1 className="text-2xl font-black leading-tight mb-2" style={{ color: '#f7f8f8' }}>
                 {project.title}
             </h1>
 
@@ -288,7 +288,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
     const totalReactions = Object.values(reactions).reduce((a, b) => a + b, 0);
 
     return (
-        <div className="fixed inset-0 flex flex-col" style={{ background: '#0A0B0F', color: '#F0F0FF' }}>
+        <div className="fixed inset-0 flex flex-col" style={{ background: '#08090a', color: '#f7f8f8' }}>
             {/* ── Top Navigation Bar ─────────────────────────────── */}
             <div
                 className="flex items-center justify-between px-4 pb-3 z-30 flex-shrink-0"
@@ -309,7 +309,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                         <ArrowLeft className="w-4 h-4" />
                     </button>
                     <div className="min-w-0">
-                        <p className="text-sm font-bold truncate max-w-[150px]" style={{ color: '#F0F0FF' }}>
+                        <p className="text-sm font-bold truncate max-w-[150px]" style={{ color: '#f7f8f8' }}>
                             {project.title}
                         </p>
                         <p className="text-[10px]" style={{ color: 'rgba(240,240,255,0.35)' }}>
@@ -331,7 +331,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                     className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm"
                                     style={{
                                         backgroundColor: v.color,
-                                        border: '2px solid #0A0B0F',
+                                        border: '2px solid #08090a',
                                         zIndex: 10 - i,
                                     }}
                                 >
@@ -343,7 +343,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                     className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shadow-sm"
                                     style={{
                                         background: 'rgba(255,255,255,0.10)',
-                                        border: '2px solid #0A0B0F',
+                                        border: '2px solid #08090a',
                                         color: 'rgba(240,240,255,0.6)',
                                         zIndex: 0,
                                     }}

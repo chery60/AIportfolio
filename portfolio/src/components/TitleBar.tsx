@@ -11,8 +11,8 @@ export default function TitleBar({ currentProject }: Props) {
       className="flex-shrink-0 flex items-center px-4 gap-3"
       style={{
         height: '44px',
-        background: '#0E0F16',
-        borderBottom: '1px solid #1A1B24',
+        background: '#0f1011',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}
     >
       {/* Logo / App name */}
@@ -20,15 +20,15 @@ export default function TitleBar({ currentProject }: Props) {
         <div
           className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold"
           style={{
-            background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)',
+            background: '#5e6ad2',
             color: 'white',
             fontSize: '10px',
           }}
         >
           DS
         </div>
-        <span className="text-xs font-semibold" style={{ color: '#6B6D8A' }}>Dev Shah</span>
-        <span style={{ color: '#2A2B3C' }}>/</span>
+        <span className="text-xs font-semibold" style={{ color: '#8a8f98' }}>Dev Shah</span>
+        <span style={{ color: '#62666d' }}>/</span>
         <span className="text-xs font-medium text-white">{currentProject.title}</span>
       </div>
 
@@ -42,7 +42,7 @@ export default function TitleBar({ currentProject }: Props) {
               width: p.id === currentProject.id ? '20px' : '6px',
               height: '4px',
               borderRadius: '9999px',
-              background: p.id === currentProject.id ? p.accentColor : '#2A2B3C',
+              background: p.id === currentProject.id ? p.accentColor : '#28282c',
             }}
           />
         ))}
@@ -51,8 +51,8 @@ export default function TitleBar({ currentProject }: Props) {
       {/* Right: actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <StatusDot label="Available for work" />
-        <div className="h-4 w-px" style={{ background: '#1E1F2C' }} />
-        <span className="text-xs" style={{ color: '#4A4B6A' }}>Portfolio · 2024</span>
+        <div className="h-4 w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+        <span className="text-xs" style={{ color: '#62666d' }}>Portfolio · 2024</span>
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ function StatusDot({ label }: { label: string }) {
         <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-40" />
         <div className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
       </div>
-      <span className="text-xs" style={{ color: '#4A4B6A' }}>{label}</span>
+      <span className="text-xs" style={{ color: '#8a8f98' }}>{label}</span>
     </div>
   );
 }

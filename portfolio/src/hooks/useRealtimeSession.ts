@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
-const COLORS = ['#7C5CFC', '#FF6B9D', '#34D399', '#FBBF24', '#60A5FA', '#A78BFA', '#F472B6', '#38BDF8'];
+const COLORS = ['#7170ff', '#5e6ad2', '#34D399', '#FBBF24', '#60A5FA', '#828fff', '#8a8f98', '#38BDF8'];
 const FIRST_NAMES = ['Alex', 'Priya', 'Sam', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Devon'];
 const LAST_INITIALS = ['M', 'S', 'W', 'K', 'R', 'L', 'T', 'B', 'C', 'P'];
 const LOCATIONS = ['San Francisco', 'London', 'New York', 'Tokyo', 'Berlin', 'Toronto', 'Sydney', 'Paris', 'Singapore', 'Austin'];

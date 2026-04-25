@@ -10,7 +10,7 @@ const DEFAULT_GAME_ELEMENT: GameZoneElement = {
   height: 0,
   data: {
     title: 'Crewmate Dash',
-    accentColor: '#7C5CFC',
+    accentColor: '#5e6ad2',
     contactEmail: undefined,
     contactLinkedIn: undefined,
   },
@@ -18,7 +18,7 @@ const DEFAULT_GAME_ELEMENT: GameZoneElement = {
 
 export default function MobileGameTab() {
   return (
-    <div className="h-full overflow-y-scroll bg-[#0A0B0F] min-h-0 mobile-smooth-scroll">
+    <div className="h-full overflow-y-scroll bg-[#08090a] min-h-0 mobile-smooth-scroll">
       <div className="px-5 pt-14" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
         <MobileGameZone element={DEFAULT_GAME_ELEMENT} />
       </div>

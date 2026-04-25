@@ -75,7 +75,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
       style={{
         width: element.width,
         height: element.height,
-        background: 'linear-gradient(135deg, #0A0B0F 0%, #0E0F16 100%)',
+        background: 'linear-gradient(135deg, #08090a 0%, #0f1011 100%)',
         border: isSelected
           ? `2px solid ${data.accentColor}`
           : '2px solid rgba(255,255,255,0.08)',
@@ -120,7 +120,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
       {(sessionState === 'idle' || sessionState === 'waiting') && (
         <div className="flex flex-col h-[calc(100%-52px-210px)]">
           {sessionState === 'waiting' ? (
-            <div className="flex-1 w-full relative bg-[#0A0B0F] overflow-hidden">
+            <div className="flex-1 w-full relative bg-[#08090a] overflow-hidden">
               <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full border border-white/10">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-white/80 text-xs font-semibold">Watching {currentPlayer} live</span>
@@ -137,7 +137,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
               <div
                 className="w-full flex-1 flex flex-col items-center justify-center gap-4 px-8"
                 style={{
-                  background: 'linear-gradient(135deg, #0D0E1A 0%, #111320 100%)',
+                  background: 'linear-gradient(135deg, #08090a 0%, #0f1011 100%)',
                   borderBottom: `1px solid ${data.accentColor}20`,
                 }}
               >
@@ -251,7 +251,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
           </div>
 
           {/* Game canvas — full width, no leaderboard column */}
-          <div className="flex-1 flex items-center justify-center bg-[#0A0B0F]">
+          <div className="flex-1 flex items-center justify-center bg-[#08090a]">
             <GameEngine
               playerColor={SESSION_COLOR}
               onGameOver={handleGameOver}

@@ -73,7 +73,7 @@ export default function Canvas({
     animateTo,
   } = useCanvas({ defaultTransform: project.defaultView });
 
-  const localColor = localIdentity?.color || '#7C5CFC';
+  const localColor = localIdentity?.color || '#7170ff';
 
   // Expose controls to parent
   useEffect(() => {
@@ -244,7 +244,7 @@ export default function Canvas({
         newElement = { id, type, x: gridX, y: gridY, width: 400, height: 200, data: { quote: 'Insert quote here', author: 'Author Name' } };
         break;
       case 'prototype-embed':
-        newElement = { id, type, x: gridX, y: gridY, width: 800, height: 600, data: { title: 'Prototype', description: '', thumbnailColor: '#FF6B9D' } };
+        newElement = { id, type, x: gridX, y: gridY, width: 800, height: 600, data: { title: 'Prototype', description: '', thumbnailColor: '#5e6ad2' } };
         break;
       case 'case-study-card':
         newElement = { id, type, x: gridX, y: gridY, width: 560, height: 320, data: { title: 'New Case Study', subtitle: 'Subtitle', description: 'Description of the case study.', tags: ['Tag 1', 'Tag 2'], accentColor: '#3B82F6', metrics: [{ label: 'Metric', value: '—' }] } };
@@ -274,7 +274,7 @@ export default function Canvas({
         newElement = { id, type, x: gridX, y: gridY, width: 620, height: 520, data: { title: 'New Flow Diagram', subtitle: '', accentColor: '#0EA5E9', nodes: [{ id: 'n1', label: 'Start', color: '#3B82F6', x: 50, y: 50, width: 140, height: 110 }, { id: 'n2', label: 'End', color: '#10B981', x: 350, y: 50, width: 140, height: 110 }], connections: [{ from: 'n1', to: 'n2' }] } };
         break;
       case 'data-dimension':
-        newElement = { id, type, x: gridX, y: gridY, width: 270, height: 190, data: { dimension: 'Dimension', title: 'Data dimension title', highlight: 'Key Value', min: '0', max: '100', typical: '50', accentColor: '#8B5CF6' } };
+        newElement = { id, type, x: gridX, y: gridY, width: 270, height: 190, data: { dimension: 'Dimension', title: 'Data dimension title', highlight: 'Key Value', min: '0', max: '100', typical: '50', accentColor: '#5e6ad2' } };
         break;
       case 'storyboard':
         newElement = { id, type, x: gridX, y: gridY, width: 1000, height: 900, zIndex: 10, data: { boardType: 'problem', dialogues: [{ characterName: 'Character', text: 'Add dialogue here', color: '#3B82F6' }] } };

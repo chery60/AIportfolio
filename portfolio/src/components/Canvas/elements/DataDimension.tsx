@@ -40,7 +40,7 @@ export default function DataDimension({ element, isSelected, onClick }: Props) {
         <div className="flex gap-3">
           {[{ label: 'Minimum', value: data.min }, { label: 'Maximum', value: data.max }, { label: 'Typical', value: data.typical }].map(({ label, value }) => (
             <div key={label} className="flex flex-col items-center flex-1">
-              <div className="text-lg font-bold" style={{ color: data.accentColor }}>{value}</div>
+              <div className="text-lg font-bold whitespace-nowrap" style={{ color: data.accentColor }}>{value}</div>
               <div className="text-[9px] text-text-secondary">{label}</div>
             </div>
           ))}

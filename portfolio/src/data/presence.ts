@@ -1,8 +1,8 @@
 import type { Viewer, Comment } from '../types';
 
 export const SIMULATED_VIEWERS: Viewer[] = [
-  { id: 'v1', name: 'Alex Morgan', color: '#7C5CFC', initials: 'AM', isActive: true, location: 'San Francisco, CA' },
-  { id: 'v2', name: 'Priya Sharma', color: '#FF6B9D', initials: 'PS', isActive: true, location: 'London, UK' },
+  { id: 'v1', name: 'Alex Morgan', color: '#5e6ad2', initials: 'AM', isActive: true, location: 'San Francisco, CA' },
+  { id: 'v2', name: 'Priya Sharma', color: '#7170ff', initials: 'PS', isActive: true, location: 'London, UK' },
   { id: 'v3', name: 'Jordan Lee', color: '#22D3EE', initials: 'JL', isActive: false, location: 'Toronto, CA' },
   { id: 'v4', name: 'Sam Williams', color: '#34D399', initials: 'SW', isActive: true, location: 'NYC, NY' },
   { id: 'v5', name: 'Riley Chen', color: '#FBBF24', initials: 'RC', isActive: false, location: 'Seoul, KR' },
@@ -12,7 +12,7 @@ export const SAMPLE_COMMENTS: Comment[] = [
   {
     id: 'c1',
     author: 'Alex Morgan',
-    authorColor: '#7C5CFC',
+    authorColor: '#5e6ad2',
     authorInitials: 'AM',
     content: 'The process steps section is really clear. Love how the color coding maps to the phases.',
     timestamp: '2 min ago',
@@ -24,7 +24,7 @@ export const SAMPLE_COMMENTS: Comment[] = [
   {
     id: 'c2',
     author: 'Priya Sharma',
-    authorColor: '#FF6B9D',
+    authorColor: '#7170ff',
     authorInitials: 'PS',
     content: 'Those metrics are impressive. How did you measure the design consistency score?',
     timestamp: '15 min ago',

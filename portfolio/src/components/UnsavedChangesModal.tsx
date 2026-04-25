@@ -70,7 +70,7 @@ export default function UnsavedChangesModal({ onSave, onDiscard, onCancel }: Pro
             <button
               onClick={onSave}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-white text-xs font-semibold shadow-sm transition-transform hover:scale-[1.02]"
-              style={{ background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)' }}
+              style={{ backgroundColor: '#5e6ad2' }}
             >
               <Save className="w-3.5 h-3.5" />
               Save

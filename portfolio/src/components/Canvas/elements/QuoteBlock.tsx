@@ -10,12 +10,12 @@ function hexToRgb(hex: string): string {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '124, 92, 252';
+    : '94, 106, 210';
 }
 
 export default function QuoteBlock({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
-  const accent = data.accentColor ?? '#7C5CFC';
+  const accent = data.accentColor ?? '#5e6ad2';
   const rgb = hexToRgb(accent);
 
   return (

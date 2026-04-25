@@ -167,7 +167,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                       <span
                         className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap"
                         style={{
-                          backgroundColor: isOnSameProject ? `${viewerProject.accentColor}22` : '#1E1F2C',
+                          backgroundColor: isOnSameProject ? `${viewerProject.accentColor}22` : '#191a1b',
                           color: isOnSameProject ? viewerProject.accentColor : '#8B8DB0',
                         }}
                       >
@@ -341,7 +341,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
               <ShimmerButton
                 onClick={() => { trigger('light'); setContactState('form'); }}
                 className="w-full mt-3 py-2.5 rounded-lg transition-transform hover:scale-[1.02] shadow-md !px-0"
-                background="linear-gradient(135deg, #7C5CFC, #FF6B9D)"
+                background="#5e6ad2"
               >
                 <span className="flex items-center justify-center gap-2 text-xs font-bold text-white relative z-10 w-full">
                   <MessageSquare className="w-4 h-4" />
@@ -366,7 +366,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                     onClick={() => { trigger('success'); handleSendContact(); }}
                     disabled={!contactName.trim() || !contactMessage.trim() || contactState === 'sending'}
                     className="flex-1 py-2 rounded-md text-white text-xs font-semibold flex flex-col justify-center items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)' }}
+                    style={{ backgroundColor: '#5e6ad2' }}
                   >
                     {contactState === 'sending' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send'}
                   </button>

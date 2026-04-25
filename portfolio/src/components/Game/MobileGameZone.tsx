@@ -194,7 +194,7 @@ export default function MobileGameZone({ element }: Props) {
         <div
             className="w-full rounded-2xl overflow-hidden"
             style={{
-                background: 'linear-gradient(135deg, #0A0B0F, #111320)',
+                background: 'linear-gradient(135deg, #08090a, #0f1011)',
                 border: '1px solid rgba(255,255,255,0.08)',
             }}
         >

@@ -41,7 +41,7 @@ export default function MobileView({ activeViewers }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#0A0B0F] flex flex-col">
+    <div className="fixed inset-0 bg-[#08090a] flex flex-col">
       {/* Custom cursor — self-disables on real touch devices */}
       <SmoothCursor />
       {/* ── Content Area ─────────────────────────────────────── */}

@@ -18,10 +18,10 @@ export default {
           active: '#F3F4F6',
         },
         accent: {
-          purple: '#8B5CF6',
-          violet: '#A78BFA',
-          pink: '#EC4899',
-          cyan: '#06B6D4',
+          purple: '#5e6ad2',
+          violet: '#7170ff',
+          pink: '#828fff',
+          cyan: '#7170ff',
           amber: '#F59E0B',
         },
         surface: {
@@ -35,16 +35,32 @@ export default {
           primary: '#111827',
           secondary: '#6B7280',
           muted: '#9CA3AF',
-          accent: '#8B5CF6',
-        }
+          accent: '#5e6ad2',
+        },
+        brand: {
+          DEFAULT: '#5e6ad2',
+          accent: '#7170ff',
+          hover: '#828fff',
+        },
+        dark: {
+          bg: '#08090a',
+          panel: '#0f1011',
+          surface: '#191a1b',
+          elevated: '#28282c',
+        },
+        'dark-text': {
+          primary: '#f7f8f8',
+          secondary: '#d0d6e0',
+          tertiary: '#8a8f98',
+          quaternary: '#62666d',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SF Mono', 'Menlo', 'monospace'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'mesh-purple': 'radial-gradient(at 40% 20%, hsla(263,80%,60%,0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(280,70%,50%,0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(220,70%,60%,0.1) 0px, transparent 50%)',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -88,10 +104,12 @@ export default {
         },
       },
       boxShadow: {
-        'glow-purple': '0 0 20px rgba(139, 92, 246, 0.3)',
-        'glow-sm': '0 0 10px rgba(139, 92, 246, 0.2)',
+        'glow-brand': '0 0 20px rgba(94, 106, 210, 0.2)',
+        'glow-sm': '0 0 10px rgba(94, 106, 210, 0.15)',
         'panel': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
         'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'ring': 'rgba(0,0,0,0.2) 0px 0px 0px 1px',
+        'elevated': 'rgba(0,0,0,0.4) 0px 2px 4px',
       }
     },
   },

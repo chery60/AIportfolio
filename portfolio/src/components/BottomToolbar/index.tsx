@@ -36,14 +36,14 @@ export default function BottomToolbar({
     switch (project.id) {
       case 'beacon-ai':
         return (
-          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full text-sm font-bold text-white transition-transform hover:scale-105 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #FF6B9D, #FBBF24)' }}>
+          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full text-sm font-[590] text-white transition-transform hover:scale-105 active:scale-95 shadow-md bg-[#5e6ad2] hover:bg-[#828fff]">
             <Bot className="w-4 h-4" />
             Try Sandbox
           </button>
         );
       case 'flow-app':
         return (
-          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full text-sm font-bold text-white transition-transform hover:scale-105 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #22D3EE, #7C5CFC)' }}>
+          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full text-sm font-[590] text-white transition-transform hover:scale-105 active:scale-95 shadow-md bg-[#5e6ad2] hover:bg-[#828fff]">
             <Smartphone className="w-4 h-4" />
             View Prototype
           </button>
@@ -131,7 +131,7 @@ export default function BottomToolbar({
           {/* AI Magic Button */}
           <button
             onClick={() => setShowAIPrompt(!showAIPrompt)}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md ml-1 mr-1 ${showAIPrompt ? 'bg-accent-purple text-white shadow-inner scale-95' : 'bg-accent-purple text-white hover:bg-opacity-90 hover:scale-[1.05]'}`}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md ml-1 mr-1 ${showAIPrompt ? 'bg-brand text-white shadow-inner scale-95' : 'bg-brand text-white hover:bg-opacity-90 hover:scale-[1.05]'}`}
             title="AI Capability"
           >
             <Sparkles className="w-4 h-4 text-white" />

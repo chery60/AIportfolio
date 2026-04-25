@@ -14,7 +14,7 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
     <MagicCard
       onClick={onClick}
       className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm cursor-pointer ${isSelected ? 'selected' : ''}`}
-      gradientColor={data.accentColor ? `${data.accentColor}33` : '#8B5CF633'}
+      gradientColor={data.accentColor ? `${data.accentColor}33` : '#5e6ad233'}
       style={{
         width,
         height,
@@ -65,7 +65,7 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
             {data.metrics.map(m => (
               <div key={m.label}>
                 <div className="text-base font-bold" style={{ color: data.accentColor }}>{m.value}</div>
-                <div className="text-xs" style={{ color: '#6B6D8A' }}>{m.label}</div>
+                <div className="text-xs" style={{ color: '#8a8f98' }}>{m.label}</div>
               </div>
             ))}
           </div>
@@ -79,5 +79,5 @@ function hexToRgb(hex: string): string {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '124, 92, 252';
+    : '94, 106, 210';
 }

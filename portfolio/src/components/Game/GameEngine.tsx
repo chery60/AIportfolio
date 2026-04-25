@@ -77,7 +77,7 @@ const HAZARD_CONFIGS: Record<HazardKind, { w: number; h: number; label: string; 
 // Hazard accent colors (used for particles on hit)
 const _HAZARD_COLORS: Record<HazardKind, string> = {
   knife: '#EF4444',
-  thief: '#8B5CF6',
+  thief: '#5e6ad2',
   ghost: '#06B6D4',
 };
 void _HAZARD_COLORS; // suppress unused warning — used for future particle color lookup
@@ -392,7 +392,7 @@ function drawThief(ctx: CanvasRenderingContext2D, h: Hazard) {
 
   // Label
   ctx.font = 'bold 9px Inter, sans-serif';
-  ctx.fillStyle = '#8B5CF6';
+  ctx.fillStyle = '#5e6ad2';
   ctx.textAlign = 'center';
   ctx.fillText('STAKEHOLDER', 0, 14);
 
@@ -834,9 +834,9 @@ export default function GameEngine({ playerColor, onGameOver, isSpectator, onSta
       ctx.fillRect(tx, GROUND_Y + 4, tileW - 2, 8);
     }
     // Ground glow line
-    ctx.strokeStyle = '#7C5CFC';
+    ctx.strokeStyle = '#7170ff';
     ctx.lineWidth = 2.5;
-    ctx.shadowColor = '#7C5CFC';
+    ctx.shadowColor = '#7170ff';
     ctx.shadowBlur = 10;
     ctx.beginPath();
     ctx.moveTo(0, GROUND_Y);

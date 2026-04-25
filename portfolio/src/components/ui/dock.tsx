@@ -22,7 +22,7 @@ export function DockIcon({ icon, label, isActive, onClick, badge }: DockIconProp
       <div
         className={clsx(
           'w-7 h-7 flex items-center justify-center transition-colors duration-150',
-          isActive ? 'text-[#7C5CFC]' : 'text-[#8B8DB0]'
+          isActive ? 'text-[#7170ff]' : 'text-[#8a8f98]'
         )}
       >
         {icon}
@@ -30,7 +30,7 @@ export function DockIcon({ icon, label, isActive, onClick, badge }: DockIconProp
       <span
         className={clsx(
           'text-[10px] font-medium tracking-wide transition-colors duration-150',
-          isActive ? 'text-[#7C5CFC]' : 'text-[#4A4B6A]'
+          isActive ? 'text-[#7170ff]' : 'text-[#62666d]'
         )}
       >
         {label}
@@ -38,12 +38,12 @@ export function DockIcon({ icon, label, isActive, onClick, badge }: DockIconProp
       {isActive && (
         <motion.div
           layoutId="dock-active-dot"
-          className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#7C5CFC]"
+          className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#7170ff]"
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         />
       )}
       {badge != null && badge > 0 && (
-        <span className="absolute top-1.5 right-4 min-w-[16px] h-4 rounded-full bg-[#7C5CFC] text-white text-[9px] font-bold flex items-center justify-center px-1">
+        <span className="absolute top-1.5 right-4 min-w-[16px] h-4 rounded-full bg-[#5e6ad2] text-white text-[9px] font-bold flex items-center justify-center px-1">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -61,7 +61,7 @@ export function Dock({ children, className }: DockProps) {
     <div
       className={clsx(
         'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
-        'bg-[#111218]/95 backdrop-blur-xl border border-[#1E1F2C]',
+        'bg-[#0f1011]/95 backdrop-blur-xl border border-white/[0.08]',
         'rounded-full w-fit px-2',
         'shadow-[0_-4px_24px_rgba(0,0,0,0.4)]',
         className

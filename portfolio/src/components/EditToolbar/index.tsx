@@ -18,7 +18,7 @@ const ELEMENT_REGISTRY: Record<CanvasElementType, { label: string; icon: React.E
     'connector':         { label: 'Connector',      icon: ArrowRight,        color: '#94A3B8' },
     'metric-card':       { label: 'Metric Card',    icon: BarChart3,         color: '#10B981' },
     'process-step':      { label: 'Process Step',   icon: ListOrdered,       color: '#F59E0B' },
-    'quote-block':       { label: 'Quote Block',    icon: MessageSquareQuote,color: '#8B5CF6' },
+    'quote-block':       { label: 'Quote Block',    icon: MessageSquareQuote,color: '#5e6ad2' },
     'section-label':     { label: 'Section Label',  icon: Tag,               color: '#EF4444' },
     'tag-cluster':       { label: 'Tag Cluster',    icon: Tags,              color: '#EC4899' },
     'prototype-embed':   { label: 'Prototype',      icon: MonitorPlay,       color: '#EC4899' },
@@ -26,7 +26,7 @@ const ELEMENT_REGISTRY: Record<CanvasElementType, { label: string; icon: React.E
     'video-embed':       { label: 'Video Embed',    icon: Video,             color: '#EF4444' },
     'figma-embed':       { label: 'Figma Embed',    icon: Figma,             color: '#A855F7' },
     'flow-diagram':      { label: 'Flow Diagram',   icon: Network,           color: '#0EA5E9' },
-    'data-dimension':    { label: 'Data Card',      icon: Database,          color: '#8B5CF6' },
+    'data-dimension':    { label: 'Data Card',      icon: Database,          color: '#5e6ad2' },
     'game-zone':         { label: 'Game Zone',      icon: Gamepad2,          color: '#EF4444' },
     'comment-board':     { label: 'Comment Board',  icon: MessageCircle,     color: '#6366F1' },
 };

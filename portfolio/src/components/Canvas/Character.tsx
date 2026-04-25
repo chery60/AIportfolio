@@ -194,6 +194,12 @@ function computePath(
 export default function Character({
     targetX, targetY, color, elementBounds = [], message = null, canvasScale = 1,
 }: Props) {
+    // ── Drop-entrance state ──────────────────────────────────────────────
+    // The character enters head-first (upside down, rotated 180°), falls
+    // with gravity, flips mid-air to land on its feet, then squishes.
+    const DROP_GRAVITY = 0.18;       // px / frame² — tuned for ~1.2s fall
+    const DROP_START_Y = -180;       // above viewport
+
     const [initialPos] = useState(() => {
         let tx = targetX;
         let ty = targetY;
@@ -208,11 +214,20 @@ export default function Character({
         return { x: tx, y: ty };
     });
 
-    const posRef = useRef({ x: initialPos.x, y: initialPos.y });
+    // Start at the correct X but far above the target Y
+    const posRef = useRef({ x: initialPos.x, y: DROP_START_Y });
     const targetRef = useRef({ x: initialPos.x, y: initialPos.y });
     const requestRef = useRef<number>(0);
     const boundsRef = useRef<ElementBounds[]>(elementBounds);
     const lastTimeRef = useRef<number>(performance.now());
+
+    // Drop-phase tracking
+    const dropPhaseRef = useRef<'falling' | 'landed' | 'done'>('falling');
+    const dropVelocityRef = useRef(0);            // current downward velocity
+    const dropRotationRef = useRef(180);           // degrees: 180 = upside-down → 0 = upright
+    const landingYRef = useRef(initialPos.y);      // where the character should land
+    const totalDropDistance = useRef(initialPos.y - DROP_START_Y); // total fall distance
+    const [isSquishing, setIsSquishing] = useState(false);
 
     const pathRef = useRef<Waypoint[]>([]);
     const pathTargetRef = useRef<Waypoint | null>(null);
@@ -221,6 +236,7 @@ export default function Character({
 
     const charRef = useRef<HTMLDivElement>(null);
     const spriteRef = useRef<HTMLDivElement>(null);
+    const dropRotWrapperRef = useRef<HTMLDivElement>(null); // separate div for drop rotation
 
     const [facingLeft, setFacingLeft] = useState(false);
     const [isWalking, setIsWalking] = useState(false);
@@ -279,6 +295,67 @@ export default function Character({
         lastTimeRef.current = time;
         const safeDt = Math.min(dt, 100);
         const timeScale = safeDt / (1000 / 60);
+
+        // ── DROP PHASE: head-first fall with mid-air flip ─────────────────
+        if (dropPhaseRef.current === 'falling') {
+            dropVelocityRef.current += DROP_GRAVITY * timeScale;
+            posRef.current.y += dropVelocityRef.current * timeScale;
+
+            // Compute how far through the fall we are (0 → 1)
+            const fallProgress = Math.min(1, Math.max(0,
+                (posRef.current.y - DROP_START_Y) / totalDropDistance.current
+            ));
+
+            // Eased rotation: slow start, fast mid-flip, soft finish
+            // Using a cubic-ish ease-in-out so the flip feels snappy in the middle
+            const eased = fallProgress < 0.5
+                ? 4 * fallProgress * fallProgress * fallProgress
+                : 1 - Math.pow(-2 * fallProgress + 2, 3) / 2;
+
+            // Rotate from 180° (head-first) → 0° (upright)
+            dropRotationRef.current = 180 * (1 - eased);
+
+            // Reached (or passed) landing position?
+            if (posRef.current.y >= landingYRef.current) {
+                posRef.current.y = landingYRef.current;
+                dropPhaseRef.current = 'landed';
+                dropVelocityRef.current = 0;
+                dropRotationRef.current = 0;
+
+                // Trigger squish animation then transition to normal movement
+                setIsSquishing(true);
+                setTimeout(() => {
+                    setIsSquishing(false);
+                    dropPhaseRef.current = 'done';
+                    posRef.current.x = initialPos.x;
+                    posRef.current.y = initialPos.y;
+                }, 450); // matches CSS squish-bounce duration
+            }
+
+            // Render position + rotation during drop
+            if (charRef.current) {
+                const renderX = Math.round(posRef.current.x);
+                const renderY = Math.round(posRef.current.y);
+                charRef.current.style.transform = `translate(${renderX}px, ${renderY}px)`;
+            }
+            if (dropRotWrapperRef.current) {
+                dropRotWrapperRef.current.style.transform = `rotate(${dropRotationRef.current}deg)`;
+            }
+
+            requestRef.current = requestAnimationFrame(updatePosition);
+            return; // Skip normal movement logic while falling
+        }
+
+        // While the squish animation plays, freeze position but reset rotation
+        if (dropPhaseRef.current === 'landed') {
+            if (dropRotWrapperRef.current) {
+                dropRotWrapperRef.current.style.transform = 'rotate(0deg)';
+            }
+            requestRef.current = requestAnimationFrame(updatePosition);
+            return;
+        }
+
+        // ── NORMAL MOVEMENT (dropPhase === 'done') ───────────────────────
 
         // Snap out if engulfed by an element
         let currentX = posRef.current.x;
@@ -460,6 +537,7 @@ export default function Character({
                 transformOrigin: '18px 44px',
             }}
         >
+
             {/* ── Message Bubble ── */}
             <AnimatePresence>
                 {message && (
@@ -479,11 +557,16 @@ export default function Character({
                 )}
             </AnimatePresence>
 
+            {/* ── Drop Rotation Wrapper (only active during fall) ── */}
+            <div
+                ref={dropRotWrapperRef}
+                style={{ transform: 'rotate(180deg)', transformOrigin: 'center center' }}
+            >
             {/* ── Sprite ── */}
             <div ref={spriteRef} style={{ transform: `scaleX(${facingLeft ? -1 : 1})` }}>
-                {/* Walking bob wrapper */}
+                {/* Walking bob wrapper — also applies squish on landing */}
                 <div
-                    className={isWalking || isIdleFidget ? 'animate-amongus-bob' : ''}
+                    className={`${isWalking || isIdleFidget ? 'animate-amongus-bob' : ''} ${isSquishing ? 'animate-drop-squish' : ''}`}
                     style={{ position: 'relative', width: '36px', height: '44px' }}
                 >
                     {/* Ground shadow */}
@@ -556,6 +639,7 @@ export default function Character({
                         <div className="absolute" style={{ top: '2px', right: '4px', width: '10px', height: '3px', borderRadius: '9999px', background: 'rgba(255,255,255,0.85)', transform: 'rotate(-8deg)' }} />
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

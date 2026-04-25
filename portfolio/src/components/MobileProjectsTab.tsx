@@ -10,14 +10,14 @@ interface Props {
 
 export default function MobileProjectsTab({ onSelectProject }: Props) {
   return (
-    <div className="h-full overflow-y-scroll overflow-x-hidden bg-[#0A0B0F] min-h-0 mobile-smooth-scroll">
+    <div className="h-full overflow-y-scroll overflow-x-hidden bg-[#08090a] min-h-0 mobile-smooth-scroll">
       <div className="px-5 pt-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
 
         {/* Header — same padding as Chat tab (px-5 py-4) */}
         <BlurFade delay={0}>
           <div className="py-4">
-            <h2 className="text-2xl font-bold text-[#F0F0FF]">Case Studies</h2>
-            <p className="text-sm text-[#4A4B6A] mt-1">{PROJECTS.length} projects · Tap to explore</p>
+            <h2 className="text-2xl font-bold text-[#f7f8f8]">Case Studies</h2>
+            <p className="text-sm text-[#8a8f98] mt-1">{PROJECTS.length} projects · Tap to explore</p>
           </div>
         </BlurFade>
 
@@ -46,7 +46,7 @@ function ProjectTile({ project, index, onSelect }: { project: Project; index: nu
     <motion.button
       onClick={() => onSelect(project)}
       whileTap={{ scale: 0.96 }}
-      className="relative w-full rounded-2xl overflow-hidden border border-[#1E1F2C] text-left"
+      className="relative w-full rounded-2xl overflow-hidden border border-[#23252a] text-left"
       style={{ aspectRatio }}
     >
       {/* Gradient background */}

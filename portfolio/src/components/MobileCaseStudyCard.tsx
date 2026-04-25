@@ -34,7 +34,7 @@ export default function MobileCaseStudyCard({ element }: Props) {
                 <div className="mb-4">
                     <h2
                         className="font-bold text-lg leading-tight mb-0.5"
-                        style={{ color: '#F0F0FF' }}
+                        style={{ color: '#f7f8f8' }}
                     >
                         {data.title}
                     </h2>

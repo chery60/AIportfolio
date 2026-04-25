@@ -8,8 +8,8 @@ interface Props {
 
 const COLORS = {
   yellow: { bg: '#2A2410', border: '#FBBF24', text: '#FDE68A', pin: '#FBBF24' },
-  purple: { bg: '#1C1529', border: '#7C5CFC', text: '#C4B5FD', pin: '#7C5CFC' },
-  pink:   { bg: '#22101A', border: '#FF6B9D', text: '#FCA5A5', pin: '#FF6B9D' },
+  purple: { bg: '#161527', border: '#5e6ad2', text: '#C4B5FD', pin: '#5e6ad2' },
+  pink:   { bg: '#1a1320', border: '#7170ff', text: '#b4b3ff', pin: '#7170ff' },
   cyan:   { bg: '#0F2028', border: '#22D3EE', text: '#A5F3FC', pin: '#22D3EE' },
   green:  { bg: '#0D2218', border: '#34D399', text: '#6EE7B7', pin: '#34D399' },
 };

@@ -4,14 +4,14 @@ import type { CanvasElement } from '../../types';
 
 const ACCENT_COLORS = [
   '#C74B18', '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
-  '#6366F1', '#8B5CF6', '#A855F7', '#EC4899', '#22D3EE',
+  '#6366F1', '#5e6ad2', '#7170ff', '#828fff', '#22D3EE',
   '#1E3A8A', '#0EA5E9',
 ];
 
 const STICKY_COLORS: Array<{ value: string; label: string; bg: string }> = [
   { value: 'yellow', label: 'Yellow', bg: '#FBBF24' },
-  { value: 'purple', label: 'Purple', bg: '#7C5CFC' },
-  { value: 'pink',   label: 'Pink',   bg: '#FF6B9D' },
+  { value: 'purple', label: 'Purple', bg: '#5e6ad2' },
+  { value: 'pink',   label: 'Pink',   bg: '#828fff' },
   { value: 'cyan',   label: 'Cyan',   bg: '#22D3EE' },
   { value: 'green',  label: 'Green',  bg: '#34D399' },
 ];

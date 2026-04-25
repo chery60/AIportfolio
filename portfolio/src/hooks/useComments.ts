@@ -12,8 +12,8 @@ export interface PortfolioComment {
 }
 
 const AVATAR_COLORS = [
-  '#7C5CFC', '#FF6B9D', '#34D399', '#F59E0B',
-  '#22D3EE', '#F87171', '#A78BFA', '#4ADE80',
+  '#5e6ad2', '#7170ff', '#34D399', '#F59E0B',
+  '#22D3EE', '#828fff', '#A78BFA', '#4ADE80',
 ];
 
 function getInitials(name: string): string {

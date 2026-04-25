@@ -1,4 +1,7 @@
 import type { Project } from '../types';
+import { splittoProject } from './splitto';
+import { plukrrProject } from './plukrr';
+import { webcrmProject } from './webcrm';
 
 export const PROJECTS: Project[] = [
   {
@@ -1770,4 +1773,403 @@ export const PROJECTS: Project[] = [
       },
     ]
   },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PROJECT 4: AI PORTFOLIO — VIBE CODED
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'ai-portfolio',
+    title: 'AI Portfolio',
+    description: 'This canvas-based portfolio — designed & coded entirely with AI. A meta case study.',
+    category: 'Vibe Coded',
+    year: '2025',
+    tags: ['AI Coded', 'Canvas UI', 'React', 'Vibe Coding', 'Meta'],
+    accentColor: '#10B981',
+    gradientFrom: '#10B981',
+    gradientTo: '#06B6D4',
+    defaultView: { x: 290, y: 42, scale: 0.72 },
+    canvasSize: { width: 2700, height: 8200 },
+    files: [
+      { id: 'f1', label: 'GitHub Repository', type: 'link' },
+      { id: 'f2', label: 'Live Portfolio', type: 'link' },
+    ],
+    assets: [
+      { id: 'a1', label: 'Canvas Engine', thumbnailColor: '#10B981', type: 'component' },
+      { id: 'a2', label: 'AI Chat System', thumbnailColor: '#06B6D4', type: 'component' },
+      { id: 'a3', label: 'Game Zone', thumbnailColor: '#F59E0B', type: 'component' },
+      { id: 'a4', label: 'Real-time Presence', thumbnailColor: '#A855F7', type: 'component' },
+    ],
+    canvasElements: [
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 1: PROJECT OVERVIEW
+      // ══════════════════════════════════════════════════════════════════════
+      {
+        id: 'sl-1', type: 'section-label', x: 80, y: 60, width: 340, height: 40,
+        data: { title: 'PROJECT OVERVIEW', color: '#10B981' }
+      },
+      {
+        id: 'cs-1', type: 'case-study-card', x: 80, y: 116, width: 560, height: 340,
+        data: {
+          title: 'AI Portfolio — The Canvas',
+          subtitle: 'Vibe Coded · 2025 · Built entirely with AI',
+          description: "A designer's world lives on the canvas — Figma, FigJam, whiteboards. So why should a portfolio be a boring scrollable page? This portfolio reimagines the case study experience as a spatial canvas where recruiters explore projects by panning, zooming, and discovering — the same way designers work. Every single line of code was written by AI through natural language conversation. Zero manual coding.",
+          tags: ['AI Coded', '0 Manual Lines', 'Canvas UI', 'React + Vite', 'Meta Project'],
+          accentColor: '#10B981',
+          metrics: [
+            { label: 'Manual Code', value: '0' },
+            { label: 'AI Models Used', value: '3' },
+            { label: 'Components', value: '15+' },
+          ],
+        }
+      },
+
+      // ── THE SPARK (right of overview) ──────────────────────────────────
+      {
+        id: 'sl-spark', type: 'section-label', x: 720, y: 60, width: 340, height: 40,
+        data: { title: 'THE SPARK — WHY CANVAS?', color: '#06B6D4' }
+      },
+      {
+        id: 'q-spark1', type: 'quote-block', x: 720, y: 116, width: 280, height: 280,
+        data: {
+          quote: '"Every designer I know thinks spatially. We pin ideas on walls, drag shapes on canvases, zoom into details. A portfolio should feel the same way."',
+          author: 'Sai Charan',
+          role: 'Product Designer · The idea behind this portfolio',
+          accentColor: '#10B981',
+        }
+      },
+      {
+        id: 'q-spark2', type: 'quote-block', x: 1020, y: 116, width: 280, height: 280,
+        data: {
+          quote: '"What if the portfolio itself was the canvas? What if exploring case studies felt like working in Figma — panning, zooming, discovering?"',
+          author: 'The Question',
+          role: 'The moment this project was born',
+          accentColor: '#06B6D4',
+        }
+      },
+      {
+        id: 'sn-spark1', type: 'sticky-note', x: 720, y: 436, width: 240, height: 130,
+        data: { content: '🎨 Canvas = Natural habitat\nDesigners already think in spatial, infinite canvas layouts. This portfolio speaks their language.', color: 'cyan', rotation: -0.5 }
+      },
+      {
+        id: 'sn-spark2', type: 'sticky-note', x: 990, y: 436, width: 240, height: 130,
+        data: { content: '🤖 AI = The builder\nEvery component, hook, animation — prompted into existence. The designer was the architect, AI was the engineer.', color: 'green', rotation: 0.8 }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 2: THE EXPERIMENT — AI CODING PROCESS
+      // ══════════════════════════════════════════════════════════════════════
+      // spark notes bottom: y=436+130=566 → cs bottom: 116+340=456. Max=566 → sl y=566+80=646
+      {
+        id: 'sl-process', type: 'section-label', x: 80, y: 646, width: 440, height: 40,
+        data: { title: 'THE EXPERIMENT — HOW IT WAS BUILT', color: '#F59E0B' }
+      },
+      {
+        id: 'ps-1', type: 'process-step', x: 80, y: 702, width: 220, height: 210,
+        data: { stepNumber: 1, title: 'Design the Vision', description: 'Sketched the canvas-based portfolio concept in Figma. Defined the spatial layout, component library, and interaction model before touching any code.', color: '#10B981' }
+      },
+      {
+        id: 'ps-2', type: 'process-step', x: 330, y: 702, width: 220, height: 210,
+        data: { stepNumber: 2, title: 'Prompt the Foundation', description: 'Described the React + Vite + TypeScript foundation to Claude. Set up the canvas engine with pan, zoom, and element rendering in one conversation.', color: '#06B6D4' }
+      },
+      {
+        id: 'ps-3', type: 'process-step', x: 580, y: 702, width: 220, height: 210,
+        data: { stepNumber: 3, title: 'Build Components', description: 'Each canvas element — sticky notes, flow diagrams, case study cards, storyboards — was prompted as a separate component. AI wrote, I reviewed.', color: '#F59E0B' }
+      },
+      {
+        id: 'ps-4', type: 'process-step', x: 830, y: 702, width: 220, height: 210,
+        data: { stepNumber: 4, title: 'Wire the System', description: 'Real-time presence via Supabase, AI chat with Gemini, game zone with leaderboard — all integrated through natural language prompts.', color: '#A855F7' }
+      },
+      {
+        id: 'ps-5', type: 'process-step', x: 1080, y: 702, width: 220, height: 210,
+        data: { stepNumber: 5, title: 'Polish & Ship', description: 'Micro-animations, mobile responsive views, smooth cursor, landing page — every detail prompted and refined. Deployed to production.', color: '#EC4899' }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 3: THE ARCHITECTURE — SYSTEM FLOW
+      // ══════════════════════════════════════════════════════════════════════
+      // ps bottom: y=642+210=852 → sl y=852+80=932
+      {
+        id: 'sl-arch', type: 'section-label', x: 80, y: 992, width: 440, height: 40,
+        data: { title: 'SYSTEM ARCHITECTURE', color: '#6366F1' }
+      },
+      {
+        id: 'fd-frontend', type: 'flow-diagram', x: 80, y: 1048, width: 620, height: 520,
+        data: {
+          title: 'Frontend — Canvas Engine',
+          subtitle: 'React components rendering on an infinite canvas',
+          accentColor: '#10B981',
+          nodes: [
+            { id: 'canvas', label: 'Canvas\\nEngine', color: '#10B981', x: 235, y: 20, width: 140, height: 110 },
+            { id: 'elements', label: 'Canvas\\nElements', color: '#06B6D4', x: 25, y: 170, width: 140, height: 110 },
+            { id: 'panels', label: 'Floating\\nPanels', color: '#F59E0B', x: 450, y: 170, width: 140, height: 110 },
+            { id: 'state', label: 'Project\\nState', color: '#A855F7', x: 235, y: 310, width: 140, height: 110 },
+          ],
+          connections: [
+            { from: 'canvas', to: 'elements', bidirectional: true },
+            { from: 'canvas', to: 'panels', bidirectional: true },
+            { from: 'elements', to: 'state', bidirectional: true },
+            { from: 'panels', to: 'state', bidirectional: true },
+          ],
+          highlightNodeId: 'canvas',
+        }
+      },
+      {
+        id: 'fd-backend', type: 'flow-diagram', x: 780, y: 1048, width: 620, height: 520,
+        data: {
+          title: 'Backend — Real-time + AI',
+          subtitle: 'Supabase for presence & data, Gemini for AI chat',
+          accentColor: '#6366F1',
+          nodes: [
+            { id: 'supabase', label: 'Supabase\\nRealtime', color: '#10B981', x: 25, y: 60, width: 140, height: 110 },
+            { id: 'gemini', label: 'Gemini\\nAI Chat', color: '#06B6D4', x: 450, y: 60, width: 140, height: 110 },
+            { id: 'presence', label: 'Live\\nPresence', color: '#A855F7', x: 25, y: 220, width: 140, height: 110 },
+            { id: 'portfolio', label: 'Portfolio\\nApp', color: '#F59E0B', x: 235, y: 140, width: 140, height: 110 },
+            { id: 'leaderboard', label: 'Game\\nLeaderboard', color: '#EC4899', x: 450, y: 220, width: 140, height: 110 },
+          ],
+          connections: [
+            { from: 'portfolio', to: 'supabase', bidirectional: true },
+            { from: 'portfolio', to: 'gemini' },
+            { from: 'supabase', to: 'presence', bidirectional: true },
+            { from: 'supabase', to: 'leaderboard', bidirectional: true },
+          ],
+          highlightNodeId: 'portfolio',
+        }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 4: CANVAS COMPONENTS — THE BUILDING BLOCKS
+      // ══════════════════════════════════════════════════════════════════════
+      // fd bottom: y=988+520=1508 → sl y=1508+80=1588
+      {
+        id: 'sl-components', type: 'section-label', x: 80, y: 1648, width: 500, height: 40,
+        data: { title: 'CANVAS COMPONENTS — BUILDING BLOCKS', color: '#EC4899' }
+      },
+      // Row 1: 3 sticky notes showcasing component types
+      {
+        id: 'sn-comp1', type: 'sticky-note', x: 80, y: 1704, width: 240, height: 145,
+        data: { content: '📋 Case Study Card\nThe hero component. Holds project overview, tags, metrics — the first thing viewers see on any project.', color: 'green', rotation: -0.5 }
+      },
+      {
+        id: 'sn-comp2', type: 'sticky-note', x: 350, y: 1704, width: 240, height: 145,
+        data: { content: '📝 Sticky Notes\nThe workhorse of ideation. Color-coded, rotatable, editable — used for problems, insights, and asides.', color: 'yellow', rotation: 1.2 }
+      },
+      {
+        id: 'sn-comp3', type: 'sticky-note', x: 620, y: 1704, width: 240, height: 145,
+        data: { content: '🔀 Flow Diagrams\nSystem architecture, user journeys, data flows — rendered as interactive node-edge graphs on the canvas.', color: 'cyan', rotation: -0.8 }
+      },
+      {
+        id: 'sn-comp4', type: 'sticky-note', x: 890, y: 1704, width: 240, height: 145,
+        data: { content: '🎬 Storyboards\nAnimated comic-strip narratives with character avatars. Problem and solution stories come alive.', color: 'pink', rotation: 0.5 }
+      },
+      // Row 2: 4 more component showcases
+      {
+        id: 'sn-comp5', type: 'sticky-note', x: 80, y: 1879, width: 240, height: 145,
+        data: { content: '📊 Metric Cards\nBold numbers with trend indicators. Perfect for showing impact, KPIs, and project stats at a glance.', color: 'purple', rotation: 0.8 }
+      },
+      {
+        id: 'sn-comp6', type: 'sticky-note', x: 350, y: 1879, width: 240, height: 145,
+        data: { content: '🔗 Figma Embeds\nLive Figma file embeds directly on the canvas. Recruiters can explore actual design files in-context.', color: 'green', rotation: -1 }
+      },
+      {
+        id: 'sn-comp7', type: 'sticky-note', x: 620, y: 1879, width: 240, height: 145,
+        data: { content: '🎮 Game Zone\nA built-in endless runner game with real-time leaderboard. Because portfolios should be fun.', color: 'yellow', rotation: 1 }
+      },
+      {
+        id: 'sn-comp8', type: 'sticky-note', x: 890, y: 1879, width: 240, height: 145,
+        data: { content: '💬 Quote Blocks\nUser personas, design principles, key insights — presented as elegant pull-quotes with attribution.', color: 'cyan', rotation: -0.5 }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 5: THE NUMBERS — METRICS
+      // ══════════════════════════════════════════════════════════════════════
+      // sn row2 bottom: y=1819+145=1964 → sl y=1964+80=2044
+      {
+        id: 'sl-metrics', type: 'section-label', x: 80, y: 2104, width: 340, height: 40,
+        data: { title: 'THE NUMBERS — WHAT WAS BUILT', color: '#F59E0B' }
+      },
+      {
+        id: 'mc-1', type: 'metric-card', x: 80, y: 2160, width: 190, height: 120,
+        data: { label: 'Canvas Components', value: '15+', change: 'Unique element types', changePositive: true, accentColor: '#10B981' }
+      },
+      {
+        id: 'mc-2', type: 'metric-card', x: 300, y: 2160, width: 190, height: 120,
+        data: { label: 'Manual Lines', value: '0', change: '100% AI generated', changePositive: true, accentColor: '#06B6D4' }
+      },
+      {
+        id: 'mc-3', type: 'metric-card', x: 520, y: 2160, width: 190, height: 120,
+        data: { label: 'AI Conversations', value: '50+', change: 'Design → code prompts', changePositive: true, accentColor: '#F59E0B' }
+      },
+      {
+        id: 'mc-4', type: 'metric-card', x: 740, y: 2160, width: 190, height: 120,
+        data: { label: 'Real-time Features', value: '4', change: 'Presence, chat, game, edit', changePositive: true, accentColor: '#A855F7' }
+      },
+      {
+        id: 'mc-5', type: 'metric-card', x: 960, y: 2160, width: 190, height: 120,
+        data: { label: 'Case Studies', value: '4', change: 'Full project canvases', changePositive: true, accentColor: '#EC4899' }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 6: KEY FEATURES — WHAT MAKES IT SPECIAL
+      // ══════════════════════════════════════════════════════════════════════
+      // mc bottom: y=2100+120=2220 → sl y=2220+80=2300
+      {
+        id: 'sl-features', type: 'section-label', x: 80, y: 2360, width: 440, height: 40,
+        data: { title: 'KEY FEATURES — WHAT MAKES IT SPECIAL', color: '#A855F7' }
+      },
+      {
+        id: 'ps-feat1', type: 'process-step', x: 80, y: 2416, width: 280, height: 200,
+        data: { stepNumber: 1, title: 'Infinite Canvas', description: 'Pan, zoom, and navigate freely across projects. The same spatial interaction model designers use daily in Figma and FigJam — now for case studies.', color: '#10B981' }
+      },
+      {
+        id: 'ps-feat2', type: 'process-step', x: 390, y: 2416, width: 280, height: 200,
+        data: { stepNumber: 2, title: 'Real-time Presence', description: 'See who else is viewing the portfolio right now. Live cursors, viewer counts, and "follow viewer" — like multiplayer Figma.', color: '#A855F7' }
+      },
+      {
+        id: 'ps-feat3', type: 'process-step', x: 700, y: 2416, width: 280, height: 200,
+        data: { stepNumber: 3, title: 'AI Chat Assistant', description: 'Ask questions about any project directly in the portfolio. Powered by Gemini, with context about every case study built in.', color: '#06B6D4' }
+      },
+      {
+        id: 'ps-feat4', type: 'process-step', x: 1010, y: 2416, width: 280, height: 200,
+        data: { stepNumber: 4, title: 'Canvas Editor', description: 'Password-protected edit mode lets the designer add, move, resize, and delete elements — with inline text editing and undo support.', color: '#F59E0B' }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 7: THE TECH STACK
+      // ══════════════════════════════════════════════════════════════════════
+      // ps bottom: y=2356+200=2556 → sl y=2556+80=2636
+      {
+        id: 'sl-stack', type: 'section-label', x: 80, y: 2696, width: 340, height: 40,
+        data: { title: 'THE TECH STACK', color: '#06B6D4' }
+      },
+      {
+        id: 'sn-stack1', type: 'sticky-note', x: 80, y: 2752, width: 200, height: 130,
+        data: { content: '⚛️ React 18\nComponent-based UI with hooks, context, and refs for the canvas engine.', color: 'cyan', rotation: -0.5 }
+      },
+      {
+        id: 'sn-stack2', type: 'sticky-note', x: 310, y: 2752, width: 200, height: 130,
+        data: { content: '⚡ Vite\nBlazing-fast HMR and build tooling. TypeScript-first development.', color: 'yellow', rotation: 1 }
+      },
+      {
+        id: 'sn-stack3', type: 'sticky-note', x: 540, y: 2752, width: 200, height: 130,
+        data: { content: '🔥 Supabase\nPostgres DB, real-time channels for presence & cursors, and game leaderboard.', color: 'green', rotation: -1 }
+      },
+      {
+        id: 'sn-stack4', type: 'sticky-note', x: 770, y: 2752, width: 200, height: 130,
+        data: { content: '🤖 Gemini API\nPowering the AI chat assistant with project-aware context for intelligent responses.', color: 'purple', rotation: 0.5 }
+      },
+      {
+        id: 'sn-stack5', type: 'sticky-note', x: 1000, y: 2752, width: 200, height: 130,
+        data: { content: '🎭 Framer Motion\nSmooth page transitions, element animations, and micro-interactions throughout.', color: 'pink', rotation: -0.8 }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 8: SKILLS APPLIED
+      // ══════════════════════════════════════════════════════════════════════
+      // sn bottom: y=2692+130=2822 → sl y=2822+80=2902
+      {
+        id: 'sl-skills', type: 'section-label', x: 80, y: 2962, width: 340, height: 40,
+        data: { title: 'SKILLS APPLIED', color: '#10B981' }
+      },
+      {
+        id: 'tc-1', type: 'tag-cluster', x: 80, y: 3018, width: 820, height: 120,
+        data: {
+          title: 'SKILLS APPLIED',
+          tags: [
+            { label: 'AI Prompting', color: '#10B981' },
+            { label: 'React Architecture', color: '#06B6D4' },
+            { label: 'Canvas UI Design', color: '#F59E0B' },
+            { label: 'Real-time Systems', color: '#A855F7' },
+            { label: 'Interaction Design', color: '#EC4899' },
+            { label: 'Spatial UX', color: '#1E3A5F' },
+            { label: 'TypeScript', color: '#3B82F6' },
+            { label: 'Vibe Coding', color: '#EF4444' },
+          ]
+        }
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SECTION 9: THE META MOMENT — CLOSING
+      // ══════════════════════════════════════════════════════════════════════
+      // tc bottom: y=2958+120=3078 → sl y=3078+80=3158
+      {
+        id: 'sl-meta', type: 'section-label', x: 80, y: 3218, width: 480, height: 40,
+        data: { title: '🪞 THE META MOMENT — YOU\'RE INSIDE IT', color: '#10B981' }
+      },
+      {
+        id: 'cs-meta', type: 'case-study-card', x: 80, y: 3274, width: 1080, height: 300,
+        data: {
+          title: 'You\'re viewing this project inside the thing it describes.',
+          subtitle: 'This is a case study about a portfolio, rendered inside that portfolio, on the canvas it describes.',
+          description: "Everything you've seen on this canvas — the sticky notes, the flow diagrams, the metrics, the process steps — they're the very same components this project is about. The canvas you're panning on right now? That's the canvas engine described in Section 3. The floating panels on either side? Those are the panels in the architecture diagram. It's turtles all the way down. If this kind of thinking excites you — where design, code, and meta-narrative converge — let's chat. But first, you've earned a game. 🎮",
+          tags: ['Meta Project', 'Self-Referential', 'Now go play 🕹️'],
+          accentColor: '#10B981',
+          metrics: [
+            { label: 'Sections Explored', value: '9' },
+            { label: 'Recursion Depth', value: '∞' },
+            { label: 'Ready to Chat?', value: 'Yes!' },
+          ],
+        }
+      },
+      {
+        id: 'sn-meta1', type: 'sticky-note', x: 80, y: 3654, width: 280, height: 130,
+        data: {
+          content: '🧠 You just explored a portfolio about a portfolio. Inception achieved.',
+          color: 'cyan',
+          rotation: -1,
+        }
+      },
+      {
+        id: 'sn-meta2', type: 'sticky-note', x: 400, y: 3639, width: 280, height: 130,
+        data: {
+          content: '🤖 Zero manual lines of code. Every pixel was prompted into existence.',
+          color: 'green',
+          rotation: 1.2,
+        }
+      },
+      {
+        id: 'sn-meta3', type: 'sticky-note', x: 720, y: 3649, width: 280, height: 130,
+        data: {
+          content: '💌 Liked what you saw? Hit "Message Me" on the right panel — let\'s talk!',
+          color: 'purple',
+          rotation: -0.8,
+        }
+      },
+
+      // ── GAME ZONE ─────────────────────────────────────────────────────────
+      // sn bottom: y=3594+130=3724 → sl y=3724+100=3824
+      {
+        id: 'sl-game', type: 'section-label', x: 80, y: 3884, width: 480, height: 40,
+        data: { title: '🎮 CREWMATE DASH — PLAY & HIRE ME', color: '#10B981' }
+      },
+      {
+        id: 'gz-1', type: 'game-zone', x: 80, y: 3940, width: 1160, height: 680,
+        data: {
+          title: 'Crewmate Dash',
+          accentColor: '#10B981',
+          contactEmail: 'kc60488charan@gmail.com',
+          contactLinkedIn: 'https://linkedin.com/in/saicharan',
+        }
+      },
+      {
+        id: 'sn-game-hint', type: 'sticky-note', x: 80, y: 4680, width: 280, height: 120,
+        data: {
+          content: '🕹️ Dodge obstacles & get on the leaderboard. Space or tap to jump!',
+          color: 'yellow',
+          rotation: -1.2,
+        }
+      },
+      {
+        id: 'sn-game-hint2', type: 'sticky-note', x: 380, y: 4695, width: 260, height: 110,
+        data: {
+          content: '⚠️ Only 1 player at a time — queue up if someone is already playing!',
+          color: 'pink',
+          rotation: 1,
+        }
+      },
+    ]
+  },
+  splittoProject,
+  plukrrProject,
+  webcrmProject,
 ];

@@ -49,7 +49,7 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                             className="flex items-center justify-between px-5 py-3"
                             style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
                         >
-                            <h3 className="text-sm font-bold" style={{ color: '#F0F0FF' }}>Switch Project</h3>
+                            <h3 className="text-sm font-bold" style={{ color: '#f7f8f8' }}>Switch Project</h3>
                             <button
                                 onClick={onClose}
                                 className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
@@ -89,7 +89,7 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                                             <div className="flex-1 min-w-0 text-left">
                                                 <p
                                                     className="text-sm font-semibold truncate"
-                                                    style={{ color: isActive ? '#F0F0FF' : 'rgba(240,240,255,0.6)' }}
+                                                    style={{ color: isActive ? '#f7f8f8' : 'rgba(247,248,248,0.6)' }}
                                                 >
                                                     {project.title}
                                                 </p>

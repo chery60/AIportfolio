@@ -61,13 +61,13 @@ function ChatBubble({ message, isLatest }: { message: ChatMessage; isLatest: boo
       {isUser && message.attachments && message.attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-end max-w-[85%]">
           {message.attachments.map((att, idx) => (
-            <div key={idx} className="rounded-xl overflow-hidden border border-white/10 bg-[#1A1B2E]">
+            <div key={idx} className="rounded-xl overflow-hidden border border-white/[0.08] bg-[#191a1b]">
               {att.mimeType.startsWith('image/') && att.previewUrl ? (
                 <img src={att.previewUrl} alt="attachment" className="w-auto h-20 object-cover" />
               ) : (
                 <div className="flex items-center gap-2 px-3 py-2">
-                  <FileIcon className="w-4 h-4 text-[#7C5CFC]" />
-                  <span className="text-xs text-[#E4E4E5] truncate max-w-[100px]">{att.file.name}</span>
+                  <FileIcon className="w-4 h-4 text-[#7170ff]" />
+                  <span className="text-xs text-[#d0d6e0] truncate max-w-[100px]">{att.file.name}</span>
                 </div>
               )}
             </div>
@@ -77,8 +77,8 @@ function ChatBubble({ message, isLatest }: { message: ChatMessage; isLatest: boo
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
-            ? 'bg-gradient-to-r from-[#7C5CFC] to-[#9D7BFF] text-white'
-            : 'bg-[#1A1B2E] text-[#C8CAE5] border border-white/5'
+            ? 'bg-[#5e6ad2] text-white'
+            : 'bg-[#191a1b] text-[#d0d6e0] border border-white/[0.08]'
         }`}
       >
         <div className="whitespace-pre-wrap">
@@ -89,7 +89,7 @@ function ChatBubble({ message, isLatest }: { message: ChatMessage; isLatest: boo
           )}
         </div>
         {!isUser && isLatest && !done && (
-          <span className="inline-block w-2 h-4 bg-[#7C5CFC] ml-0.5 animate-pulse rounded-sm" />
+          <span className="inline-block w-2 h-4 bg-[#7170ff] ml-0.5 animate-pulse rounded-sm" />
         )}
       </div>
     </motion.div>
@@ -156,7 +156,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       setMessages(prev => [...prev, {
         id: `a-err-${Date.now()}`,
         role: 'assistant',
-        content: "Hmm, something went wrong. Try again? 🤔",
+        content: "Hmm, something went wrong. Try again?",
       }]);
     } finally {
       setIsTyping(false);
@@ -196,7 +196,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-      className="fixed inset-0 z-[45] flex flex-col bg-[#0A0B0F]"
+      className="fixed inset-0 z-[45] flex flex-col bg-[#08090a]"
       style={{
         paddingBottom: `calc(${dockHeight}px + env(safe-area-inset-bottom, 0px) + 8px)`,
         overflowX: 'hidden',
@@ -205,12 +205,12 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       {/* Handle + header */}
       <div className="flex items-center justify-between px-5 py-4 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#7C5CFC]/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-[#5e6ad2]/15 flex items-center justify-center">
             <span className="text-sm">🚀</span>
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#F0F0FF]">Ask Sai's AI</p>
-            <p className="text-[10px] text-[#4A4B6A]">Powered by Gemini</p>
+            <p className="text-sm font-[510] text-[#f7f8f8]">Ask Sai's AI</p>
+            <p className="text-[10px] text-[#62666d]">Powered by Gemini</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -224,17 +224,17 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
               });
             }}
             whileTap={{ scale: 0.9 }}
-            className="w-8 h-8 rounded-full bg-[#1E1F2C] flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center"
             title="New chat"
           >
-            <Plus className="w-4 h-4 text-[#8B8DB0]" />
+            <Plus className="w-4 h-4 text-[#8a8f98]" />
           </motion.button>
           <motion.button
             onClick={onClose}
             whileTap={{ scale: 0.9 }}
-            className="w-8 h-8 rounded-full bg-[#1E1F2C] flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center"
           >
-            <X className="w-4 h-4 text-[#8B8DB0]" />
+            <X className="w-4 h-4 text-[#8a8f98]" />
           </motion.button>
         </div>
       </div>
@@ -245,8 +245,8 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
           <div className="flex flex-col items-center justify-center h-full gap-6 px-4">
             <div className="text-center">
               <p className="text-4xl mb-3">👋</p>
-              <p className="text-sm font-semibold text-[#F0F0FF]">Hey there!</p>
-              <p className="text-xs text-[#4A4B6A] mt-1">Ask me anything about Sai Charan</p>
+              <p className="text-sm font-[510] text-[#f7f8f8]">Hey there!</p>
+              <p className="text-xs text-[#62666d] mt-1">Ask me anything about Sai Charan</p>
             </div>
             <div className="flex flex-col gap-2 w-full">
               {STARTER_PROMPTS.map((sp) => (
@@ -254,7 +254,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
                   key={sp.label}
                   onClick={() => sendMessage(sp.prompt)}
                   whileTap={{ scale: 0.97 }}
-                  className="w-full text-left px-4 py-3 rounded-xl border border-[#1E1F2C] bg-[#111218] text-sm text-[#8B8DB0]"
+                  className="w-full text-left px-4 py-3 rounded-xl border border-white/[0.08] bg-[#0f1011] text-sm text-[#8a8f98]"
                 >
                   {sp.label}
                 </motion.button>
@@ -267,11 +267,11 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
               <ChatBubble key={msg.id} message={msg} isLatest={idx === messages.length - 1} />
             ))}
             {isTyping && (
-              <div className="flex items-center gap-1.5 bg-[#1A1B2E] rounded-2xl px-4 py-3 self-start border border-white/5">
+              <div className="flex items-center gap-1.5 bg-[#191a1b] rounded-2xl px-4 py-3 self-start border border-white/[0.08]">
                 {[0, 1, 2].map(i => (
                   <motion.div
                     key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-[#7C5CFC]"
+                    className="w-1.5 h-1.5 rounded-full bg-[#7170ff]"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
                   />
@@ -290,15 +290,15 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="flex gap-2 px-4 py-2 border-t border-[#1E1F2C] overflow-x-auto mobile-smooth-scroll-x"
+            className="flex gap-2 px-4 py-2 border-t border-white/[0.08] overflow-x-auto mobile-smooth-scroll-x"
           >
             {attachments.map((att, idx) => (
               <div key={idx} className="relative flex-shrink-0">
                 {att.mimeType.startsWith('image/') && att.previewUrl ? (
                   <img src={att.previewUrl} alt="preview" className="w-14 h-14 rounded-lg object-cover" />
                 ) : (
-                  <div className="w-14 h-14 rounded-lg bg-[#1A1B2E] border border-white/10 flex items-center justify-center">
-                    <FileIcon className="w-5 h-5 text-[#7C5CFC]" />
+                  <div className="w-14 h-14 rounded-lg bg-[#191a1b] border border-white/[0.08] flex items-center justify-center">
+                    <FileIcon className="w-5 h-5 text-[#7170ff]" />
                   </div>
                 )}
                 <button
@@ -314,17 +314,17 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
       </AnimatePresence>
 
       {/* Input bar */}
-      <div className="flex items-end gap-2 px-4 py-3 border-t border-[#1E1F2C] flex-shrink-0">
+      <div className="flex items-end gap-2 px-4 py-3 border-t border-white/[0.08] flex-shrink-0">
         <input ref={fileInputRef} type="file" className="hidden" multiple onChange={handleFileChange} />
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => fileInputRef.current?.click()}
-          className="w-9 h-9 rounded-xl bg-[#1E1F2C] flex items-center justify-center flex-shrink-0 mb-0.5"
+          className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0 mb-0.5"
         >
-          <Paperclip className="w-4 h-4 text-[#8B8DB0]" />
+          <Paperclip className="w-4 h-4 text-[#8a8f98]" />
         </motion.button>
 
-        <div className="flex-1 flex items-end bg-[#111218] border border-[#1E1F2C] rounded-xl px-3 py-2">
+        <div className="flex-1 flex items-end bg-[#0f1011] border border-white/[0.08] rounded-xl px-3 py-2">
           <textarea
             ref={inputRef}
             value={inputValue}
@@ -332,7 +332,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything…"
             rows={1}
-            className="flex-1 bg-transparent text-sm text-[#F0F0FF] placeholder-[#4A4B6A] resize-none outline-none leading-5 max-h-24"
+            className="flex-1 bg-transparent text-sm text-[#f7f8f8] placeholder-[#62666d] resize-none outline-none leading-5 max-h-24"
             style={{ minHeight: 20, overflowX: 'hidden' }}
           />
         </div>
@@ -343,7 +343,7 @@ export default function MobileChatPanel({ dockHeight, onClose }: Props) {
           disabled={!inputValue.trim() && attachments.length === 0}
           className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mb-0.5 transition-colors"
           style={{
-            backgroundColor: (inputValue.trim() || attachments.length > 0) ? '#7C5CFC' : '#1E1F2C',
+            backgroundColor: (inputValue.trim() || attachments.length > 0) ? '#5e6ad2' : 'rgba(255,255,255,0.05)',
           }}
         >
           <Send className="w-4 h-4 text-white" />

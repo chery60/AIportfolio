@@ -18,7 +18,7 @@ type Tab = 'comments' | 'viewers' | 'share';
 const DARK_BG = '#111218';
 const SURFACE = 'rgba(255,255,255,0.05)';
 const BORDER = 'rgba(255,255,255,0.08)';
-const TEXT_PRIMARY = '#F0F0FF';
+const TEXT_PRIMARY = '#f7f8f8';
 const TEXT_SECONDARY = 'rgba(240,240,255,0.45)';
 const TEXT_MUTED = 'rgba(240,240,255,0.25)';
 

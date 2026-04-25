@@ -19,7 +19,7 @@ export default function Splash({ onDone }: Props) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#0A0B0F',
+        background: '#08090a',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -43,7 +43,7 @@ export default function Splash({ onDone }: Props) {
             width: '64px',
             height: '64px',
             borderRadius: '18px',
-            background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)',
+            background: '#5e6ad2',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -51,7 +51,7 @@ export default function Splash({ onDone }: Props) {
             fontWeight: '700',
             color: 'white',
             margin: '0 auto 24px',
-            boxShadow: '0 0 40px rgba(124,92,252,0.5)',
+            boxShadow: '0 0 40px rgba(94,106,210,0.4)',
             fontFamily: 'Inter, sans-serif',
           }}
         >
@@ -62,7 +62,7 @@ export default function Splash({ onDone }: Props) {
           <h1 style={{
             fontSize: '28px',
             fontWeight: '700',
-            color: '#F0F0FF',
+            color: '#f7f8f8',
             margin: '0 0 8px',
             fontFamily: 'Inter, sans-serif',
             letterSpacing: '-0.02em',
@@ -71,7 +71,7 @@ export default function Splash({ onDone }: Props) {
           </h1>
           <p style={{
             fontSize: '14px',
-            color: '#6B6D8A',
+            color: '#8a8f98',
             fontFamily: 'Inter, sans-serif',
           }}>
             Product Designer · 2024
@@ -79,11 +79,11 @@ export default function Splash({ onDone }: Props) {
         </div>
 
         {/* Loading bar */}
-        <div style={{ marginTop: '40px', width: '200px', height: '2px', background: '#1E1F2C', borderRadius: '9999px', overflow: 'hidden' }}>
+        <div style={{ marginTop: '40px', width: '200px', height: '2px',         background: '#191a1b', borderRadius: '9999px', overflow: 'hidden' }}>
           <div
             style={{
               height: '100%',
-              background: 'linear-gradient(90deg, #7C5CFC, #FF6B9D)',
+              background: 'linear-gradient(90deg, #5e6ad2, #828fff)',
               borderRadius: '9999px',
               width: phase === 'hold' ? '100%' : '0%',
               transition: 'width 1.2s ease',
@@ -98,7 +98,7 @@ export default function Splash({ onDone }: Props) {
         top: '24px',
         left: '24px',
         fontSize: '11px',
-        color: '#2A2B3C',
+        color: '#62666d',
         fontFamily: 'JetBrains Mono, monospace',
       }}>
         PORTFOLIO.V1
@@ -108,7 +108,7 @@ export default function Splash({ onDone }: Props) {
         bottom: '24px',
         right: '24px',
         fontSize: '11px',
-        color: '#2A2B3C',
+        color: '#62666d',
         fontFamily: 'JetBrains Mono, monospace',
       }}>
         2024

@@ -10,8 +10,8 @@ interface Props {
 }
 
 const CROWD_COLORS = [
-    '#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6',
-    '#EC4899', '#14B8A6', '#F97316', '#64748B', '#A855F7',
+    '#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#5e6ad2',
+    '#7170ff', '#14B8A6', '#F97316', '#64748B', '#828fff',
     '#D946EF', '#06B6D4', '#84CC16', '#EAB308',
 ];
 
@@ -560,7 +560,7 @@ export default function Storyboard({ element, isSelected, onClick }: Props) {
             x: 380, y: 690,
             chars: [
                 { color: '#EC4899', pos: [-50, -35] as [number, number], behaviour: 'eating' as SeatBehaviour, foodEmoji: '🍕' },
-                { color: '#8B5CF6', pos: [50, -35] as [number, number], flip: true, behaviour: 'waiting' as SeatBehaviour },
+                { color: '#5e6ad2', pos: [50, -35] as [number, number], flip: true, behaviour: 'waiting' as SeatBehaviour },
                 { color: '#F97316', pos: [-50, 20] as [number, number], behaviour: 'chatting' as SeatBehaviour },
                 { color: '#14B8A6', pos: [50, 20] as [number, number], flip: true, behaviour: 'eating' as SeatBehaviour, foodEmoji: '🍗' },
             ],
