@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Hand, StickyNote, Minus, Plus, Maximize, Smartphone, Bot, ExternalLink, BoxSelect, MonitorPlay, Sparkles, Undo, Redo, ChevronDown, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Hand, StickyNote, Minus, Plus, Maximize, Smartphone, Bot, ExternalLink, BoxSelect, MonitorPlay, Sparkles, Undo, Redo, ChevronDown, X, ArrowUp } from 'lucide-react';
 import type { Project } from '../../types';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
   isEditing?: boolean;
   isPreviewMode?: boolean;
   onTogglePreview?: (preview: boolean) => void;
+  onSendAI?: (text: string) => Promise<void>;
+  isAILoading?: boolean;
 }
 
 export default function BottomToolbar({
@@ -26,10 +29,41 @@ export default function BottomToolbar({
   isEditing = false,
   isPreviewMode = false,
   onTogglePreview,
+  onSendAI,
+  isAILoading = false,
 }: Props) {
   const [activeTool, setActiveTool] = useState<'pointer' | 'comment'>('pointer');
   const [showAIPrompt, setShowAIPrompt] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
+  const [showAIChatInput, setShowAIChatInput] = useState(false);
+  const [aiChatInput, setAiChatInput] = useState('');
+  const aiInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the AI input when it appears
+  useEffect(() => {
+    if (showAIChatInput) {
+      setTimeout(() => aiInputRef.current?.focus(), 80);
+    }
+  }, [showAIChatInput]);
+
+  const handleAISend = async () => {
+    const text = aiChatInput.trim();
+    if (!text || isAILoading || !onSendAI) return;
+    setAiChatInput('');
+    setShowAIChatInput(false);
+    await onSendAI(text);
+  };
+
+  const handleAIKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAISend();
+    }
+    if (e.key === 'Escape') {
+      setShowAIChatInput(false);
+      setAiChatInput('');
+    }
+  };
 
   // Dynamic context action based on the selected project
   const renderContextAction = () => {
@@ -174,46 +208,103 @@ export default function BottomToolbar({
     );
   }
 
-  // View Mode Toolbar (Unchanged)
+  // View Mode Toolbar
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full p-1.5 shadow-[0_8px_32px_rgb(0,0,0,0.12)] border border-panel-border pointer-events-auto h-14 z-40">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-40">
 
-      {/* Navigation & Interaction */}
-      <ToolBtn active title="Pan Tool (Space + Drag)">
-        <Hand className="w-5 h-5" />
-      </ToolBtn>
+      {/* ── Inline AI Chat Input ── */}
+      <AnimatePresence>
+        {showAIChatInput && (
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="mb-3 pointer-events-auto w-[420px]"
+          >
+            <div className="flex items-center gap-2 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.14)] border border-panel-border px-3 py-2">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Sparkles className="w-4 h-4 text-brand flex-shrink-0" />
+                <input
+                  ref={aiInputRef}
+                  value={aiChatInput}
+                  onChange={(e) => setAiChatInput(e.target.value)}
+                  onKeyDown={handleAIKeyDown}
+                  placeholder="Ask about this project…"
+                  disabled={isAILoading}
+                  className="flex-1 text-sm text-text-primary placeholder:text-text-secondary bg-transparent outline-none disabled:opacity-50"
+                />
+              </div>
+              <button
+                onClick={handleAISend}
+                disabled={!aiChatInput.trim() || isAILoading}
+                className="w-8 h-8 flex items-center justify-center rounded-xl bg-brand text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
+              >
+                <ArrowUp className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="h-8 w-px bg-panel-border self-center mx-2" />
+      {/* ── View Mode Bottom Toolbar ── */}
+      <div className="flex items-center gap-1 bg-white rounded-full p-1.5 shadow-[0_8px_32px_rgb(0,0,0,0.12)] border border-panel-border pointer-events-auto h-14">
 
-      {/* Zoom Controls */}
-      <ToolBtn onClick={onZoomOut} title="Zoom Out (-)">
-        <Minus className="w-4 h-4" />
-      </ToolBtn>
+        {/* Navigation & Interaction */}
+        <ToolBtn active title="Pan Tool (Space + Drag)">
+          <Hand className="w-5 h-5" />
+        </ToolBtn>
 
-      <button
-        onClick={onResetZoom}
-        className="px-3 h-10 rounded-full text-xs font-bold text-text-primary hover:bg-surface-1 transition-colors min-w-[64px]"
-        title="Reset Zoom to 100%"
-      >
-        {Math.max(0, Math.round(scale * 100) - 40)}%
-      </button>
+        <div className="h-8 w-px bg-panel-border self-center mx-2" />
 
-      <ToolBtn onClick={onZoomIn} title="Zoom In (+)">
-        <Plus className="w-4 h-4" />
-      </ToolBtn>
+        {/* Zoom Controls */}
+        <ToolBtn onClick={onZoomOut} title="Zoom Out (-)">
+          <Minus className="w-4 h-4" />
+        </ToolBtn>
 
-      <div className="h-8 w-px bg-panel-border self-center mx-2" />
+        <button
+          onClick={onResetZoom}
+          className="px-3 h-10 rounded-full text-xs font-bold text-text-primary hover:bg-surface-1 transition-colors min-w-[64px]"
+          title="Reset Zoom to 100%"
+        >
+          {Math.max(0, Math.round(scale * 100) - 40)}%
+        </button>
 
-      {/* Fit to Screen */}
-      <ToolBtn onClick={onFitToScreen} title="Fit to Screen (Shift + 1)">
-        <Maximize className="w-4 h-4" />
-      </ToolBtn>
+        <ToolBtn onClick={onZoomIn} title="Zoom In (+)">
+          <Plus className="w-4 h-4" />
+        </ToolBtn>
 
-      <div className="h-8 w-px bg-panel-border self-center mx-2" />
+        <div className="h-8 w-px bg-panel-border self-center mx-2" />
 
-      {/* Contextual Action */}
-      {renderContextAction()}
+        {/* Fit to Screen */}
+        <ToolBtn onClick={onFitToScreen} title="Fit to Screen (Shift + 1)">
+          <Maximize className="w-4 h-4" />
+        </ToolBtn>
 
+        <div className="h-8 w-px bg-panel-border self-center mx-2" />
+
+        {/* AI Chat Icon */}
+        {onSendAI && (
+          <>
+            <button
+              onClick={() => setShowAIChatInput(prev => !prev)}
+              title="Ask AI about this project"
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm ml-0.5 ${
+                showAIChatInput
+                  ? 'bg-brand text-white shadow-inner scale-95'
+                  : 'bg-brand text-white hover:opacity-90 hover:scale-[1.05]'
+              }`}
+            >
+              <Sparkles className="w-[18px] h-[18px]" />
+            </button>
+            <div className="h-8 w-px bg-panel-border self-center mx-2" />
+          </>
+        )}
+
+        {/* Contextual Action */}
+        {renderContextAction()}
+
+      </div>
     </div>
   );
 }

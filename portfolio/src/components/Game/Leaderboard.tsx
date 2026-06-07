@@ -13,8 +13,8 @@ export default function Leaderboard({ scores, isLoading, myName, myScore }: Prop
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Leaderboard</span>
-        <span className="text-xs text-white/30">Top 3</span>
+        <span className="text-xs font-bold text-white/80 uppercase tracking-widest">Leaderboard</span>
+        <span className="text-xs text-white/70">Top 3</span>
       </div>
 
       {isLoading ? (
@@ -22,7 +22,7 @@ export default function Leaderboard({ scores, isLoading, myName, myScore }: Prop
           <div className="w-5 h-5 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
         </div>
       ) : scores.length === 0 ? (
-        <div className="text-center py-6 text-white/30 text-sm">
+        <div className="text-center py-6 text-white/70 text-sm">
           No scores yet — be the first! 🚀
         </div>
       ) : (
@@ -41,14 +41,14 @@ export default function Leaderboard({ scores, isLoading, myName, myScore }: Prop
               >
                 <span className="text-base w-6 text-center flex-shrink-0">
                   {idx < 3 ? MEDALS[idx] : (
-                    <span className="text-xs text-white/40 font-mono">{idx + 1}</span>
+                    <span className="text-xs text-white/70 font-mono">{idx + 1}</span>
                   )}
                 </span>
                 <span className={`flex-1 text-sm font-semibold truncate ${isMe ? 'text-[#F59E0B]' : 'text-white/80'}`}>
                   {entry.player_name}
                   {isMe && <span className="ml-1 text-xs text-[#F59E0B]/70">(you)</span>}
                 </span>
-                <span className={`text-sm font-bold font-mono ${idx === 0 ? 'text-yellow-400' : isMe ? 'text-[#C74B18]' : 'text-white/60'
+                <span className={`text-sm font-bold font-mono ${idx === 0 ? 'text-yellow-400' : isMe ? 'text-[#C74B18]' : 'text-white/75'
                   }`}>
                   {entry.score.toLocaleString()}
                 </span>

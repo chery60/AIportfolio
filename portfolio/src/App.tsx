@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import type { Project, CanvasElement } from './types';
 import { PROJECTS } from './data/projects';
 import LeftPanel from './components/LeftPanel';
@@ -17,6 +17,7 @@ import { supabase } from './lib/supabase';
 import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { useIsMobile } from './hooks/useIsMobile';
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
+import { useCharacterChat } from './hooks/useCharacterChat';
 
 const defaultControls: CanvasControlsRef = {
   zoomIn: () => { },
@@ -44,6 +45,22 @@ export default function App() {
   const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession(selectedProject.id);
   const pendingNavRef = useRef<{ x: number, y: number } | null>(null);
   const isMobile = useIsMobile();
+  const previewCanvasControls = useRef<CanvasControlsRef>(defaultControls);
+  const canvasRevealRawProgress = useMotionValue(0);
+  const canvasRevealProgress = useSpring(canvasRevealRawProgress, { stiffness: 120, damping: 20 });
+  const canvasRevealScale = useTransform(canvasRevealProgress, [0, 1], [0.35, 1]);
+  const canvasRevealY = useTransform(canvasRevealProgress, [0, 1], ['75vh', '0vh']);
+  const canvasRevealOpacity = useTransform(canvasRevealProgress, [0, 0.15], [0, 1]);
+  const canvasRevealRadius = useTransform(canvasRevealProgress, [0, 1], ['24px', '0px']);
+  const [canvasRevealValue, setCanvasRevealValue] = useState(0);
+  const [isEnteringFromReveal, setIsEnteringFromReveal] = useState(false);
+
+  // Among Us crewmate AI chat
+  const chat = useCharacterChat({ project: selectedProject });
+
+  useEffect(() => {
+    return canvasRevealRawProgress.on('change', setCanvasRevealValue);
+  }, [canvasRevealRawProgress]);
 
   // Dirty tracking — compare current elements to snapshot
   const isDirty = (() => {
@@ -122,11 +139,12 @@ export default function App() {
       setSelectedElementId(null);
       editSnapshotRef.current = JSON.parse(JSON.stringify(pendingAction.project.canvasElements));
     } else if (pendingAction?.type === 'exit-canvas') {
+      canvasRevealRawProgress.set(0);
       setCurrentView('landing');
     }
     
     setPendingAction(null);
-  }, [saveToSupabase, pendingAction]);
+  }, [saveToSupabase, pendingAction, canvasRevealRawProgress]);
 
   // Discard & Exit: restore snapshot and leave edit mode (or switch project)
   const handleDiscardAndExit = useCallback(() => {
@@ -152,10 +170,11 @@ export default function App() {
       setSelectedElementId(null);
       editSnapshotRef.current = JSON.parse(JSON.stringify(pendingAction.project.canvasElements));
     } else if (pendingAction?.type === 'exit-canvas') {
+      canvasRevealRawProgress.set(0);
       setCurrentView('landing');
     }
     setPendingAction(null);
-  }, [pendingAction]);
+  }, [pendingAction, canvasRevealRawProgress]);
 
   // Cancel modal — close it, keep editing
   const handleCancelModal = useCallback(() => {
@@ -369,7 +388,7 @@ export default function App() {
         zIndex: 50, // above the board
         data: {
           content: 'New Comment',
-          color: 'blue' as any
+          color: 'cyan'
         }
       };
 
@@ -430,8 +449,10 @@ export default function App() {
 
   // Handle entering canvas with transition
   const handleEnterCanvas = useCallback(() => {
+    setIsEnteringFromReveal(canvasRevealRawProgress.get() > 0.01);
+    canvasRevealRawProgress.set(1);
     setCurrentView('canvas');
-  }, []);
+  }, [canvasRevealRawProgress]);
 
   // Handle exiting canvas back to landing (with unsaved changes guard)
   const handleExitCanvas = useCallback(() => {
@@ -445,9 +466,119 @@ export default function App() {
       setIsEditing(false);
       setIsPreviewMode(false);
     }
+    canvasRevealRawProgress.set(0);
     setCurrentView('landing');
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, isDirty]);
+  }, [isEditing, isDirty, canvasRevealRawProgress]);
+
+  useEffect(() => {
+    if (currentView === 'landing') {
+      canvasRevealRawProgress.set(0);
+      setIsEnteringFromReveal(false);
+    }
+  }, [currentView, canvasRevealRawProgress]);
+
+  useEffect(() => {
+    if (!isEnteringFromReveal) return;
+    const timeout = window.setTimeout(() => setIsEnteringFromReveal(false), 500);
+    return () => window.clearTimeout(timeout);
+  }, [isEnteringFromReveal]);
+
+  const renderDesktopCanvasContent = (isRevealPreview = false) => {
+    const activeCanvasControls = isRevealPreview ? previewCanvasControls : canvasControls;
+    const activeEditing = !isRevealPreview && isEditing && !isPreviewMode;
+
+    return (
+      <>
+        {/* Main content area */}
+        <div className="flex flex-1 overflow-hidden relative">
+          {/* Canvas */}
+          <div className="absolute inset-0 w-full h-full flex flex-col">
+            <Canvas
+              project={selectedProject}
+              selectedElementId={selectedElementId}
+              onSelectElement={handleSelectElement}
+              onTransformChange={handleTransformChange}
+              canvasControlsRef={activeCanvasControls}
+              isEditing={activeEditing}
+              isCommentMode={!isRevealPreview && isCommentMode}
+              onDeleteElement={handleDeleteElement}
+              onUpdateElement={handleUpdateElement}
+              onAddElement={handleAddElement}
+              onUpdateElementPosition={handleUpdateElementPosition}
+              onCanvasClick={handleCanvasClick}
+              activeViewers={activeViewers}
+              cursors={cursors}
+              localIdentity={localIdentity}
+              broadcastCursor={isRevealPreview ? undefined : broadcastCursor}
+              onCharacterClick={undefined}
+              characterChatBubble={chat.characterBubble}
+              isPreviewOnly={isRevealPreview}
+            />
+          </div>
+
+          {/* Floating Left Panel */}
+          <div className="absolute top-3 bottom-3 left-3 z-10 pointer-events-none flex flex-col">
+            <LeftPanel
+              selectedProject={selectedProject}
+              onSelectProject={handleSelectProject}
+              isEditing={activeEditing}
+              onToggleEdit={handleToggleEdit}
+              onSaveAndExit={handleSaveAndExit}
+              isDirty={!isRevealPreview && isDirty}
+              onExit={isRevealPreview ? undefined : handleExitCanvas}
+              isPreviewOnly={isRevealPreview}
+            />
+          </div>
+
+          {/* Floating Right Panel or Edit Toolbar */}
+          <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
+            {activeEditing ? (
+              selectedElement ? (
+                <PropertiesPanel
+                  element={selectedElement}
+                  onUpdate={handleUpdateElement}
+                  onDelete={handleDeleteElement}
+                />
+              ) : (
+                <EditToolbar project={selectedProject} />
+              )
+            ) : (
+              <RightPanel
+                project={selectedProject}
+                selectedElement={selectedElement}
+                activeViewers={activeViewers}
+                onViewerClick={isRevealPreview ? undefined : handleViewerClick}
+                localIdentity={localIdentity}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Toolbar */}
+        <BottomToolbar
+          project={selectedProject}
+          scale={scale}
+          isEditing={activeEditing}
+          isPreviewMode={!isRevealPreview && isPreviewMode}
+          onTogglePreview={isRevealPreview ? undefined : setIsPreviewMode}
+          onZoomIn={() => activeCanvasControls.current.zoomIn()}
+          onZoomOut={() => activeCanvasControls.current.zoomOut()}
+          onResetZoom={() => activeCanvasControls.current.resetZoom()}
+          onFitToScreen={() => activeCanvasControls.current.fitToScreen()}
+          onAddNote={isRevealPreview ? () => { } : handleAddNote}
+          onSendAI={isRevealPreview ? undefined : chat.sendMessage}
+          isAILoading={!isRevealPreview && chat.isLoading}
+        />
+      </>
+    );
+  };
+
+  const shouldShowCanvasReveal = currentView === 'landing' && canvasRevealValue > 0.01;
+  const handleCanvasRevealClick = () => {
+    canvasRevealRawProgress.set(1);
+    window.setTimeout(() => handleEnterCanvas(), 100);
+  };
 
   // Mobile gets its own self-contained experience
   if (isMobile) {
@@ -459,27 +590,51 @@ export default function App() {
       <div className="hidden md:block">
         <SmoothCursor />
       </div>
-      <AnimatePresence mode="wait">
+      <AnimatePresence initial={false}>
         {currentView === 'landing' && (
           <motion.div
             key="landing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
+            exit={isEnteringFromReveal ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+            transition={isEnteringFromReveal ? { duration: 0.12 } : { duration: 0.4 }}
           >
-            <LandingPage onEnterCanvas={handleEnterCanvas} />
+            <LandingPage
+              onEnterCanvas={handleEnterCanvas}
+              canvasRevealRawProgress={canvasRevealRawProgress}
+              canvasRevealProgress={canvasRevealProgress}
+            />
           </motion.div>
+        )}
+
+        {shouldShowCanvasReveal && (
+          <div key="canvas-reveal" className="fixed inset-0 z-[70] pointer-events-none overflow-hidden">
+            <motion.div
+              className="w-full h-full flex flex-col bg-surface-1 text-text-primary overflow-hidden shadow-[0_30px_90px_rgba(0,0,0,0.35)] pointer-events-auto cursor-pointer"
+              style={{
+                scale: canvasRevealScale,
+                y: canvasRevealY,
+                opacity: canvasRevealOpacity,
+                borderRadius: canvasRevealRadius,
+                transformOrigin: '50% 100%',
+              }}
+              onClick={handleCanvasRevealClick}
+            >
+              <div className="w-full h-full flex flex-col pointer-events-none" aria-hidden="true" inert>
+                {renderDesktopCanvasContent(true)}
+              </div>
+            </motion.div>
+          </div>
         )}
 
         {currentView === 'canvas' && (
           <motion.div
             key="canvas"
-            initial={{ opacity: 0, scale: 1.05 }}
+            initial={isEnteringFromReveal ? false : { opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="fixed inset-0 flex flex-col bg-surface-1 text-text-primary overflow-hidden"
+            transition={isEnteringFromReveal ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
+            className="fixed inset-0 z-[80] flex flex-col bg-surface-1 text-text-primary overflow-hidden"
           >
             {isMobile ? (
               /* ── Mobile Views ── */
@@ -498,82 +653,7 @@ export default function App() {
               )
             ) : (
               /* ── Desktop Canvas View ── */
-              <>
-                {/* Main content area */}
-                <div className="flex flex-1 overflow-hidden relative">
-                  {/* Canvas */}
-                  <div className="absolute inset-0 w-full h-full flex flex-col">
-                    <Canvas
-                      project={selectedProject}
-                      selectedElementId={selectedElementId}
-                      onSelectElement={handleSelectElement}
-                      onTransformChange={handleTransformChange}
-                      canvasControlsRef={canvasControls}
-                      isEditing={isEditing && !isPreviewMode}
-                      isCommentMode={isCommentMode}
-                      onDeleteElement={handleDeleteElement}
-                      onUpdateElement={handleUpdateElement}
-                      onAddElement={handleAddElement}
-                      onUpdateElementPosition={handleUpdateElementPosition}
-                      onCanvasClick={handleCanvasClick}
-                      activeViewers={activeViewers}
-                      cursors={cursors}
-                      localIdentity={localIdentity}
-                      broadcastCursor={broadcastCursor}
-                    />
-                  </div>
-
-                  {/* Floating Left Panel */}
-                  <div className="absolute top-3 bottom-3 left-3 z-10 pointer-events-none flex flex-col">
-                    <LeftPanel
-                      selectedProject={selectedProject}
-                      onSelectProject={handleSelectProject}
-                      isEditing={isEditing}
-                      onToggleEdit={handleToggleEdit}
-                      onSaveAndExit={handleSaveAndExit}
-                      isDirty={isDirty}
-                      onExit={handleExitCanvas}
-                    />
-                  </div>
-
-                  {/* Floating Right Panel or Edit Toolbar */}
-                  <div className="absolute top-3 bottom-3 right-3 z-10 pointer-events-none flex flex-col w-[280px]">
-                    {isEditing && !isPreviewMode ? (
-                      selectedElement ? (
-                        <PropertiesPanel
-                          element={selectedElement}
-                          onUpdate={handleUpdateElement}
-                          onDelete={handleDeleteElement}
-                        />
-                      ) : (
-                        <EditToolbar project={selectedProject} />
-                      )
-                    ) : (
-                      <RightPanel
-                        project={selectedProject}
-                        selectedElement={selectedElement}
-                        activeViewers={activeViewers}
-                        onViewerClick={handleViewerClick}
-                        localIdentity={localIdentity}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Bottom Toolbar */}
-                <BottomToolbar
-                  project={selectedProject}
-                  scale={scale}
-                  isEditing={isEditing}
-                  isPreviewMode={isPreviewMode}
-                  onTogglePreview={setIsPreviewMode}
-                  onZoomIn={() => canvasControls.current.zoomIn()}
-                  onZoomOut={() => canvasControls.current.zoomOut()}
-                  onResetZoom={() => canvasControls.current.resetZoom()}
-                  onFitToScreen={() => canvasControls.current.fitToScreen()}
-                  onAddNote={handleAddNote}
-                />
-              </>
+              renderDesktopCanvasContent()
             )}
 
             {/* Unsaved Changes Modal */}

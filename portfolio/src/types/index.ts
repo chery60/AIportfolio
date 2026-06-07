@@ -59,6 +59,7 @@ export interface StickyNoteElement extends BaseCanvasElement {
     content: string;
     color: 'yellow' | 'purple' | 'pink' | 'cyan' | 'green';
     rotation?: number;
+    footer?: string;
   };
 }
 
@@ -336,3 +337,41 @@ export interface SelectedElement {
   element: CanvasElement | null;
   projectId: string | null;
 }
+
+export type ViewMode = 'top' | 'third-person';
+
+export type SceneViewMode = 'explorer' | 'gallery' | 'cinematic' | 'third-person';
+
+export interface SceneViewModeConfig {
+  label: string;
+  worldScale: number;
+  movementSpeed: number;
+  cameraFov?: number;
+}
+
+export const VIEW_MODE_CONFIGS: Record<SceneViewMode, SceneViewModeConfig> = {
+  explorer: {
+    label: 'Explorer',
+    worldScale: 0.01,
+    movementSpeed: 16,
+    cameraFov: 70,
+  },
+  gallery: {
+    label: 'Gallery',
+    worldScale: 0.01,
+    movementSpeed: 13,
+    cameraFov: 64,
+  },
+  cinematic: {
+    label: 'Cinematic',
+    worldScale: 0.01,
+    movementSpeed: 10,
+    cameraFov: 58,
+  },
+  'third-person': {
+    label: '3D Walkthrough',
+    worldScale: 0.01,
+    movementSpeed: 16,
+    cameraFov: 70,
+  },
+};

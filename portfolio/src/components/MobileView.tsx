@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Home, MessageCircle, Grid2X2, Gamepad2 } from 'lucide-react';
 import { Dock, DockIcon, DOCK_HEIGHT } from './ui/dock';
 import { SmoothCursor } from './ui/smooth-cursor';
+import PixelBangaloreBackground from './PixelBangaloreBackground';
 import MobileHomeTab from './MobileHomeTab';
 import MobileProjectsTab from './MobileProjectsTab';
 import MobileGameTab from './MobileGameTab';
@@ -41,14 +42,23 @@ export default function MobileView({ activeViewers }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#08090a] flex flex-col">
+    <div className="fixed inset-0 bg-[#08090a] flex flex-col overflow-hidden">
+      {!selectedProject && (
+        <>
+          <PixelBangaloreBackground className="z-0 opacity-75 brightness-[0.72] saturate-[0.86]" />
+          <div className="pointer-events-none fixed inset-0 z-[1] bg-[linear-gradient(180deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.34)_32%,rgba(0,0,0,0.5)_62%,rgba(0,0,0,0.82)_100%)]" />
+          <div className="pointer-events-none fixed inset-0 z-[2] bg-[radial-gradient(circle_at_34%_36%,rgba(0,0,0,0.12)_0%,rgba(0,0,0,0.42)_60%,rgba(0,0,0,0.72)_100%)]" />
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-44 bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.9)_48%,rgba(8,9,10,1)_100%)]" />
+        </>
+      )}
+
       {/* Custom cursor — self-disables on real touch devices */}
       <SmoothCursor />
       {/* ── Content Area ─────────────────────────────────────── */}
       <div
-        className="flex-1 overflow-hidden"
+        className="relative z-10 flex-1 overflow-hidden"
         style={{
-          paddingBottom: selectedProject ? 0 : 0,
+          marginBottom: selectedProject ? 0 : `calc(${DOCK_HEIGHT + 24}px + env(safe-area-inset-bottom, 0px))`,
         }}
       >
         <AnimatePresence mode="wait">

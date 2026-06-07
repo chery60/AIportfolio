@@ -16,11 +16,11 @@ interface Props {
 type Tab = 'comments' | 'viewers' | 'share';
 
 const DARK_BG = '#111218';
-const SURFACE = 'rgba(255,255,255,0.05)';
-const BORDER = 'rgba(255,255,255,0.08)';
+const SURFACE = 'rgba(255,255,255,0.075)';
+const BORDER = 'rgba(255,255,255,0.14)';
 const TEXT_PRIMARY = '#f7f8f8';
-const TEXT_SECONDARY = 'rgba(240,240,255,0.45)';
-const TEXT_MUTED = 'rgba(240,240,255,0.25)';
+const TEXT_SECONDARY = 'rgba(240,240,255,0.76)';
+const TEXT_MUTED = 'rgba(240,240,255,0.62)';
 
 export default function MobileEngagementSheet({ isOpen, onClose, project, activeViewers }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>('comments');
@@ -268,7 +268,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                                             onChange={e => setAuthorName(e.target.value)}
                                             placeholder="Your name"
                                             maxLength={50}
-                                            className="w-full rounded-xl px-3 py-2.5 text-xs outline-none mb-2 transition-colors"
+                                            className="w-full rounded-xl px-3 py-2.5 text-xs outline-none mb-2 transition-colors placeholder-[#aeb7c6]"
                                             style={{
                                                 background: SURFACE,
                                                 border: `1px solid ${BORDER}`,
@@ -281,7 +281,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                                                 onChange={e => setNewComment(e.target.value)}
                                                 placeholder="Leave a comment…"
                                                 maxLength={500}
-                                                className="w-full rounded-xl pl-3 pr-10 py-2.5 text-xs outline-none resize-none transition-colors"
+                                                className="w-full rounded-xl pl-3 pr-10 py-2.5 text-xs outline-none resize-none transition-colors placeholder-[#aeb7c6]"
                                                 style={{
                                                     background: SURFACE,
                                                     border: `1px solid ${BORDER}`,

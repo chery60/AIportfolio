@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useTransform, type MotionValue } from 'framer-motion';
 import { Sparkles, Download, ExternalLink, ArrowDown, Briefcase, Compass, ChevronDown, Check, X, File as FileIcon, MessageCircle, ArrowLeft } from 'lucide-react';
 import Character from './Canvas/Character';
+import PixelBangaloreBackground from './PixelBangaloreBackground';
 import Stack from './Stack/Stack';
 import { createChatSession, generateAvatarReaction, type ChatIntent } from '../lib/gemini';
 import { saveConversationLog } from '../lib/analytics';
@@ -52,44 +53,45 @@ const RECRUITER_QUESTIONS = [
     { id: 'challenge', label: '/challenge', text: 'Tell me about a time you faced a significant design challenge and how you overcame it.' },
     { id: 'tools', label: '/tools', text: 'What design and prototyping tools are you most proficient in?' }
 ];
+
+const ASSISTANT_FOCUS_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eef6ff]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#27445d]';
+const ASSISTANT_GLASS_BUTTON_CLASS = `border border-white/[0.34] bg-[rgba(8,24,40,0.34)] text-[#f1f7ff] shadow-[0_14px_34px_rgba(4,14,24,0.18)] backdrop-blur-[34px] hover:border-white/[0.5] hover:bg-[rgba(18,42,62,0.48)] hover:text-white ${ASSISTANT_FOCUS_CLASS}`;
+const ASSISTANT_MENU_CLASS = 'bg-[rgba(8,22,36,0.74)] border border-white/[0.3] shadow-[0_22px_56px_rgba(4,12,22,0.32)] backdrop-blur-[36px]';
+
 // ── Typing Animation Hook ───────────────────────────────────────────────────
 function useTypewriter(text: string, speed = 12) {
     const [displayed, setDisplayed] = useState('');
     const [done, setDone] = useState(false);
-    const indexRef = useRef(0);
-    const textRef = useRef(text);
 
     useEffect(() => {
-        // Only reset if the text actually changed to a brand new text
-        // This prevents re-renders from restarting the typing animation midway
-        if (text !== textRef.current) {
-            setDisplayed('');
-            setDone(false);
-            indexRef.current = 0;
-            textRef.current = text;
-        }
+        let index = 0;
+        let timer: ReturnType<typeof setInterval> | undefined;
 
-        // If we've already done typing this text, just return
-        if (indexRef.current >= text.length) {
-            if (!done) {
+        const startTimer = window.setTimeout(() => {
+            if (speed <= 0 || text.length === 0) {
                 setDisplayed(text);
                 setDone(true);
+                return;
             }
-            return;
-        }
 
-        const timer = setInterval(() => {
-            indexRef.current++;
-            setDisplayed(text.slice(0, indexRef.current));
+            setDisplayed('');
+            setDone(false);
+            timer = setInterval(() => {
+                index++;
+                setDisplayed(text.slice(0, index));
 
-            if (indexRef.current >= text.length) {
-                clearInterval(timer);
-                setDone(true);
-            }
-        }, speed);
+                if (index >= text.length) {
+                    if (timer) clearInterval(timer);
+                    setDone(true);
+                }
+            }, speed);
+        }, 0);
 
-        return () => clearInterval(timer);
-    }, [text, speed, done]);
+        return () => {
+            window.clearTimeout(startTimer);
+            if (timer) clearInterval(timer);
+        };
+    }, [text, speed]);
 
     return { displayed, done };
 }
@@ -120,13 +122,13 @@ function ChatBubble({
             {isUser && message.attachments && message.attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-end max-w-[85%]">
                     {message.attachments.map((att, idx) => (
-                        <div key={idx} className="relative rounded-xl overflow-hidden border border-white/[0.08] bg-[#191a1b]">
+                        <div key={idx} className="relative rounded-xl overflow-hidden border border-white/[0.28] bg-[rgba(8,24,40,0.38)] shadow-[0_10px_30px_rgba(5,16,28,0.16)] backdrop-blur-[30px]">
                             {att.mimeType.startsWith('image/') && att.previewUrl ? (
                                 <img src={att.previewUrl} alt="attachment" className="w-auto h-24 object-cover" />
                             ) : (
                                 <div className="flex items-center gap-2 px-3 py-2 h-12">
-                                    <FileIcon className="w-4 h-4 text-[#7170ff]" />
-                                    <span className="text-xs text-[#d0d6e0] truncate max-w-[120px]">{att.file.name}</span>
+                                    <FileIcon className="w-4 h-4 text-[#b9c7ff]" />
+                                    <span className="text-xs text-[#edf5ff] truncate max-w-[120px]">{att.file.name}</span>
                                 </div>
                             )}
                         </div>
@@ -136,8 +138,8 @@ function ChatBubble({
 
             <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser
-                    ? 'bg-[#5e6ad2] text-white'
-                    : 'bg-[#191a1b] text-[#d0d6e0] border border-white/[0.08]'
+                    ? 'bg-[rgba(94,106,210,0.9)] text-white shadow-[0_12px_34px_rgba(70,84,180,0.24)]'
+                    : 'bg-[rgba(8,24,40,0.44)] text-[#f1f7ff] border border-white/[0.28] shadow-[0_12px_34px_rgba(5,16,28,0.18)] backdrop-blur-[32px]'
                     }`}
             >
                 <div className="whitespace-pre-wrap">
@@ -164,9 +166,15 @@ function ChatBubble({
 // ═════════════════════════════════════════════════════════════════════════════
 interface LandingPageProps {
     onEnterCanvas: () => void;
+    canvasRevealRawProgress: MotionValue<number>;
+    canvasRevealProgress: MotionValue<number>;
 }
 
-export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
+export default function LandingPage({
+    onEnterCanvas,
+    canvasRevealRawProgress,
+    canvasRevealProgress,
+}: LandingPageProps) {
     const { trigger } = useWebHaptics({ debug: true });
     const isMobile = useIsMobile();
     const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
@@ -203,24 +211,14 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const rightPanelRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
-    const landingRef = useRef<HTMLDivElement>(null);
     const [mousePos, setMousePos] = useState({ x: 200, y: 300 });
 
-    // Scroll Transition State
-    const rawProgress = useMotionValue(0);
-    const progress = useSpring(rawProgress, { stiffness: 120, damping: 20 });
     const hasTriggeredEnter = useRef(false);
 
     // Transforms for main intro content mapping from progress [0..1]
-    const contentScale = useTransform(progress, [0, 0.9], [1, 0.85]);
-    const contentY = useTransform(progress, [0, 0.9], ["0vh", "-15vh"]);
-    const contentOpacity = useTransform(progress, [0, 0.7], [1, 0]);
-
-    // Transforms for Canvas Preview mapping from progress [0..1]
-    const canvasScale = useTransform(progress, [0, 1], [0.35, 1]);
-    const canvasY = useTransform(progress, [0, 1], ["75vh", "0vh"]);
-    const canvasOpacity = useTransform(progress, [0, 0.15], [0, 1]);
-    const canvasRadius = useTransform(progress, [0, 1], ["24px", "0px"]);
+    const contentScale = useTransform(canvasRevealProgress, [0, 0.9], [1, 0.85]);
+    const contentY = useTransform(canvasRevealProgress, [0, 0.9], ["0vh", "-15vh"]);
+    const contentOpacity = useTransform(canvasRevealProgress, [0, 0.7], [1, 0]);
 
     // Touch tracking for mobile swipe-to-canvas
     const touchStartY = useRef<number | null>(null);
@@ -236,9 +234,9 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             // Prevent actual scrolling of the body to keep hijacked scroll
             e.preventDefault();
 
-            let target = rawProgress.get() + e.deltaY * 0.0015;
+            let target = canvasRevealRawProgress.get() + e.deltaY * 0.0015;
             target = Math.max(0, Math.min(1.05, target));
-            rawProgress.set(target);
+            canvasRevealRawProgress.set(target);
 
             if (target >= 1 && !hasTriggeredEnter.current) {
                 hasTriggeredEnter.current = true;
@@ -263,9 +261,9 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             const deltaY = touchStartY.current - e.touches[0].clientY;
             if (deltaY > 0) {
                 e.preventDefault();
-                let target = rawProgress.get() + deltaY * 0.003;
+                let target = canvasRevealRawProgress.get() + deltaY * 0.003;
                 target = Math.max(0, Math.min(1.05, target));
-                rawProgress.set(target);
+                canvasRevealRawProgress.set(target);
                 touchStartY.current = e.touches[0].clientY;
 
                 if (target >= 1 && !hasTriggeredEnter.current) {
@@ -281,22 +279,17 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             touchStartY.current = null;
         };
 
-        const wrapper = landingRef.current;
-        if (wrapper) {
-            wrapper.addEventListener('wheel', handleWheel, { passive: false });
-            wrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
-            wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
-            wrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
-        }
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd, { passive: true });
         return () => {
-            if (wrapper) {
-                wrapper.removeEventListener('wheel', handleWheel);
-                wrapper.removeEventListener('touchstart', handleTouchStart);
-                wrapper.removeEventListener('touchmove', handleTouchMove);
-                wrapper.removeEventListener('touchend', handleTouchEnd);
-            }
+            window.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('touchstart', handleTouchStart);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [rawProgress, onEnterCanvas, isMobileChatOpen]);
+    }, [canvasRevealRawProgress, onEnterCanvas, isMobileChatOpen]);
 
     // Measure Right Panel bounds for Avatar collision
     useEffect(() => {
@@ -359,12 +352,10 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
 
     // Track mouse position for the Among Us character
     const handleLandingMouseMove = useCallback((e: React.MouseEvent) => {
-        if (landingRef.current) {
-            setMousePos({
-                x: e.clientX,
-                y: e.clientY,
-            });
-        }
+        setMousePos({
+            x: e.clientX,
+            y: e.clientY,
+        });
     }, []);
 
     // Auto-resize textarea
@@ -493,7 +484,6 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                     return;
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const result = await chatSessionRef.current.sendMessage(parts);
                 const responseText = result.response.text();
 
@@ -531,7 +521,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                 setIsTyping(false);
             }
         },
-        [isTyping, intent, attachments]
+        [isTyping, intent, attachments, isMobile]
     );
 
     const handleSend = () => {
@@ -604,19 +594,22 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-[200] bg-[#08090a] flex flex-col"
+            className="fixed inset-0 z-[200] bg-[linear-gradient(180deg,#0b1621_0%,#08101a_54%,#050b12_100%)] flex flex-col"
         >
             {/* Chat Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] mobile-safe-top">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.14] bg-white/[0.04] mobile-safe-top">
                 <button
+                    type="button"
                     onClick={() => setIsMobileChatOpen(false)}
-                    className="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label="Close assistant chat"
+                    title="Close assistant chat"
+                    className={`w-9 h-9 rounded-full flex items-center justify-center bg-white/[0.08] text-[#e6eef9] hover:text-white hover:bg-white/[0.16] transition-colors ${ASSISTANT_FOCUS_CLASS}`}
                 >
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div className="flex-1">
                     <p className="text-sm font-semibold text-[#f7f8f8]">Portfolio AI Assistant</p>
-                    <p className="text-[11px] text-[#8a8f98]">Ask about Sai Charan's work</p>
+                    <p className="text-[11px] text-[#b8c2d0]">Ask about Sai Charan's work</p>
                 </div>
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
@@ -626,16 +619,16 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center flex-1 gap-4 py-8">
                         <div className="w-16 h-16 relative flex items-center justify-center mb-2">
-                            <div className="absolute inset-0 bg-[#5e6ad2]/15 rounded-2xl blur-xl pb-2"></div>
-                            <div className="w-14 h-14 rounded-2xl bg-[#191a1b] border border-[#5e6ad2]/30 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(94,106,210,0.25)]">
-                                <Sparkles className="w-6 h-6 text-[#7170ff]" />
+                            <div className="absolute inset-0 bg-[#9fb7ff]/18 rounded-2xl blur-xl pb-2"></div>
+                            <div className="w-14 h-14 rounded-2xl bg-[rgba(14,31,47,0.74)] border border-white/[0.24] flex items-center justify-center relative z-10 shadow-[0_0_22px_rgba(120,150,255,0.24)] backdrop-blur-xl">
+                                <Sparkles className="w-6 h-6 text-[#c9d6ff]" />
                             </div>
                         </div>
                         <div className="text-center mb-6">
                             <p className="text-base font-semibold text-[#f7f8f8] mb-1.5">
                                 Portfolio AI Assistant
                             </p>
-                            <p className="text-[13px] text-[#8a8f98] max-w-[280px]">
+                            <p className="text-[13px] text-[#c5cfdd] max-w-[280px]">
                                 Ask me anything about Sai Charan's work,
                                 skills, and projects.
                             </p>
@@ -643,9 +636,10 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                         <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
                             {STARTER_PROMPTS.map((sp) => (
                                 <button
+                                    type="button"
                                     key={sp.label}
                                     onClick={() => sendMessage(sp.prompt)}
-                                    className="w-full text-left px-5 py-3.5 rounded-xl border border-white/[0.05] bg-[#0f1011] text-[13px] text-[#8a8f98] hover:text-[#f7f8f8] hover:border-white/[0.08] hover:bg-[#191a1b] transition-all flex items-center group"
+                                    className={`w-full text-left px-5 py-3.5 rounded-xl text-[13px] transition-all flex items-center group ${ASSISTANT_GLASS_BUTTON_CLASS}`}
                                 >
                                     <span className="group-hover:translate-x-1 inline-block transition-transform">
                                         {sp.label}
@@ -682,22 +676,25 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
             </div>
 
             {/* Chat Input */}
-            <div className="p-3 bg-[#08090a] border-t border-white/[0.06] mobile-safe-bottom">
+            <div className="p-3 bg-[rgba(5,12,20,0.86)] border-t border-white/[0.14] mobile-safe-bottom backdrop-blur-xl">
                 {attachments.length > 0 && (
                     <div className="flex flex-wrap gap-2 px-2 pt-2 pb-1">
                         {attachments.map((att, idx) => (
-                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#191a1b]">
+                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/[0.2] bg-[rgba(14,31,47,0.68)] backdrop-blur-xl">
                                 {att.mimeType.startsWith('image/') && att.previewUrl ? (
                                     <img src={att.previewUrl} alt="preview" className="w-14 h-14 object-cover" />
                                 ) : (
                                     <div className="w-14 h-14 flex flex-col items-center justify-center p-1">
-                                        <FileIcon className="w-4 h-4 text-[#8a8f98] mb-1" />
-                                        <span className="text-[8px] text-[#8a8f98] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase()}</span>
+                                        <FileIcon className="w-4 h-4 text-[#d6e3f2] mb-1" />
+                                        <span className="text-[8px] text-[#eef5ff] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase()}</span>
                                     </div>
                                 )}
                                 <button
+                                    type="button"
                                     onClick={() => removeAttachment(idx)}
-                                    className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white flex items-center justify-center"
+                                    aria-label={`Remove ${att.file.name}`}
+                                    title={`Remove ${att.file.name}`}
+                                    className={`absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 text-white flex items-center justify-center ${ASSISTANT_FOCUS_CLASS}`}
                                 >
                                     <X className="w-2.5 h-2.5" />
                                 </button>
@@ -705,7 +702,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                         ))}
                     </div>
                 )}
-                <div className="bg-[#0f1011] border border-white/[0.06] rounded-2xl relative focus-within:border-white/[0.12] transition-colors duration-200">
+                <div className="bg-[rgba(10,24,38,0.78)] border border-white/[0.22] rounded-2xl relative focus-within:border-white/[0.44] focus-within:ring-2 focus-within:ring-[#eef6ff]/20 transition-colors duration-200 backdrop-blur-xl shadow-[0_16px_38px_rgba(5,16,28,0.26)]">
                     <textarea
                         ref={inputRef}
                         value={inputValue}
@@ -714,21 +711,30 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                         onPaste={handlePaste}
                         placeholder="Ask about Sai Charan..."
                         rows={1}
-                        className="w-full bg-transparent text-[#d0d6e0] text-[13px] px-4 py-3 min-h-[44px] max-h-[120px] placeholder-[#62666d] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-2xl"
+                        className="w-full bg-transparent text-[#f3f8ff] text-[13px] px-4 py-3 min-h-[44px] max-h-[120px] placeholder-[#d0dbea] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-2xl"
                     />
                     <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
                         <div className="flex items-center gap-2">
                             <input type="file" ref={fileInputRef} onChange={handleFileInputChange} className="hidden" multiple accept="image/*,application/pdf,.doc,.docx,.txt" />
-                            <button onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full flex items-center justify-center text-[#8a8f98] hover:text-[#d0d6e0] hover:bg-white/5 transition-colors">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                aria-label="Attach files"
+                                title="Attach files"
+                                className={`w-6 h-6 rounded-full flex items-center justify-center text-[#d6e3f2] hover:text-white hover:bg-white/15 transition-colors ${ASSISTANT_FOCUS_CLASS}`}
+                            >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                             </button>
                         </div>
                         <button
+                            type="button"
                             onClick={handleSend}
                             disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
+                            aria-label="Send message"
+                            title="Send message"
                             className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${((inputValue.trim() || attachments.length > 0) && !isTyping)
-                                    ? 'bg-white text-black hover:bg-[#d0d6e0] shadow-md'
-                                    : 'bg-[#23252a] text-[#62666d] cursor-not-allowed'
+                                    ? `bg-white text-[#05111d] hover:bg-[#dfeaff] shadow-md ${ASSISTANT_FOCUS_CLASS}`
+                                    : 'bg-white/[0.16] text-[#b8c4d4] cursor-not-allowed'
                                 }`}
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
@@ -741,10 +747,11 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
 
     return (
         <div
-            ref={landingRef}
             className={`fixed inset-0 z-50 overflow-hidden transition-colors duration-1000 ${isSabotaged ? 'bg-[#1a0505]' : 'bg-[#08090a]'}`}
             onMouseMove={!isMobile ? handleLandingMouseMove : undefined}
         >
+            <PixelBangaloreBackground className={isSabotaged ? 'opacity-70 saturate-[0.7] hue-rotate-[130deg]' : 'opacity-100'} />
+
             {/* ── Walking Among Us Character (desktop only) ──────────── */}
             {!isMobile && (
                 <div className="fixed inset-0 pointer-events-none z-[60]">
@@ -765,32 +772,23 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
 
             {/* ── MAIN CONTENT LAYER (fades/scales down on scroll) ──────── */}
             <motion.div
-                className="absolute inset-0 flex"
+                className="absolute inset-0 z-10 flex"
                 style={{ scale: contentScale, y: contentY, opacity: contentOpacity }}
             >
-                {/* Ambient background effects */}
+                {/* Atmospheric readability overlays */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     <div
-                        className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-[0.05]"
+                        className="absolute inset-0"
                         style={{
                             background:
-                                'radial-gradient(circle, #5e6ad2 0%, transparent 70%)',
+                                'linear-gradient(90deg, rgba(0,0,0,0.24) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.14) 100%)',
                         }}
                     />
                     <div
-                        className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-[0.03]"
+                        className="absolute inset-0"
                         style={{
                             background:
-                                'radial-gradient(circle, #7170ff 0%, transparent 70%)',
-                        }}
-                    />
-                    {/* Grid pattern */}
-                    <div
-                        className="absolute inset-0 opacity-[0.03]"
-                        style={{
-                            backgroundImage:
-                                'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-                            backgroundSize: '60px 60px',
+                                'linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.08) 58%, rgba(0,0,0,0.5) 100%)',
                         }}
                     />
                 </div>
@@ -820,15 +818,15 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                 {/* ── Layout — two-column desktop, single-column mobile ── */}
                 <div className={`relative z-10 flex items-stretch w-full h-screen ${isMobile ? 'flex-col' : ''}`}>
                     {/* ═══ LEFT SECTION — Creative intro ═══ */}
-                    <div className={`flex flex-col justify-center ${isMobile ? 'flex-1 px-6 pt-16' : 'flex-1 px-6 lg:px-12 xl:px-24'}`}>
-                        {/* Stack */}
+                    <div className={`relative flex flex-col justify-center ${isMobile ? 'flex-1 px-6 pt-16' : 'flex-1 px-6 lg:px-12 xl:px-24'}`}>
+                        {/* Image stack */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.3 }}
-                            className="mb-6"
+                            className="mb-8"
                         >
-                            <div style={{ width: '160px', height: '160px' }}>
+                            <div className="h-[168px] w-[168px] sm:h-[180px] sm:w-[180px]">
                                 <Stack
                                     randomRotation
                                     sensitivity={150}
@@ -846,14 +844,14 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.4 }}
                         >
-                            <h1 className={`${isMobile ? 'text-4xl' : 'text-5xl lg:text-6xl'} font-semibold text-[#f7f8f8] tracking-[-0.022em] leading-none mb-2`}>
+                            <h1 className={`${isMobile ? 'text-4xl' : 'text-5xl lg:text-6xl'} font-semibold text-[#f7f8f8] tracking-normal leading-none mb-2 drop-shadow-[0_10px_34px_rgba(0,0,0,0.55)]`}>
                                 {PERSONA.name}
                             </h1>
-                            <p className="text-2xl text-[#7170ff] font-[510] mb-5 min-h-[1.75rem]">
+                            <p className="text-2xl text-[#87c7ff] font-[510] mb-5 min-h-[1.75rem] drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]">
                                 <RotatingText
                                     words={['Enterprise & SaaS Specialist', 'Information Architect L2', 'UX Designer', 'Interaction Designer', 'Senior Product Designer']}
                                     interval={2800}
-                                    className="text-[#7170ff]"
+                                    className="text-[#87c7ff]"
                                 />
                             </p>
                         </motion.div>
@@ -865,17 +863,17 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             transition={{ duration: 0.5, delay: 0.55 }}
                             className="mb-5"
                         >
-                            <div className="inline-flex items-center gap-2 bg-[#0f1011] border border-white/[0.08] rounded-lg px-4 py-2.5">
-                                <span className="text-[#7170ff] font-mono text-xs">{'>'}</span>
+                            <div className="inline-flex items-center gap-2 rounded-lg border border-white/[0.14] bg-black/35 px-4 py-2.5 shadow-[0_14px_44px_rgba(0,0,0,0.28)] backdrop-blur-md">
+                                <span className="text-[#80f2bd] font-mono text-xs">{'>'}</span>
                                 <code className="text-[#8a8f98] font-mono text-xs">
-                                    <span className="text-[#828fff]">const</span>{' '}
+                                    <span className="text-[#bcefff]">const</span>{' '}
                                     <span className="text-[#d0d6e0]">passion</span>{' '}
                                     <span className="text-[#62666d]">=</span>{' '}
                                     <span className="text-[#8a8f98]">
                                         "Designing for humans, powered by craft"
                                     </span>
                                 </code>
-                                <span className="w-2 h-4 bg-[#7170ff] animate-pulse rounded-sm" />
+                                <span className="w-2 h-4 bg-[#80f2bd] animate-pulse rounded-sm" />
                             </div>
                         </motion.div>
 
@@ -884,7 +882,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.65 }}
-                            className="text-[#8a8f98] text-base leading-relaxed max-w-md mb-8"
+                            className="text-[#c7ccd4] text-base leading-relaxed max-w-md mb-8 drop-shadow-[0_8px_24px_rgba(0,0,0,0.65)]"
                         >
                             {PERSONA.bio}
                         </motion.p>
@@ -916,24 +914,36 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                             initial={{ opacity: 0, x: 40 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: 0.3 }}
-                            className="w-[500px] xl:w-[640px] h-full"
+                            className="relative z-20 flex h-full w-[min(44vw,640px)] min-w-[520px] items-center justify-end py-5 pr-5 xl:py-8 xl:pr-10"
                         >
-                            <div className="w-full h-full border-l border-white/[0.04] bg-[#08090a] flex flex-col pt-12">
+                            <div className="relative flex h-full max-h-[calc(100vh-2.5rem)] w-full flex-col overflow-hidden rounded-[34px] border border-white/[0.34] bg-[rgba(188,219,244,0.13)] pt-8 shadow-[0_26px_80px_rgba(3,12,20,0.34),0_1px_0_rgba(255,255,255,0.28)_inset] backdrop-blur-[44px] xl:max-h-[calc(100vh-4rem)]">
+                                <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.13)_0%,rgba(107,143,171,0.08)_42%,rgba(5,16,28,0.2)_100%)]"
+                                />
+                                <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_16%,rgba(245,250,255,0.2)_0%,rgba(173,198,255,0.06)_32%,rgba(5,16,28,0)_64%)]"
+                                />
+                                <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/55 to-transparent"
+                                />
                                 {/* Chat messages area */}
-                                <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 scrollbar-thin scroll-smooth flex flex-col">
+                                <div ref={chatContainerRef} className="relative z-10 flex flex-1 flex-col overflow-y-auto px-6 py-4 scrollbar-thin scroll-smooth">
                                     {messages.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center flex-1 gap-4 py-8">
                                             <div className="w-16 h-16 relative flex items-center justify-center mb-2">
-                                                <div className="absolute inset-0 bg-[#5e6ad2]/15 rounded-2xl blur-xl pb-2"></div>
-                                                <div className="w-14 h-14 rounded-2xl bg-[#191a1b] border border-[#5e6ad2]/30 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(94,106,210,0.25)]">
-                                                    <Sparkles className="w-6 h-6 text-[#7170ff]" />
+                                                <div className="absolute inset-0 bg-[rgba(226,240,255,0.22)] rounded-2xl blur-xl pb-2"></div>
+                                                <div className="w-14 h-14 rounded-2xl bg-[rgba(8,24,40,0.38)] border border-white/[0.38] flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(173,199,255,0.2)] backdrop-blur-[34px]">
+                                                    <Sparkles className="w-6 h-6 text-[#dce8ff]" />
                                                 </div>
                                             </div>
                                             <div className="text-center mb-6">
-                                                <p className="text-base font-semibold text-[#f7f8f8] mb-1.5">
+                                                <p className="text-base font-semibold text-[#ffffff] mb-1.5 drop-shadow-[0_2px_18px_rgba(3,10,18,0.88)]">
                                                     Portfolio AI Assistant
                                                 </p>
-                                                <p className="text-[13px] text-[#8a8f98] max-w-[280px]">
+                                                <p className="text-[13px] text-[#edf5ff] max-w-[280px] drop-shadow-[0_1px_14px_rgba(3,10,18,0.82)]">
                                                     Ask me anything about Sai Charan's work,
                                                     skills, and projects.
                                                 </p>
@@ -943,9 +953,10 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                             <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
                                                 {STARTER_PROMPTS.map((sp) => (
                                                     <button
+                                                        type="button"
                                                         key={sp.label}
                                                         onClick={() => sendMessage(sp.prompt)}
-                                                        className="w-full text-left px-5 py-3.5 rounded-xl border border-white/[0.05] bg-[#0f1011] text-[13px] text-[#8a8f98] hover:text-[#f7f8f8] hover:border-white/[0.08] hover:bg-[#191a1b] transition-all flex items-center group"
+                                                        className={`w-full text-left px-5 py-3.5 rounded-xl text-[13px] font-medium transition-all flex items-center group ${ASSISTANT_GLASS_BUTTON_CLASS}`}
                                                     >
                                                         <span className="group-hover:translate-x-1 inline-block transition-transform">
                                                             {sp.label}
@@ -984,23 +995,26 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                 </div>
 
                                 {/* Chat input area */}
-                                <div className="p-4 bg-[#08090a] flex flex-col gap-2">
+                                <div className="relative z-20 m-4 mt-0 flex flex-col gap-2 rounded-[28px] border border-white/[0.18] bg-[rgba(5,14,24,0.24)] p-3 shadow-[0_18px_48px_rgba(3,12,20,0.24),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-[38px]">
                                     {/* Attachment Previews */}
                                     {attachments.length > 0 && (
                                         <div className="flex flex-wrap gap-2 px-2 pt-2">
                                             {attachments.map((att, idx) => (
-                                                <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#191a1b]">
+                                                <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/[0.28] bg-[rgba(8,24,40,0.42)] shadow-[0_10px_26px_rgba(5,16,28,0.18)] backdrop-blur-[30px]">
                                                     {att.mimeType.startsWith('image/') && att.previewUrl ? (
                                                         <img src={att.previewUrl} alt="preview" className="w-16 h-16 object-cover" />
                                                     ) : (
                                                         <div className="w-16 h-16 flex flex-col items-center justify-center p-1">
-                                                            <FileIcon className="w-5 h-5 text-[#8a8f98] mb-1" />
-                                                            <span className="text-[9px] text-[#8a8f98] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase() || 'FILE'}</span>
+                                                            <FileIcon className="w-5 h-5 text-[#d6e3f2] mb-1" />
+                                                            <span className="text-[9px] text-[#eef5ff] truncate w-full text-center">{att.file.name.split('.').pop()?.toUpperCase() || 'FILE'}</span>
                                                         </div>
                                                     )}
                                                     <button
+                                                        type="button"
                                                         onClick={() => removeAttachment(idx)}
-                                                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                                                        aria-label={`Remove ${att.file.name}`}
+                                                        title={`Remove ${att.file.name}`}
+                                                        className={`absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-black/80 ${ASSISTANT_FOCUS_CLASS}`}
                                                     >
                                                         <X className="w-3 h-3" />
                                                     </button>
@@ -1009,7 +1023,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                         </div>
                                     )}
 
-                                    <div className="bg-[#0f1011] border border-white/[0.06] rounded-[20px] shadow-sm relative focus-within:border-white/[0.12] transition-colors duration-200">
+                                    <div className="bg-[rgba(8,24,40,0.42)] border border-white/[0.34] rounded-[20px] shadow-[0_18px_42px_rgba(5,16,28,0.2),inset_0_1px_0_rgba(255,255,255,0.16)] relative focus-within:border-white/[0.58] focus-within:ring-2 focus-within:ring-[#eef6ff]/22 transition-colors duration-200 backdrop-blur-[36px]">
                                         {/* Slash command menu */}
                                         <AnimatePresence>
                                             {isSlashMenuOpen && (
@@ -1018,30 +1032,31 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="absolute bottom-[calc(100%+8px)] left-0 w-full bg-[#0f1011] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 z-[100]"
+                                                    className={`absolute bottom-[calc(100%+8px)] left-0 w-full rounded-xl overflow-hidden py-1.5 z-[100] ${ASSISTANT_MENU_CLASS}`}
                                                 >
-                                                    <div className="px-3 py-1.5 text-xs font-semibold text-[#8a8f98] uppercase tracking-wider">
+                                                    <div className="px-3 py-1.5 text-xs font-semibold text-[#dbe7f7] uppercase tracking-wider">
                                                         Recruiter Questions
                                                     </div>
                                                     <div className="max-h-[200px] overflow-y-auto scrollbar-thin">
                                                         {filteredCommands.map((cmd, idx) => (
                                                             <button
+                                                                type="button"
                                                                 key={cmd.id}
                                                                 onMouseEnter={() => setSlashIndex(idx)}
                                                                 onClick={() => handleSelectCommand(cmd.text)}
-                                                                className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${slashIndex === idx
-                                                                    ? 'bg-white/10 text-[#f7f8f8]'
-                                                                    : 'text-[#8a8f98] hover:bg-white/5 hover:text-[#f7f8f8]'
+                                                                className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${ASSISTANT_FOCUS_CLASS} ${slashIndex === idx
+                                                                    ? 'bg-white/[0.18] text-white'
+                                                                    : 'text-[#e3edf9] hover:bg-white/[0.12] hover:text-white'
                                                                     }`}
                                                             >
                                                                 <span className="flex flex-col gap-0.5">
-                                                                    <span className="font-medium text-[#7170ff]">{cmd.label}</span>
+                                                                    <span className="font-medium text-[#d8e2ff]">{cmd.label}</span>
                                                                     <span className="text-[11px] opacity-80 truncate max-w-[400px]">{cmd.text}</span>
                                                                 </span>
                                                             </button>
                                                         ))}
                                                         {filteredCommands.length === 0 && (
-                                                            <div className="px-3 py-2 text-[12px] text-[#62666d]">No commands found</div>
+                                                            <div className="px-3 py-2 text-[12px] text-[#d0dbea]">No commands found</div>
                                                         )}
                                                     </div>
                                                 </motion.div>
@@ -1056,7 +1071,7 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                             onPaste={handlePaste}
                                             placeholder={attachments.length > 0 ? "Add a message..." : "Describe what you want to create or type / for recruiter questions..."}
                                             rows={1}
-                                            className="w-full bg-transparent text-[#d0d6e0] text-[13px] px-4 py-3 min-h-[44px] max-h-[200px] placeholder-[#62666d] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-[20px]"
+                                            className="w-full bg-transparent text-[#f3f8ff] text-[13px] px-4 py-3 min-h-[44px] max-h-[200px] placeholder-[#d0dbea] resize-none outline-none leading-relaxed overflow-y-auto scrollbar-none rounded-t-[20px]"
                                         />
                                         <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
                                             <div className="flex items-center gap-2">
@@ -1068,20 +1083,30 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                                     multiple
                                                     accept="image/*,application/pdf,.doc,.docx,.txt"
                                                 />
-                                                <button onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full flex items-center justify-center text-[#8a8f98] hover:text-[#d0d6e0] hover:bg-white/5 transition-colors">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    aria-label="Attach files"
+                                                    title="Attach files"
+                                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[#d6e3f2] hover:text-white hover:bg-white/15 transition-colors ${ASSISTANT_FOCUS_CLASS}`}
+                                                >
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                                                 </button>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <div className="relative">
-                                                    <div
+                                                    <button
+                                                        type="button"
                                                         onClick={() => setIsIntentDropdownOpen(!isIntentDropdownOpen)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] text-[#8a8f98] bg-[#191a1b] hover:text-[#d0d6e0] hover:bg-white/10 transition-colors cursor-pointer border border-white/[0.04]"
+                                                        aria-haspopup="menu"
+                                                        aria-expanded={isIntentDropdownOpen}
+                                                        title="Change conversation intent"
+                                                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] text-[#f1f7ff] bg-[rgba(8,24,40,0.38)] hover:text-white hover:bg-[rgba(18,42,62,0.52)] transition-colors cursor-pointer border border-white/[0.32] shadow-[0_8px_20px_rgba(5,16,28,0.16)] backdrop-blur-[30px] ${ASSISTANT_FOCUS_CLASS}`}
                                                     >
                                                         {intent === 'hire' ? <Briefcase className="w-3 h-3 text-emerald-400" /> : <Compass className="w-3 h-3 text-blue-400" />}
                                                         {intent === 'hire' ? 'Intend to Hire' : 'Just Exploring'}
                                                         <ChevronDown className={`w-3 h-3 transition-transform ${isIntentDropdownOpen ? 'rotate-180' : ''}`} />
-                                                    </div>
+                                                    </button>
 
                                                     <AnimatePresence>
                                                         {isIntentDropdownOpen && (
@@ -1090,11 +1115,12 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                                                 transition={{ duration: 0.15 }}
-                                                                className="absolute bottom-[calc(100%+8px)] left-0 w-40 bg-[#0f1011] border border-white/[0.08] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1 z-[100]"
+                                                                className={`absolute bottom-[calc(100%+8px)] left-0 w-40 rounded-xl overflow-hidden py-1 z-[100] ${ASSISTANT_MENU_CLASS}`}
                                                             >
                                                                 <button
+                                                                    type="button"
                                                                     onClick={() => handleIntentChange('hire')}
-                                                                    className="w-full text-left px-3 py-2 text-[11px] text-[#8a8f98] hover:bg-white/5 hover:text-[#f7f8f8] flex items-center justify-between transition-colors"
+                                                                    className={`w-full text-left px-3 py-2 text-[11px] text-[#e3edf9] hover:bg-white/[0.12] hover:text-white flex items-center justify-between transition-colors ${ASSISTANT_FOCUS_CLASS}`}
                                                                 >
                                                                     <span className="flex items-center gap-2">
                                                                         <Briefcase className="w-3 h-3 text-emerald-400" /> Intend to Hire
@@ -1102,8 +1128,9 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                                                     {intent === 'hire' && <Check className="w-3 h-3" />}
                                                                 </button>
                                                                 <button
+                                                                    type="button"
                                                                     onClick={() => handleIntentChange('explore')}
-                                                                    className="w-full text-left px-3 py-2 text-[11px] text-[#8a8f98] hover:bg-white/5 hover:text-[#f7f8f8] flex items-center justify-between transition-colors"
+                                                                    className={`w-full text-left px-3 py-2 text-[11px] text-[#e3edf9] hover:bg-white/[0.12] hover:text-white flex items-center justify-between transition-colors ${ASSISTANT_FOCUS_CLASS}`}
                                                                 >
                                                                     <span className="flex items-center gap-2">
                                                                         <Compass className="w-3 h-3 text-blue-400" /> Just Exploring
@@ -1115,11 +1142,14 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                                     </AnimatePresence>
                                                 </div>
                                                 <button
+                                                    type="button"
                                                     onClick={handleSend}
                                                     disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
+                                                    aria-label="Send message"
+                                                    title="Send message"
                                                     className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${((inputValue.trim() || attachments.length > 0) && !isTyping)
-                                                        ? 'bg-white text-black hover:bg-[#d0d6e0] shadow-md'
-                                                        : 'bg-[#23252a] text-[#62666d] cursor-not-allowed'
+                                                        ? `bg-white text-[#05111d] hover:bg-[#dfeaff] shadow-md ${ASSISTANT_FOCUS_CLASS}`
+                                                        : 'bg-white/[0.16] text-[#b8c4d4] cursor-not-allowed'
                                                         }`}
                                                 >
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${(inputValue.trim() || attachments.length > 0) && !isTyping ? 'animate-in slide-in-from-bottom-2 fade-in duration-200' : ''}`}><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
@@ -1131,8 +1161,9 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                                     {/* New chat button */}
                                     <div className="flex justify-center mt-3">
                                         <button
+                                            type="button"
                                             onClick={() => setMessages([])}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] text-[#62666d] hover:text-[#8a8f98] transition-colors"
+                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] text-[#dbe7f7] hover:text-white hover:bg-white/[0.12] transition-colors ${ASSISTANT_FOCUS_CLASS}`}
                                         >
                                             <Sparkles className="w-3.5 h-3.5" />
                                             New chat
@@ -1176,119 +1207,6 @@ export default function LandingPage({ onEnterCanvas }: LandingPageProps) {
                 )}
             </motion.div>
 
-            {/* ── Canvas Preview / Scroll Transition ────────────────────── */}
-            {/* Fixed wrapper holding the expanding canvas representation */}
-            <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center overflow-hidden">
-                <motion.div
-                    className="w-full h-full flex flex-col bg-[#0f1011] border border-white/[0.06] shadow-2xl shadow-black/50 pointer-events-auto cursor-pointer group"
-                    style={{
-                        scale: canvasScale,
-                        y: canvasY,
-                        opacity: canvasOpacity,
-                        borderRadius: canvasRadius,
-                    }}
-                    onClick={() => {
-                        rawProgress.set(1);
-                        setTimeout(() => onEnterCanvas(), 100);
-                    }}
-                >
-                    <div className="flex-1 relative overflow-hidden">
-                        {/* Mock canvas content inside preview */}
-                        <div className="absolute inset-0">
-                            {/* Grid pattern */}
-                            <div
-                                className="absolute inset-0 opacity-[0.04]"
-                                style={{
-                                    backgroundImage:
-                                        'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)',
-                                    backgroundSize: '40px 40px',
-                                }}
-                            />
-
-                            {/* Mock left panel */}
-                            <div className="absolute top-4 left-4 w-[180px] h-[calc(100%-32px)] bg-white/[0.03] border border-white/[0.04] rounded-xl backdrop-blur-md">
-                                <div className="p-3 border-b border-white/[0.04]">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-5 h-5 rounded-md bg-[#5e6ad2]" />
-                                        <div className="w-16 h-2 bg-white/10 rounded-full" />
-                                    </div>
-                                </div>
-                                <div className="p-3 space-y-2">
-                                    {[1, 2, 3, 4, 5].map((i) => (
-                                        <div
-                                            key={i}
-                                            className="flex items-center gap-2 p-1.5 rounded-md"
-                                            style={{
-                                                background: i === 1 ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                            }}
-                                        >
-                                            <div
-                                                className="w-4 h-4 rounded text-[8px] flex items-center justify-center text-white/30 font-mono"
-                                                style={{
-                                                    background: i === 1 ? 'rgba(199,75,24,0.2)' : 'rgba(255,255,255,0.03)',
-                                                }}
-                                            >
-                                                {i}
-                                            </div>
-                                            <div
-                                                className="h-1.5 rounded-full bg-white/10"
-                                                style={{ width: `${40 + Math.random() * 40}%` }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Mock canvas cards */}
-                            <div className="absolute top-8 left-[220px] right-8 bottom-8 flex justify-center items-center">
-                                <div className="w-[400px] h-[240px] rounded-xl bg-[#191a1b] border border-white/[0.08] p-6 shadow-xl">
-                                    <div className="w-32 h-3 bg-[#C74B18]/40 rounded-full mb-4" />
-                                    <div className="w-64 h-3.5 bg-white/10 rounded-full mb-3" />
-                                    <div className="w-48 h-2.5 bg-white/5 rounded-full mb-6" />
-                                    <div className="flex gap-2">
-                                        {['#C74B18', '#F59E0B', '#10B981'].map((c) => (
-                                            <div
-                                                key={c}
-                                                className="px-3 py-1 rounded text-[8px] font-mono"
-                                                style={{
-                                                    background: `${c}20`,
-                                                    color: c,
-                                                }}
-                                            >
-                                                TAG
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Magnifying overlay effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#08090a] via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
-
-                        {/* Enter canvas CTA */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="px-6 py-3 rounded-xl bg-[#5e6ad2] text-white text-sm font-[590] shadow-lg shadow-[#5e6ad2]/20 flex items-center gap-2">
-                                <Sparkles className="w-4 h-4" />
-                                Interactive Canvas Ready
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bottom bar */}
-                    <div className="px-5 py-3 border-t border-white/[0.04] flex items-center justify-between bg-[#0f1011]">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-emerald-400/60" />
-                            <span className="text-[10px] text-[#62666d] font-mono">
-                                6 PROJECTS · INTERACTIVE CANVAS
-                            </span>
-                        </div>
-                        <span className="text-[10px] text-[#62666d] font-mono">
-                            CLICK TO EXPLORE →
-                        </span>
-                    </div>
-                </motion.div>
-            </div>
         </div>
     );
 }

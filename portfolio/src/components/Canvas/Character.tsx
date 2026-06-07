@@ -16,6 +16,7 @@ interface Props {
     elementBounds?: ElementBounds[];
     message?: string | null;
     canvasScale?: number;
+    onClick?: () => void;
 }
 
 /**
@@ -192,7 +193,7 @@ function computePath(
 }
 
 export default function Character({
-    targetX, targetY, color, elementBounds = [], message = null, canvasScale = 1,
+    targetX, targetY, color, elementBounds = [], message = null, canvasScale = 1, onClick,
 }: Props) {
     // ── Drop-entrance state ──────────────────────────────────────────────
     // The character enters head-first (upside down, rotated 180°), falls
@@ -528,10 +529,13 @@ export default function Character({
         };
     }, []);
 
+    const interactive = !!onClick;
     return (
         <div
             ref={charRef}
-            className="absolute w-[36px] h-[44px] -ml-[18px] -mt-[44px] pointer-events-none z-[65] will-change-transform"
+            onClick={onClick}
+            title={interactive ? 'Ask Crew about this project' : undefined}
+            className={`absolute w-[36px] h-[44px] -ml-[18px] -mt-[44px] z-[65] will-change-transform ${interactive ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
             style={{
                 transform: `translate(${Math.round(posRef.current.x)}px, ${Math.round(posRef.current.y)}px)`,
                 transformOrigin: '18px 44px',

@@ -7,9 +7,10 @@ const ZOOM_SENSITIVITY = 0.001;
 
 interface UseCanvasOptions {
   defaultTransform?: CanvasTransform;
+  disabled?: boolean;
 }
 
-export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
+export function useCanvas({ defaultTransform, disabled = false }: UseCanvasOptions = {}) {
   const [transform, setTransform] = useState<CanvasTransform>(
     defaultTransform ?? { x: 0, y: 0, scale: 1 }
   );
@@ -26,6 +27,7 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
   }, []);
 
   const handleWheel = useCallback((e: WheelEvent) => {
+    if (disabled) return;
     e.preventDefault();
 
     if (e.ctrlKey || e.metaKey) {
@@ -55,25 +57,27 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
         y: prev.y - e.deltaY,
       }));
     }
-  }, []);
+  }, [disabled]);
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || disabled) return;
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [handleWheel]);
+  }, [handleWheel, disabled]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (disabled) return;
     // Only pan on middle mouse or space+click (handled separately)
     if (e.button === 1 || e.button === 2) {
       e.preventDefault();
       setIsPanning(true);
       panStart.current = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y };
     }
-  }, [transform]);
+  }, [transform, disabled]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (disabled) return;
     if (!isPanning || !panStart.current) return;
     const dx = e.clientX - panStart.current.x;
     const dy = e.clientY - panStart.current.y;
@@ -82,12 +86,13 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
       x: panStart.current!.tx + dx,
       y: panStart.current!.ty + dy,
     }));
-  }, [isPanning]);
+  }, [isPanning, disabled]);
 
   const handleMouseUp = useCallback(() => {
+    if (disabled) return;
     setIsPanning(false);
     panStart.current = null;
-  }, []);
+  }, [disabled]);
 
   // Space + drag panning
   const spaceDown = useRef(false);
@@ -95,6 +100,7 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
   const [isSpacePanning, setIsSpacePanning] = useState(false);
 
   useEffect(() => {
+    if (disabled) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault();
@@ -114,17 +120,19 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, []);
+  }, [disabled]);
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
+    if (disabled) return;
     if (spaceDown.current) {
       e.preventDefault();
       setIsSpacePanning(true);
       spacePanStart.current = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y };
     }
-  }, [transform]);
+  }, [transform, disabled]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent) => {
+    if (disabled) return;
     if (!isSpacePanning || !spacePanStart.current) return;
     const dx = e.clientX - spacePanStart.current.x;
     const dy = e.clientY - spacePanStart.current.y;
@@ -133,14 +141,15 @@ export function useCanvas({ defaultTransform }: UseCanvasOptions = {}) {
       x: spacePanStart.current!.tx + dx,
       y: spacePanStart.current!.ty + dy,
     }));
-  }, [isSpacePanning]);
+  }, [isSpacePanning, disabled]);
 
   const handleCanvasMouseUp = useCallback(() => {
+    if (disabled) return;
     if (isSpacePanning) {
       setIsSpacePanning(false);
       spacePanStart.current = null;
     }
-  }, [isSpacePanning]);
+  }, [isSpacePanning, disabled]);
 
   const zoomIn = useCallback(() => {
     const rect = containerRef.current?.getBoundingClientRect();

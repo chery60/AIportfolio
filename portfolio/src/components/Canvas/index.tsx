@@ -24,6 +24,9 @@ interface Props {
   cursors?: Record<string, { x: number, y: number, projectId: string }>;
   localIdentity?: ActiveViewer | null;
   broadcastCursor?: (x: number, y: number) => void;
+  onCharacterClick?: () => void;
+  characterChatBubble?: string | null;
+  isPreviewOnly?: boolean;
 }
 
 export interface CanvasControlsRef {
@@ -53,6 +56,9 @@ export default function Canvas({
   cursors = {},
   localIdentity = null,
   broadcastCursor,
+  onCharacterClick,
+  characterChatBubble = null,
+  isPreviewOnly = false,
 }: Props) {
   const {
     transform,
@@ -71,7 +77,7 @@ export default function Canvas({
     fitToScreen,
     setDefaultTransform,
     animateTo,
-  } = useCanvas({ defaultTransform: project.defaultView });
+  } = useCanvas({ defaultTransform: project.defaultView, disabled: isPreviewOnly });
 
   const localColor = localIdentity?.color || '#7170ff';
 
@@ -152,7 +158,7 @@ export default function Canvas({
       y: el.y,
       width: el.width,
       height: el.height,
-      aiDescription: (el.data as any).aiDescription || null,
+      aiDescription: (el.data as { aiDescription?: string }).aiDescription ?? null,
     })),
     [project.canvasElements]
   );
@@ -197,7 +203,9 @@ export default function Canvas({
         try {
           const o = JSON.parse(offsetStr);
           offsetX = o.x; offsetY = o.y;
-        } catch { }
+        } catch {
+          // Malformed drag offsets fall back to the zero offset above.
+        }
       }
 
       const rect = containerRef.current?.getBoundingClientRect();
@@ -289,7 +297,7 @@ export default function Canvas({
         newElement = { id, type, x: gridX, y: gridY, width: 1000, height: 1000, data: { title: 'Comment Board' } };
         break;
       default:
-        newElement = { id, type: 'text-block', x: gridX, y: gridY, width: 200, height: 100, data: { content: `Unsupported type: ${type}`, variant: 'body' } } as any;
+        newElement = { id, type: 'text-block', x: gridX, y: gridY, width: 200, height: 100, data: { content: `Unsupported type: ${type}`, variant: 'body' } };
     }
 
     onAddElement(newElement);
@@ -299,22 +307,22 @@ export default function Canvas({
     <div
       ref={containerRef}
       className={`relative flex-1 overflow-hidden bg-[#F5F5F5] ${isGrabbing ? 'cursor-grabbing' : spaceDown.current ? 'cursor-grab' : 'cursor-default'}`}
-      onMouseDown={(e) => {
+      onMouseDown={isPreviewOnly ? undefined : (e) => {
         handleMouseDown(e);
         handleCanvasMouseDown(e);
       }}
-      onMouseMove={handleWrapperMouseMove}
-      onMouseUp={() => {
+      onMouseMove={isPreviewOnly ? undefined : handleWrapperMouseMove}
+      onMouseUp={isPreviewOnly ? undefined : () => {
         handleMouseUp();
         handleCanvasMouseUp();
       }}
-      onMouseLeave={() => {
+      onMouseLeave={isPreviewOnly ? undefined : () => {
         handleMouseUp();
         handleCanvasMouseUp();
       }}
-      onClick={handleBackgroundClick}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      onClick={isPreviewOnly ? undefined : handleBackgroundClick}
+      onDragOver={isPreviewOnly ? undefined : handleDragOver}
+      onDrop={isPreviewOnly ? undefined : handleDrop}
       style={{ cursor: isCommentMode ? 'crosshair' : 'default' }}
     >
       {/* Project transition overlay */}
@@ -366,8 +374,9 @@ export default function Canvas({
             targetY={mouseGridPos.y}
             color={localColor}
             elementBounds={elementBounds}
-            message={contextualTip}
+            message={characterChatBubble ?? contextualTip}
             canvasScale={transform.scale}
+            onClick={onCharacterClick}
           />
         )}
 

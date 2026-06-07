@@ -61,7 +61,7 @@ export default function MobileCaseStudyCard({ element }: Props) {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,255,0.55)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,255,0.78)' }}>
                     {data.description}
                 </p>
 
@@ -85,7 +85,7 @@ export default function MobileCaseStudyCard({ element }: Props) {
                                 >
                                     {m.value}
                                 </span>
-                                <span className="text-[10px] font-medium uppercase tracking-wide" style={{ color: 'rgba(240,240,255,0.35)' }}>
+                                <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'rgba(240,240,255,0.68)' }}>
                                     {m.label}
                                 </span>
                             </div>

@@ -209,7 +209,7 @@ export default function MobileGameZone({ element }: Props) {
                     </div>
                     <div>
                         <p className="text-sm font-bold text-white">{data.title}</p>
-                        <p className="text-[10px] text-white/30 font-mono">1 Player at a Time</p>
+                        <p className="text-[10px] text-white/70 font-mono">1 Player at a Time</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -217,7 +217,7 @@ export default function MobileGameZone({ element }: Props) {
                         className="w-2 h-2 rounded-full animate-pulse"
                         style={{ background: sessionState === 'waiting' ? '#10B981' : '#F59E0B' }}
                     />
-                    <span className="text-[10px] text-white/40 font-mono">
+                    <span className="text-[10px] text-white/70 font-mono">
                         {sessionState === 'waiting' ? 'LIVE' : 'READY'}
                     </span>
                 </div>
@@ -244,7 +244,7 @@ export default function MobileGameZone({ element }: Props) {
                                 isSpectator={true}
                             />
                         </div>
-                        <p className="text-[10px] text-white/30 text-center mt-3">
+                        <p className="text-[10px] text-white/70 text-center mt-3">
                             Play button will appear when the game is over
                         </p>
                     </div>
@@ -264,7 +264,7 @@ export default function MobileGameZone({ element }: Props) {
                         {/* Name input — collect before fullscreen */}
                         {!myName ? (
                             <div className="flex flex-col gap-2 w-full max-w-xs">
-                                <label className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">
+                                <label className="text-[10px] text-white/70 font-semibold uppercase tracking-wider">
                                     Enter your name
                                 </label>
                                 <input
@@ -275,7 +275,7 @@ export default function MobileGameZone({ element }: Props) {
                                     onKeyDown={e => e.key === 'Enter' && handlePlayTap()}
                                     placeholder="Your name..."
                                     maxLength={20}
-                                    className="w-full border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 outline-none focus:border-white/30 transition-colors"
+                                    className="w-full border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/60 outline-none focus:border-white/40 transition-colors"
                                     style={{ background: 'rgba(255,255,255,0.05)' }}
                                 />
                                 {nameError && <p className="text-red-400 text-xs">{nameError}</p>}
@@ -284,11 +284,11 @@ export default function MobileGameZone({ element }: Props) {
                             <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl w-full max-w-xs"
                                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }}>
                                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: SESSION_COLOR }} />
-                                <span className="text-white/70 text-sm flex-1">Playing as <span className="font-bold text-white">{myName}</span></span>
+                                <span className="text-white/80 text-sm flex-1">Playing as <span className="font-bold text-white">{myName}</span></span>
                                 <button
                                     type="button"
                                     onClick={() => { clearName(); setNameInput(''); }}
-                                    className="text-white/30 text-xs hover:text-white/60 transition-colors"
+                                    className="text-white/70 text-xs hover:text-white transition-colors"
                                 >
                                     change
                                 </button>
@@ -305,7 +305,7 @@ export default function MobileGameZone({ element }: Props) {
                             ].map((r, i) => (
                                 <div key={i} className="flex flex-col items-center gap-1">
                                     <span className="text-lg">{r.icon}</span>
-                                    <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center whitespace-pre-line leading-tight">
+                                    <span className="text-[9px] text-white/75 font-semibold uppercase tracking-wider text-center whitespace-pre-line leading-tight">
                                         {r.label}
                                     </span>
                                 </div>
@@ -325,7 +325,7 @@ export default function MobileGameZone({ element }: Props) {
                             {myName ? `Play as ${myName}` : 'Play Game'}
                         </button>
 
-                        <p className="text-white/20 text-[10px]">
+                        <p className="text-white/70 text-[10px]">
                             Game opens in landscape mode
                         </p>
                     </div>
@@ -363,7 +363,7 @@ export default function MobileGameZone({ element }: Props) {
                     {/* Close button */}
                     <button
                         onClick={handleExit}
-                        className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
+                        className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-colors z-10"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -377,7 +377,7 @@ export default function MobileGameZone({ element }: Props) {
 
                     {!myName ? (
                         <div className="flex flex-col gap-3 w-full max-w-sm">
-                            <label className="text-xs text-white/40 font-semibold uppercase tracking-wider">
+                            <label className="text-xs text-white/75 font-semibold uppercase tracking-wider">
                                 Enter your name
                             </label>
                             <input
@@ -389,7 +389,7 @@ export default function MobileGameZone({ element }: Props) {
                                 placeholder="Your name..."
                                 maxLength={20}
                                 autoFocus
-                                className="w-full border border-white/10 rounded-xl px-4 py-3 text-white text-base placeholder-white/20 outline-none focus:border-white/30 transition-colors"
+                                className="w-full border border-white/20 rounded-xl px-4 py-3 text-white text-base placeholder-white/60 outline-none focus:border-white/40 transition-colors"
                                 style={{ background: 'rgba(255,255,255,0.05)' }}
                             />
                             {nameError && <p className="text-red-400 text-xs">{nameError}</p>}
@@ -398,10 +398,10 @@ export default function MobileGameZone({ element }: Props) {
                         <div className="flex items-center gap-3 px-4 py-3 rounded-xl w-full max-w-sm"
                             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)' }}>
                             <div className="w-3 h-3 rounded-full" style={{ background: SESSION_COLOR }} />
-                            <span className="text-white/70 text-sm flex-1">Playing as <span className="font-bold text-white">{myName}</span></span>
+                            <span className="text-white/80 text-sm flex-1">Playing as <span className="font-bold text-white">{myName}</span></span>
                             <button
                                 onClick={() => { clearName(); setNameInput(''); }}
-                                className="text-white/30 text-xs hover:text-white/60 transition-colors"
+                                className="text-white/70 text-xs hover:text-white transition-colors"
                             >
                                 change
                             </button>
@@ -425,7 +425,7 @@ export default function MobileGameZone({ element }: Props) {
                             Rotate your device to landscape for best experience
                         </p>
                     )}
-                    <p className="text-white/20 text-xs text-center">
+                    <p className="text-white/70 text-xs text-center">
                         Tap anywhere to jump · Dodge obstacles!
                     </p>
                 </div>
@@ -438,11 +438,11 @@ export default function MobileGameZone({ element }: Props) {
                     <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06] flex-shrink-0">
                         <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: SESSION_COLOR }} />
                         <span className="text-xs font-semibold" style={{ color: SESSION_COLOR }}>{myName}</span>
-                        <span className="text-white/30 text-xs">— playing now</span>
+                        <span className="text-white/70 text-xs">— playing now</span>
                         {/* Exit button in playing state */}
                         <button
                             onClick={handleExit}
-                            className="ml-auto w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+                            className="ml-auto w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/75 hover:text-white hover:bg-white/20 transition-colors"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -475,13 +475,13 @@ export default function MobileGameZone({ element }: Props) {
                     {/* Score */}
                     <div className="flex flex-col items-center gap-2">
                         <span className="text-5xl">💀</span>
-                        <p className="text-white/50 text-xs font-bold uppercase tracking-widest">
+                        <p className="text-white/75 text-xs font-bold uppercase tracking-widest">
                             Eliminated
                         </p>
                         <span className="text-6xl font-black text-white font-mono leading-none">
                             {lastScore.toLocaleString()}
                         </span>
-                        <span className="text-white/30 text-sm">points</span>
+                        <span className="text-white/70 text-sm">points</span>
                     </div>
 
                     {/* Actions */}
@@ -539,7 +539,7 @@ export default function MobileGameZone({ element }: Props) {
                         {/* Exit */}
                         <button
                             onClick={handleExit}
-                            className="w-full py-2.5 rounded-xl border border-white/15 text-white/60 text-xs font-semibold hover:bg-white/5 hover:text-white/90 transition-all flex items-center justify-center gap-2 active:scale-95"
+                            className="w-full py-2.5 rounded-xl border border-white/20 text-white/75 text-xs font-semibold hover:bg-white/5 hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95"
                             style={{ background: 'rgba(255,255,255,0.04)' }}
                         >
                             <LogOut className="w-3.5 h-3.5" />
@@ -550,15 +550,15 @@ export default function MobileGameZone({ element }: Props) {
                         <div className="mt-1">
                             <div className="flex items-center gap-1.5 mb-2">
                                 <Trophy className="w-3 h-3 text-yellow-500/60" />
-                                <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Top 3</span>
+                                <span className="text-[10px] text-white/70 font-bold uppercase tracking-wider">Top 3</span>
                             </div>
                             {leaderboard.slice(0, 3).map((entry, idx) => (
                                 <div key={entry.id} className="flex items-center gap-2 py-1">
                                     <span className="text-xs w-5 text-center">
                                         {['🥇', '🥈', '🥉'][idx]}
                                     </span>
-                                    <span className="text-xs text-white/60 flex-1 truncate">{entry.player_name}</span>
-                                    <span className="text-xs text-white/40 font-mono">{entry.score.toLocaleString()}</span>
+                                    <span className="text-xs text-white/80 flex-1 truncate">{entry.player_name}</span>
+                                    <span className="text-xs text-white/70 font-mono">{entry.score.toLocaleString()}</span>
                                 </div>
                             ))}
                         </div>

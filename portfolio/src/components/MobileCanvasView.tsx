@@ -232,7 +232,7 @@ function MobileProjectHero({ project }: { project: Project }) {
                 >
                     {project.category}
                 </span>
-                <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.35)' }}>
+                <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.72)' }}>
                     {project.year}
                 </span>
             </div>
@@ -243,7 +243,7 @@ function MobileProjectHero({ project }: { project: Project }) {
             </h1>
 
             {/* Description */}
-            <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(240,240,255,0.55)' }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(240,240,255,0.78)' }}>
                 {project.description}
             </p>
 
@@ -255,8 +255,8 @@ function MobileProjectHero({ project }: { project: Project }) {
                         className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
                         style={{
                             background: 'rgba(255,255,255,0.07)',
-                            color: 'rgba(240,240,255,0.65)',
-                            border: '1px solid rgba(255,255,255,0.09)',
+                            color: 'rgba(240,240,255,0.86)',
+                            border: '1px solid rgba(255,255,255,0.14)',
                         }}
                     >
                         {tag}
@@ -304,7 +304,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                     <button
                         onClick={onBack}
                         className="w-9 h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
-                        style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(240,240,255,0.7)' }}
+                        style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(240,240,255,0.86)' }}
                     >
                         <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -312,7 +312,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                         <p className="text-sm font-bold truncate max-w-[150px]" style={{ color: '#f7f8f8' }}>
                             {project.title}
                         </p>
-                        <p className="text-[10px]" style={{ color: 'rgba(240,240,255,0.35)' }}>
+                        <p className="text-[10px] font-medium" style={{ color: 'rgba(240,240,255,0.72)' }}>
                             {project.category} · {project.year}
                         </p>
                     </div>
@@ -344,7 +344,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                     style={{
                                         background: 'rgba(255,255,255,0.10)',
                                         border: '2px solid #08090a',
-                                        color: 'rgba(240,240,255,0.6)',
+                                        color: 'rgba(240,240,255,0.84)',
                                         zIndex: 0,
                                     }}
                                 >
@@ -359,18 +359,18 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                         onClick={handlePrevProject}
                         disabled={currentIdx <= 0}
                         className="w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-25"
-                        style={{ color: 'rgba(240,240,255,0.5)' }}
+                        style={{ color: 'rgba(240,240,255,0.76)' }}
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="text-[10px] font-mono px-0.5" style={{ color: 'rgba(240,240,255,0.35)' }}>
+                    <span className="text-[10px] font-mono px-0.5" style={{ color: 'rgba(240,240,255,0.72)' }}>
                         {currentIdx + 1}/{PROJECTS.length}
                     </span>
                     <button
                         onClick={handleNextProject}
                         disabled={currentIdx >= PROJECTS.length - 1}
                         className="w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-25"
-                        style={{ color: 'rgba(240,240,255,0.5)' }}
+                        style={{ color: 'rgba(240,240,255,0.76)' }}
                     >
                         <ChevronRight className="w-4 h-4" />
                     </button>
@@ -380,7 +380,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                     <button
                         onClick={() => setShowProjectSwitcher(true)}
                         className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                        style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(240,240,255,0.55)' }}
+                        style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(240,240,255,0.82)' }}
                     >
                         <MoreVertical className="w-4 h-4" />
                     </button>
@@ -526,7 +526,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                 style={{ color: totalReactions > 0 ? '#ef4444' : 'rgba(240,240,255,0.7)', fill: totalReactions > 0 ? '#ef4444' : 'none' }}
                             />
                         </button>
-                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.5)' }}>
+                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.78)' }}>
                             {totalReactions > 0 ? totalReactions : 'Like'}
                         </span>
                     </div>
@@ -540,7 +540,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                         >
                             <MessageSquare className="w-5 h-5" style={{ color: 'rgba(240,240,255,0.7)', transform: 'scaleX(-1)' }} />
                         </button>
-                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.5)' }}>
+                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.78)' }}>
                             Note
                         </span>
                     </div>
@@ -554,7 +554,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                         >
                             <Send className="w-4.5 h-4.5" style={{ color: 'rgba(240,240,255,0.7)' }} />
                         </button>
-                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.5)' }}>
+                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.78)' }}>
                             Share
                         </span>
                     </div>

@@ -15,9 +15,10 @@ interface Props {
   onSaveAndExit?: () => void;
   isDirty?: boolean;
   onExit?: () => void;
+  isPreviewOnly?: boolean;
 }
 
-export default function LeftPanel({ selectedProject, onSelectProject, isEditing = false, onToggleEdit = () => { }, onSaveAndExit, isDirty = false, onExit }: Props) {
+export default function LeftPanel({ selectedProject, onSelectProject, isEditing = false, onToggleEdit = () => { }, onSaveAndExit, isDirty = false, onExit, isPreviewOnly = false }: Props) {
   const [activeTab, setActiveTab] = useState<'projects' | 'vibe-tools'>('projects');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showMainMenu, setShowMainMenu] = useState(false);
@@ -53,6 +54,8 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
   };
 
   useEffect(() => {
+    if (isPreviewOnly) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
         e.preventDefault();
@@ -77,7 +80,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onExit, showPassword, handleEditClick]);
+  }, [onExit, showPassword, handleEditClick, isPreviewOnly]);
 
   if (isCollapsed) {
     return (

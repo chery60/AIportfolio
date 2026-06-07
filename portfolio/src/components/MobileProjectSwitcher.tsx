@@ -53,7 +53,7 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                             <button
                                 onClick={onClose}
                                 className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(240,240,255,0.5)' }}
+                                style={{ background: 'rgba(255,255,255,0.09)', color: 'rgba(240,240,255,0.82)' }}
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -81,7 +81,7 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                                                 className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-mono font-bold text-sm"
                                                 style={{
                                                     background: isActive ? `${project.accentColor}25` : 'rgba(255,255,255,0.07)',
-                                                    color: isActive ? project.accentColor : 'rgba(240,240,255,0.35)',
+                                                    color: isActive ? project.accentColor : 'rgba(240,240,255,0.78)',
                                                 }}
                                             >
                                                 {String(idx + 1).padStart(2, '0')}
@@ -89,18 +89,18 @@ export default function MobileProjectSwitcher({ isOpen, onClose, selectedProject
                                             <div className="flex-1 min-w-0 text-left">
                                                 <p
                                                     className="text-sm font-semibold truncate"
-                                                    style={{ color: isActive ? '#f7f8f8' : 'rgba(247,248,248,0.6)' }}
+                                                    style={{ color: isActive ? '#f7f8f8' : 'rgba(247,248,248,0.84)' }}
                                                 >
                                                     {project.title}
                                                 </p>
-                                                <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(240,240,255,0.3)' }}>
+                                                <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(240,240,255,0.68)' }}>
                                                     {project.category} · {project.year}
                                                 </p>
                                             </div>
                                             {isActive ? (
                                                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: project.accentColor }} />
                                             ) : (
-                                                <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(240,240,255,0.2)' }} />
+                                                <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(240,240,255,0.7)' }} />
                                             )}
                                         </button>
                                     );

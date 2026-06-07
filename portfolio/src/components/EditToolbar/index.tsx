@@ -3,13 +3,14 @@ import {
     Type, Image as ImageIcon, StickyNote, MessageSquareQuote, MonitorPlay,
     Key, Check, Trash2, Loader2, MessageSquareDashed,
     LayoutDashboard, GitBranch, BarChart3, ListOrdered, Tag, Tags,
-    Film, Video, Figma, Network, Database, Gamepad2, MessageCircle, ArrowRight
+    Film, Video, Figma, Network, Database, Gamepad2, MessageCircle, ArrowRight,
+    type LucideIcon
 } from 'lucide-react';
 import type { CanvasElementType, Project } from '../../types';
 import { useComments } from '../../hooks/useComments';
 
 /* ── Master registry: every CanvasElementType → icon + label + accent color ── */
-const ELEMENT_REGISTRY: Record<CanvasElementType, { label: string; icon: React.ElementType; color: string }> = {
+const ELEMENT_REGISTRY: Record<CanvasElementType, { label: string; icon: LucideIcon; color: string }> = {
     'case-study-card':   { label: 'Case Study',    icon: LayoutDashboard,   color: '#3B82F6' },
     'sticky-note':       { label: 'Sticky Note',   icon: StickyNote,        color: '#F59E0B' },
     'image-frame':       { label: 'Image Frame',   icon: ImageIcon,         color: '#10B981' },
@@ -106,32 +107,35 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                             Components used in this project. Drag to add a new instance.
                         </p>
                         <div className="grid grid-cols-2 gap-2">
-                            {projectComponents.map((comp) => (
-                                <div
-                                    key={comp.type}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, comp.type)}
-                                    className="group relative flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02] hover:shadow-sm"
-                                >
-                                    {/* Count badge */}
-                                    <span
-                                        className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full"
-                                        style={{ backgroundColor: `${comp.color}18`, color: comp.color }}
-                                    >
-                                        ×{comp.count}
-                                    </span>
+                            {projectComponents.map((comp) => {
+                                const Icon = comp.icon;
+                                return (
                                     <div
-                                        className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm transition-transform group-hover:scale-110"
-                                        style={{ backgroundColor: `${comp.color}15`, color: comp.color }}
+                                        key={comp.type}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, comp.type)}
+                                        className="group relative flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02] hover:shadow-sm"
                                     >
-                                        <comp.icon className="w-4 h-4" />
+                                        {/* Count badge */}
+                                        <span
+                                            className="absolute top-1.5 right-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full"
+                                            style={{ backgroundColor: `${comp.color}18`, color: comp.color }}
+                                        >
+                                            ×{comp.count}
+                                        </span>
+                                        <div
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm transition-transform group-hover:scale-110"
+                                            style={{ backgroundColor: `${comp.color}15`, color: comp.color }}
+                                        >
+                                            <Icon className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-[10px] font-semibold text-text-primary text-center leading-tight">
+                                            {comp.label}
+                                        </span>
+                                        <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
                                     </div>
-                                    <span className="text-[10px] font-semibold text-text-primary text-center leading-tight">
-                                        {comp.label}
-                                    </span>
-                                    <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
@@ -142,6 +146,7 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                     <div className="grid grid-cols-2 gap-2 mt-3">
                         {GENERIC_ELEMENTS.map((type) => {
                             const el = ELEMENT_REGISTRY[type];
+                            const Icon = el.icon;
                             return (
                                 <div
                                     key={type}
@@ -153,7 +158,7 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                                         className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm"
                                         style={{ backgroundColor: `${el.color}15`, color: el.color }}
                                     >
-                                        <el.icon className="w-4 h-4" />
+                                        <Icon className="w-4 h-4" />
                                     </div>
                                     <span className="text-[10px] font-semibold text-text-primary text-center">
                                         {el.label}
