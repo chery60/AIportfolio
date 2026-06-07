@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, type PanInfo } from 'motion/react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import './Stack.css';
 
 interface CardRotateProps {
@@ -7,10 +7,9 @@ interface CardRotateProps {
   onSendToBack: () => void;
   sensitivity: number;
   disableDrag?: boolean;
-  layer: number;
 }
 
-function CardRotate({ children, onSendToBack, sensitivity, disableDrag = false, layer }: CardRotateProps) {
+function CardRotate({ children, onSendToBack, sensitivity, disableDrag = false }: CardRotateProps) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotateX = useTransform(y, [-100, 100], [60, -60]);
@@ -27,7 +26,7 @@ function CardRotate({ children, onSendToBack, sensitivity, disableDrag = false, 
 
   if (disableDrag) {
     return (
-      <motion.div className="card-rotate-disabled" style={{ x: 0, y: 0, zIndex: layer }}>
+      <motion.div className="card-rotate-disabled" style={{ x: 0, y: 0 }}>
         {children}
       </motion.div>
     );
@@ -36,7 +35,7 @@ function CardRotate({ children, onSendToBack, sensitivity, disableDrag = false, 
   return (
     <motion.div
       className="card-rotate"
-      style={{ x, y, rotateX, rotateY, zIndex: layer }}
+      style={{ x, y, rotateX, rotateY }}
       drag
       dragConstraints={{ top: 0, right: 0, bottom: 0, left: 0 }}
       dragElastic={0.6}
@@ -66,27 +65,29 @@ const DEFAULT_CARDS = [
     id: 1,
     src: 'img-cat.png',
     alt: 'With my cat',
-    className: 'card-image card-image--portrait card-image--cat',
+    className: 'card-image',
   },
   {
     id: 2,
     src: 'img-teddy.png',
     alt: 'With teddy bear',
-    className: 'card-image card-image--portrait card-image--teddy',
+    className: 'card-image',
   },
   {
     id: 3,
     src: 'img-lego-car.png',
     alt: 'Lego BMW M3',
-    className: 'card-image card-image--contain card-image--lego',
+    className: 'card-image',
   },
   {
     id: 4,
     src: 'img-watercolor.png',
     alt: 'Watercolor portrait',
-    className: 'card-image card-image--portrait card-image--watercolor',
+    className: 'card-image',
   },
 ];
+
+const getStackRotation = (id: number) => ((id * 17) % 11) - 5;
 
 export default function Stack({
   randomRotation = false,
@@ -124,20 +125,6 @@ export default function Stack({
     }));
   });
 
-  useEffect(() => {
-    if (cards.length) {
-      setStack(cards.map((content, index) => ({ id: index + 1, content })));
-    }
-  }, [cards]);
-
-  const randomRotations = useRef<Map<number, number>>(new Map());
-  const getRandomRotation = (id: number) => {
-    if (!randomRotations.current.has(id)) {
-      randomRotations.current.set(id, Math.random() * 10 - 5);
-    }
-    return randomRotations.current.get(id)!;
-  };
-
   const sendToBack = (id: number) => {
     setStack(prev => {
       const newStack = [...prev];
@@ -165,14 +152,13 @@ export default function Stack({
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
     >
       {stack.map((card, index) => {
-        const randomRotate = randomRotation ? getRandomRotation(card.id) : 0;
+        const randomRotate = randomRotation ? getStackRotation(card.id) : 0;
         return (
           <CardRotate
             key={card.id}
             onSendToBack={() => sendToBack(card.id)}
             sensitivity={sensitivity}
             disableDrag={shouldDisableDrag}
-            layer={index + 1}
           >
             <motion.div
               className="card"

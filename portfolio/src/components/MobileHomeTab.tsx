@@ -61,8 +61,8 @@ export default function MobileHomeTab() {
 
         {/* Stack */}
         <ScrollReveal delay={0.05} yOffset={20} blur="8px">
-          <div style={{ height: 'clamp(146px, 38vw, 172px)' }}>
-            <div style={{ width: 'clamp(146px, 38vw, 172px)', height: 'clamp(146px, 38vw, 172px)' }}>
+          <div style={{ height: 160 }}>
+            <div style={{ width: 160, height: 160 }}>
               <Stack
                 randomRotation
                 sensitivity={150}
