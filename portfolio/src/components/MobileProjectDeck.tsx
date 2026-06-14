@@ -12,6 +12,7 @@ const SWIPE_THRESHOLD = 88;
 const VELOCITY_THRESHOLD = 480;
 const COMMIT_DELAY_MS = 280;
 
+// Card content only — no open button (button lives outside the drag area)
 function ProjectCard({ project, index, layer }: { project: Project; index: number; layer: number }) {
   return (
     <div
@@ -27,13 +28,13 @@ function ProjectCard({ project, index, layer }: { project: Project; index: numbe
       <div className="absolute inset-0 opacity-[0.16] mix-blend-soft-light bg-[linear-gradient(90deg,rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.22)_1px,transparent_1px)] bg-[size:34px_34px]" />
 
       <div className="relative flex h-full flex-col justify-between p-5">
+        {/* Index badge — top left (↗ button is rendered outside the drag area) */}
         <div className="flex items-center justify-between">
           <span className="rounded-full border border-white/25 bg-white/12 px-3 py-1 text-[12px] font-black tabular-nums text-white shadow-sm backdrop-blur-md">
             {String(index + 1).padStart(2, '0')}
           </span>
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white backdrop-blur-md">
-            <ArrowUpRight className="h-4 w-4" />
-          </span>
+          {/* Placeholder so layout matches — invisible */}
+          <span className="h-10 w-10" aria-hidden="true" />
         </div>
 
         <div>
@@ -86,7 +87,7 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
   const activeProject = deck[0];
   const visibleCards = deck.slice(0, Math.min(deck.length, 4));
 
-  // Swipe LEFT → card shrinks and sinks to back of stack
+  // Swipe LEFT → current card to back of stack (next project)
   const sendTopToBack = () => {
     if (!activeProject || committingId) return;
     const swipedProject = activeProject;
@@ -108,13 +109,13 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
     }, COMMIT_DELAY_MS);
   };
 
-  // Swipe RIGHT → open project immediately; AnimatePresence handles the enter transition
-  const expandAndOpen = () => {
-    if (!activeProject || committingId) return;
+  // Swipe RIGHT → undo last swipe (previous project returns to front)
+  const bringFromBack = () => {
+    if (committingId) return;
+    setRotatedIds(current => current.slice(0, -1));
+    suppressNextClickRef.current = false;
     dragDistanceRef.current = 0;
     isDraggingRef.current = false;
-    suppressNextClickRef.current = false;
-    onOpenProject(activeProject);
   };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -135,7 +136,7 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
     }
 
     if (info.offset.x > 0) {
-      expandAndOpen();   // swipe right → open project
+      bringFromBack();   // swipe right → previous card
     } else {
       sendTopToBack();   // swipe left → next card
     }
@@ -144,8 +145,9 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
   if (!activeProject) return null;
 
   return (
-    <div className="relative mx-auto flex min-h-0 w-full max-w-[430px] flex-1 items-start justify-center">
-      <div className="relative mx-auto h-[clamp(310px,48dvh,430px)] max-h-full w-[min(84vw,360px)] overflow-visible">
+    <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center">
+      <div className="relative mx-auto h-[clamp(310px,48dvh,430px)] w-[min(84vw,360px)] overflow-visible">
+        {/* Draggable card stack */}
         {visibleCards
           .map((project, layer) => ({ project, layer, index: projects.findIndex(item => item.id === project.id) }))
           .reverse()
@@ -175,7 +177,6 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
                 animate={
                   isActive
                     ? isCommitting
-                      // Left-swipe exit: card shrinks and sinks as x flies it off screen
                       ? { scale: 0.86, opacity: 0.4, y: 18, transition: { duration: 0.24, ease: 'easeIn' as const } }
                       : { y: 0, scale: 1, opacity: 1 }
                     : {
@@ -191,6 +192,17 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
               </motion.div>
             );
           })}
+
+        {/* ↗ Open button — outside drag area so it always receives tap events */}
+        <button
+          type="button"
+          onClick={() => !committingId && onOpenProject(activeProject)}
+          className="absolute right-5 top-5 z-[30] flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white backdrop-blur-md transition-transform active:scale-90"
+          style={{ pointerEvents: committingId ? 'none' : 'auto' }}
+          aria-label={`Open ${activeProject.title}`}
+        >
+          <ArrowUpRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );

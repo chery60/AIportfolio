@@ -25,8 +25,8 @@ export default function MobileProjectsTab({ onSelectProject }: Props) {
           </header>
         </BlurFade>
 
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center pt-2">
-          <BlurFade delay={0.08} className="flex min-h-0 w-full flex-1">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
+          <BlurFade delay={0.08} className="w-full">
             <MobileProjectDeck
               projects={PROJECTS}
               onOpenProject={onSelectProject}
@@ -34,8 +34,8 @@ export default function MobileProjectsTab({ onSelectProject }: Props) {
           </BlurFade>
 
           <BlurFade delay={0.12}>
-            <p className="mt-5 text-center text-[11px] font-medium tracking-wide text-white/46 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
-              ← browse &nbsp;·&nbsp; open →
+            <p className="text-center text-[11px] font-medium tracking-wide text-white/46 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
+              ← → browse &nbsp;·&nbsp; tap ↗ to open
             </p>
           </BlurFade>
         </div>
