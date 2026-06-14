@@ -25,18 +25,18 @@ export default function MobileProjectsTab({ onSelectProject }: Props) {
           </header>
         </BlurFade>
 
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-start pt-3">
-          <BlurFade delay={0.05}>
-            <p className="mb-3 text-center text-[12px] font-black uppercase tracking-[0.12em] text-white/86 drop-shadow-[0_2px_14px_rgba(0,0,0,0.5)]">
-              Explore case studies
-            </p>
-          </BlurFade>
-
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center pt-2">
           <BlurFade delay={0.08} className="flex min-h-0 w-full flex-1">
             <MobileProjectDeck
               projects={PROJECTS}
               onOpenProject={onSelectProject}
             />
+          </BlurFade>
+
+          <BlurFade delay={0.12}>
+            <p className="mt-5 text-center text-[11px] font-medium tracking-wide text-white/46 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
+              ← browse &nbsp;·&nbsp; open →
+            </p>
           </BlurFade>
         </div>
       </div>

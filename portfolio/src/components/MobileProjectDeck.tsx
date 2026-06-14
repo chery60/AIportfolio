@@ -8,9 +8,9 @@ interface Props {
   onOpenProject: (project: Project) => void;
 }
 
-const SWIPE_THRESHOLD = 96;
-const VELOCITY_THRESHOLD = 520;
-const COMMIT_DELAY_MS = 260;
+const SWIPE_THRESHOLD = 88;
+const VELOCITY_THRESHOLD = 480;
+const COMMIT_DELAY_MS = 280;
 
 function ProjectCard({ project, index, layer }: { project: Project; index: number; layer: number }) {
   return (
@@ -71,6 +71,7 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-180, 0, 180], [-9, 0, 9]);
+
   const deck = useMemo(() => {
     const projectById = new Map(projects.map(project => [project.id, project]));
     const queuedIds = rotatedIds.filter(id => projectById.has(id));
@@ -79,54 +80,50 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
     const queuedProjects = queuedIds
       .map(id => projectById.get(id))
       .filter((project): project is Project => Boolean(project));
-
     return [...frontProjects, ...queuedProjects];
   }, [projects, rotatedIds]);
-  const activeProject = deck[0];
 
+  const activeProject = deck[0];
   const visibleCards = deck.slice(0, Math.min(deck.length, 4));
 
-  const sendTopToBack = (direction: -1 | 1) => {
-    if (!activeProject) return;
+  // Swipe LEFT → card shrinks and sinks to back of stack
+  const sendTopToBack = () => {
+    if (!activeProject || committingId) return;
     const swipedProject = activeProject;
     suppressNextClickRef.current = true;
     setCommittingId(swipedProject.id);
-    x.set(direction * 520);
+    x.set(-480);
 
     window.setTimeout(() => {
       setRotatedIds(current => {
-        const validProjectIds = new Set(projects.map(project => project.id));
-        const currentIds = current.filter(id => validProjectIds.has(id) && id !== swipedProject.id);
-        return [...currentIds, swipedProject.id];
+        const valid = new Set(projects.map(p => p.id));
+        const filtered = current.filter(id => valid.has(id) && id !== swipedProject.id);
+        return [...filtered, swipedProject.id];
       });
-      dragDistanceRef.current = 0;
-      isDraggingRef.current = false;
-      suppressNextClickRef.current = false;
       x.set(0);
       setCommittingId(null);
+      suppressNextClickRef.current = false;
+      dragDistanceRef.current = 0;
+      isDraggingRef.current = false;
     }, COMMIT_DELAY_MS);
   };
 
-  const openActiveProject = () => {
+  // Swipe RIGHT → open project immediately; AnimatePresence handles the enter transition
+  const expandAndOpen = () => {
     if (!activeProject || committingId) return;
-    const projectToOpen = activeProject;
     dragDistanceRef.current = 0;
     isDraggingRef.current = false;
     suppressNextClickRef.current = false;
-    setCommittingId(projectToOpen.id);
-    x.set(0);
-    window.setTimeout(() => {
-      dragDistanceRef.current = 0;
-      isDraggingRef.current = false;
-      suppressNextClickRef.current = false;
-      onOpenProject(projectToOpen);
-    }, COMMIT_DELAY_MS);
+    onOpenProject(activeProject);
   };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     dragDistanceRef.current = Math.abs(info.offset.x);
     isDraggingRef.current = false;
-    const shouldSwipe = Math.abs(info.offset.x) > SWIPE_THRESHOLD || Math.abs(info.velocity.x) > VELOCITY_THRESHOLD;
+    const shouldSwipe =
+      Math.abs(info.offset.x) > SWIPE_THRESHOLD ||
+      Math.abs(info.velocity.x) > VELOCITY_THRESHOLD;
+
     if (!shouldSwipe) {
       x.set(0);
       suppressNextClickRef.current = dragDistanceRef.current > 8;
@@ -137,7 +134,11 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
       return;
     }
 
-    sendTopToBack(info.offset.x > 0 ? 1 : -1);
+    if (info.offset.x > 0) {
+      expandAndOpen();   // swipe right → open project
+    } else {
+      sendTopToBack();   // swipe left → next card
+    }
   };
 
   if (!activeProject) return null;
@@ -153,46 +154,41 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
             const isCommitting = committingId === project.id;
 
             return (
-              <motion.button
+              <motion.div
                 key={project.id}
-                type="button"
-                aria-label={`${isActive ? 'Open' : 'Queued'} ${project.title}`}
-                disabled={!isActive || Boolean(committingId)}
                 drag={isActive && !committingId ? 'x' : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.22}
+                dragConstraints={{ left: -20, right: 20 }}
+                dragElastic={0.28}
                 onDragStart={() => {
                   dragDistanceRef.current = 0;
                   isDraggingRef.current = true;
                   suppressNextClickRef.current = false;
                 }}
                 onDragEnd={isActive ? handleDragEnd : undefined}
-                onClick={() => {
-                  if (!isActive || committingId || isDraggingRef.current || suppressNextClickRef.current) return;
-                  openActiveProject();
-                }}
-                className="absolute inset-0 touch-pan-y overflow-visible rounded-[28px] outline-none"
+                className="absolute inset-0 touch-pan-y overflow-visible rounded-[28px] outline-none cursor-grab active:cursor-grabbing"
                 style={{
                   x: isActive ? x : 0,
                   rotate: isActive ? rotate : 0,
                   zIndex: 20 - layer,
-                  pointerEvents: isActive ? 'auto' : 'none',
+                  pointerEvents: isActive && !committingId ? 'auto' : 'none',
                 }}
-                animate={isActive
-                  ? isCommitting
-                    ? { y: -18, scale: 0.94, opacity: 0 }
-                    : { y: 0, scale: 1, opacity: 1 }
-                  : {
-                    y: -18 * layer,
-                    scale: 1 - layer * 0.055,
-                    rotate: layer % 2 === 0 ? -3.5 : 3.5,
-                    opacity: 1 - layer * 0.16,
-                  }}
-                transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-                whileTap={isActive && !committingId ? { scale: 0.985 } : undefined}
+                animate={
+                  isActive
+                    ? isCommitting
+                      // Left-swipe exit: card shrinks and sinks as x flies it off screen
+                      ? { scale: 0.86, opacity: 0.4, y: 18, transition: { duration: 0.24, ease: 'easeIn' as const } }
+                      : { y: 0, scale: 1, opacity: 1 }
+                    : {
+                      y: -18 * layer,
+                      scale: 1 - layer * 0.055,
+                      rotate: layer % 2 === 0 ? -3.5 : 3.5,
+                      opacity: 1 - layer * 0.16,
+                    }
+                }
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               >
                 <ProjectCard project={project} index={index} layer={layer} />
-              </motion.button>
+              </motion.div>
             );
           })}
       </div>
