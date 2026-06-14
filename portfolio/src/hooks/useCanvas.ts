@@ -183,14 +183,19 @@ export function useCanvas({ defaultTransform, disabled = false }: UseCanvasOptio
     setTransform(defaultTransform ?? { x: 20, y: 20, scale: 0.75 });
   }, [defaultTransform]);
 
-  const animateTo = useCallback((targetX: number, targetY: number, durationMs = 800) => {
+  const animateTo = useCallback((targetX: number, targetY: number, durationMs = 800, targetScale?: number) => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     
     setTransform(prev => {
       const startX = prev.x;
       const startY = prev.y;
+      const startScale = prev.scale;
       const distanceX = targetX - startX;
       const distanceY = targetY - startY;
+      const safeTargetScale = Number.isFinite(targetScale)
+        ? Math.max(MIN_SCALE, Math.min(MAX_SCALE, targetScale as number))
+        : prev.scale;
+      const distanceScale = safeTargetScale - startScale;
       const startTime = performance.now();
       
       const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
@@ -204,6 +209,7 @@ export function useCanvas({ defaultTransform, disabled = false }: UseCanvasOptio
           ...current,
           x: startX + (distanceX * easedProgress),
           y: startY + (distanceY * easedProgress),
+          scale: startScale + (distanceScale * easedProgress),
         }));
         
         if (progress < 1) {

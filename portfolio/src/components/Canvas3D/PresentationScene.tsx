@@ -3,7 +3,7 @@ import { useFrame, useThree, type RootState } from '@react-three/fiber';
 import * as THREE from 'three';
 
 import type { Project, CanvasElement } from '../../types';
-import { resolveViewerPosition, type ActiveViewer, type CursorPosition } from '../../hooks/useRealtimeSession';
+import type { ActiveViewer, CursorPosition } from '../../hooks/useRealtimeSession';
 import type { CanvasControlsRef } from '../Canvas';
 import { useCanvasDomOverlay } from '../../context/CanvasDomOverlayContext';
 import Environment3D from './Environment3D';
@@ -456,8 +456,8 @@ export default function PresentationScene({
 
       {activeViewers.map((viewer) => {
         if (localIdentity && viewer.id === localIdentity.id) return null;
-        if (viewer.projectId !== project.id) return null;
-        const pos = resolveViewerPosition(viewer, cursors[viewer.id], { x: 0, y: 0 });
+        const pos = cursors[viewer.id] ?? viewer;
+        if (pos.projectId !== project.id) return null;
         return (
           <VisitorCharacter
             key={viewer.id}

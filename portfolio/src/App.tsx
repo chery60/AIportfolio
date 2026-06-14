@@ -14,7 +14,7 @@ import MobileCanvasView from './components/MobileCanvasView';
 import MobileProjectList from './components/MobileProjectList';
 import MobileView from './components/MobileView';
 import { supabase } from './lib/supabase';
-import { resolveViewerPosition, useRealtimeSession } from './hooks/useRealtimeSession';
+import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { useIsMobile } from './hooks/useIsMobile';
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { useCharacterChat } from './hooks/useCharacterChat';
@@ -27,6 +27,12 @@ const defaultControls: CanvasControlsRef = {
   getScale: () => 1,
   getCenterPos: () => ({ x: 0, y: 0 }),
   navigateTo: () => { },
+};
+
+type FollowTarget = {
+  x: number;
+  y: number;
+  scale?: number;
 };
 
 export default function App() {
@@ -43,8 +49,7 @@ export default function App() {
   const canvasControls = useRef<CanvasControlsRef>(defaultControls);
   const editSnapshotRef = useRef<CanvasElement[] | null>(null);
   const { activeViewers, cursors, localIdentity, broadcastCursor, updatePresencePosition } = useRealtimeSession(selectedProject.id);
-  const projectViewers = activeViewers.filter(viewer => viewer.projectId === selectedProject.id);
-  const pendingNavRef = useRef<{ x: number, y: number } | null>(null);
+  const pendingNavRef = useRef<FollowTarget | null>(null);
   const isMobile = useIsMobile();
   const previewCanvasControls = useRef<CanvasControlsRef>(defaultControls);
   const canvasRevealRawProgress = useMotionValue(0);
@@ -246,16 +251,32 @@ export default function App() {
 
   // Navigate to a viewer's project and position (Figma-style click-to-follow)
   const handleViewerClick = useCallback((viewer: import('./hooks/useRealtimeSession').ActiveViewer) => {
-    const center = canvasControls.current.getCenterPos();
-    const pos = resolveViewerPosition(viewer, cursors[viewer.id], center);
-    pendingNavRef.current = { x: pos.x, y: pos.y };
     const target = PROJECTS.find(p => p.id === viewer.projectId);
+    const cursor = cursors[viewer.id];
+    const cursorMatchesProject = cursor?.projectId === viewer.projectId && cursor.hasCursor;
+    const hasViewerCursor = viewer.hasCursor && Number.isFinite(viewer.x) && Number.isFinite(viewer.y);
+    const hasViewport = Number.isFinite(viewer.viewportX) && Number.isFinite(viewer.viewportY);
+    const fallbackProjectView = target?.defaultView;
+    const followTarget: FollowTarget = cursorMatchesProject
+      ? { x: cursor.x, y: cursor.y }
+      : hasViewerCursor
+        ? { x: viewer.x, y: viewer.y }
+        : hasViewport
+          ? { x: viewer.viewportX, y: viewer.viewportY, scale: viewer.viewportScale }
+          : {
+              x: fallbackProjectView ? -fallbackProjectView.x / fallbackProjectView.scale : 0,
+              y: fallbackProjectView ? -fallbackProjectView.y / fallbackProjectView.scale : 0,
+              scale: fallbackProjectView?.scale,
+            };
+
+    pendingNavRef.current = followTarget;
+
     if (target && target.id !== selectedProject.id) {
       setSelectedProject(target);
       setSelectedElementId(null);
     } else {
       // Same project — navigate immediately
-      canvasControls.current.navigateTo(pos.x, pos.y);
+      canvasControls.current.navigateTo(followTarget.x, followTarget.y, followTarget.scale);
       pendingNavRef.current = null;
     }
   }, [cursors, selectedProject.id]);
@@ -263,11 +284,11 @@ export default function App() {
   // After a project switch triggered by handleViewerClick, execute deferred navigation
   useEffect(() => {
     if (!pendingNavRef.current) return;
-    const { x, y } = pendingNavRef.current;
+    const { x, y, scale } = pendingNavRef.current;
     pendingNavRef.current = null;
     // Small delay to let canvas initialize to the new project's default view first
     const id = setTimeout(() => {
-      canvasControls.current.navigateTo(x, y);
+      canvasControls.current.navigateTo(x, y, scale);
     }, 50);
     return () => clearTimeout(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -548,7 +569,7 @@ export default function App() {
               <RightPanel
                 project={selectedProject}
                 selectedElement={selectedElement}
-                activeViewers={projectViewers}
+                activeViewers={activeViewers}
                 onViewerClick={isRevealPreview ? undefined : handleViewerClick}
                 localIdentity={localIdentity}
               />

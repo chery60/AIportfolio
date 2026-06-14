@@ -15,7 +15,6 @@ interface Props {
     color: string;
     elementBounds?: ElementBounds[];
     message?: string | null;
-    canvasScale?: number;
     onClick?: () => void;
 }
 
@@ -193,7 +192,7 @@ function computePath(
 }
 
 export default function Character({
-    targetX, targetY, color, elementBounds = [], message = null, canvasScale = 1, onClick,
+    targetX, targetY, color, elementBounds = [], message = null, onClick,
 }: Props) {
     // ── Drop-entrance state ──────────────────────────────────────────────
     // Premium entrance: a short settle-in, not a slapstick fall.
@@ -245,9 +244,6 @@ export default function Character({
 
     const [isIdleFidget, setIsIdleFidget] = useState(false);
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const canvasScaleRef = useRef(canvasScale);
-    useEffect(() => { canvasScaleRef.current = canvasScale; }, [canvasScale]);
 
     const resetIdleTimer = useCallback(() => {
         if (idleTimerRef.current) clearTimeout(idleTimerRef.current);

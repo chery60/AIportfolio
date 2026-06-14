@@ -477,13 +477,20 @@
 
 /* Cursor states */
 .cursor-hidden-active,
-.cursor-hidden-active button,
-.cursor-hidden-active a {
+.cursor-hidden-active * {
   cursor: none !important;
 }
 
-input, textarea, select {
+.cursor-hidden-active input,
+.cursor-hidden-active textarea,
+.cursor-hidden-active select,
+.cursor-hidden-active [contenteditable="true"] {
   cursor: text !important;
+}
+
+.cursor-hidden-active .cursor-grab,
+.cursor-hidden-active .cursor-grabbing {
+  cursor: none !important;
 }
 
 .cursor-grab {

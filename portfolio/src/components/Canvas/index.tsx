@@ -4,8 +4,7 @@ import { useCanvas } from '../../hooks/useCanvas';
 import CanvasElementRenderer from './CanvasElement';
 import Character from './Character';
 import { useAvatarGuide } from '../../hooks/useAvatarGuide';
-import { resolveViewerPosition, type ActiveViewer, type CursorPosition } from '../../hooks/useRealtimeSession';
-import { MousePointer2 } from 'lucide-react';
+import type { ActiveViewer, CursorPosition } from '../../hooks/useRealtimeSession';
 
 interface Props {
   project: Project;
@@ -24,7 +23,7 @@ interface Props {
   cursors?: Record<string, CursorPosition>;
   localIdentity?: ActiveViewer | null;
   broadcastCursor?: (x: number, y: number) => void;
-  updatePresencePosition?: (x: number, y: number) => void;
+  updatePresencePosition?: (x: number, y: number, scale?: number) => void;
   onCharacterClick?: () => void;
   characterChatBubble?: string | null;
   isPreviewOnly?: boolean;
@@ -37,7 +36,7 @@ export interface CanvasControlsRef {
   fitToScreen: () => void;
   getScale: () => number;
   getCenterPos: () => { x: number; y: number };
-  navigateTo: (canvasX: number, canvasY: number) => void;
+  navigateTo: (canvasX: number, canvasY: number, scale?: number) => void;
 }
 
 export default function Canvas({
@@ -100,13 +99,14 @@ export default function Canvas({
           y: (height / 2 - transform.y) / transform.scale
         };
       },
-      navigateTo: (canvasX: number, canvasY: number) => {
+      navigateTo: (canvasX: number, canvasY: number, targetScale?: number) => {
         if (!containerRef.current) return;
         const width = containerRef.current.clientWidth;
         const height = containerRef.current.clientHeight;
-        const targetTx = width / 2 - canvasX * transform.scale;
-        const targetTy = height / 2 - canvasY * transform.scale;
-        animateTo(targetTx, targetTy);
+        const nextScale = Number.isFinite(targetScale) ? targetScale as number : transform.scale;
+        const targetTx = width / 2 - canvasX * nextScale;
+        const targetTy = height / 2 - canvasY * nextScale;
+        animateTo(targetTx, targetTy, 800, nextScale);
       },
     };
   }, [canvasControlsRef, zoomIn, zoomOut, resetZoom, fitToScreen, transform.scale, containerRef, transform.x, transform.y, animateTo]);
@@ -131,10 +131,10 @@ export default function Canvas({
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const centerX = (rect.width / 2 - project.defaultView.x) / project.defaultView.scale;
-    const centerY = (rect.height / 2 - project.defaultView.y) / project.defaultView.scale;
-    updatePresencePosition(centerX, centerY);
-  }, [containerRef, isPreviewOnly, project.defaultView, project.id, updatePresencePosition]);
+    const centerX = (rect.width / 2 - transform.x) / transform.scale;
+    const centerY = (rect.height / 2 - transform.y) / transform.scale;
+    updatePresencePosition(centerX, centerY, transform.scale);
+  }, [containerRef, isPreviewOnly, project.id, transform.x, transform.y, transform.scale, updatePresencePosition]);
 
   const [isPlayingGame, setIsPlayingGame] = useState(false);
   useEffect(() => {
@@ -315,20 +315,6 @@ export default function Canvas({
     onAddElement(newElement);
   };
 
-  const fallbackViewerPosition = () => {
-    if (containerRef.current) {
-      return {
-        x: (containerRef.current.clientWidth / 2 - transform.x) / transform.scale,
-        y: (containerRef.current.clientHeight / 2 - transform.y) / transform.scale,
-      };
-    }
-
-    return {
-      x: project.canvasElements[0]?.x ?? 0,
-      y: project.canvasElements[0]?.y ?? 0,
-    };
-  };
-
   return (
     <div
       ref={containerRef}
@@ -406,7 +392,6 @@ export default function Canvas({
             color={localColor}
             elementBounds={elementBounds}
             message={characterChatBubble ?? contextualTip}
-            canvasScale={transform.scale}
             onClick={onCharacterClick}
           />
         )}
@@ -416,7 +401,14 @@ export default function Canvas({
           if (localIdentity && viewer.id === localIdentity.id) return null;
           if (viewer.projectId !== project.id) return null;
 
-          const pos = resolveViewerPosition(viewer, cursors[viewer.id], fallbackViewerPosition());
+          const cursor = cursors[viewer.id];
+          const cursorMatchesProject = cursor?.projectId === project.id && cursor.hasCursor;
+          const pos = cursorMatchesProject
+            ? cursor
+            : viewer.hasCursor
+              ? { x: viewer.x, y: viewer.y }
+              : { x: viewer.viewportX, y: viewer.viewportY };
+          if (!Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return null;
 
           return (
             <div key={viewer.id}>
@@ -427,22 +419,16 @@ export default function Canvas({
                 elementBounds={elementBounds}
               />
 
-              {/* Screen-stable cursor and name tag */}
+              {/* Screen-stable name tag */}
               <div
                 className="absolute top-0 left-0 transition-all duration-100 ease-linear will-change-transform z-[100] pointer-events-none"
                 style={{
-                  transform: `translate(${pos.x + 12}px, ${pos.y - 68}px) scale(${1 / transform.scale})`,
+                  transform: `translate(${pos.x + 14}px, ${pos.y - 66}px) scale(${1 / transform.scale})`,
                   transformOrigin: '0 0'
                 }}
               >
-                <MousePointer2
-                  className="absolute -left-2 top-3 w-4 h-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.22)] opacity-85"
-                  fill={viewer.color}
-                  color="white"
-                  strokeWidth={1.75}
-                />
                 <div
-                  className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-[0_8px_18px_rgba(25,26,27,0.16)] whitespace-nowrap w-max border border-white/80"
+                  className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-[0_8px_18px_rgba(25,26,27,0.16)] whitespace-nowrap w-max border border-white/80"
                   style={{ backgroundColor: viewer.color }}
                 >
                   {viewer.name}

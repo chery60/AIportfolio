@@ -142,7 +142,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
               </span>
             </div>
             <div className="space-y-1.5 mt-2">
-              {activeViewers.slice(0, 3).map(v => {
+              {activeViewers.map(v => {
                 const isMe = v.id === localIdentity?.id;
                 const viewerProject = PROJECTS.find(p => p.id === v.projectId);
                 const isOnSameProject = v.projectId === project.id;
@@ -160,9 +160,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                       <p className="text-xs font-semibold text-[var(--exec-ink)] truncate leading-tight">
                         {isMe ? 'You' : v.name}
                       </p>
-                      {!isMe && (
-                        <p className="text-[10px] text-[var(--exec-muted)] truncate leading-tight mt-0.5">{v.location}</p>
-                      )}
+                      <p className="text-[10px] text-[var(--exec-muted)] truncate leading-tight mt-0.5">{v.location}</p>
                     </div>
                     {viewerProject && (
                       <span
