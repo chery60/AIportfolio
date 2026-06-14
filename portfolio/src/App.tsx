@@ -48,10 +48,10 @@ export default function App() {
   const previewCanvasControls = useRef<CanvasControlsRef>(defaultControls);
   const canvasRevealRawProgress = useMotionValue(0);
   const canvasRevealProgress = useSpring(canvasRevealRawProgress, { stiffness: 120, damping: 20 });
-  const canvasRevealScale = useTransform(canvasRevealProgress, [0, 1], [0.35, 1]);
-  const canvasRevealY = useTransform(canvasRevealProgress, [0, 1], ['75vh', '0vh']);
+  const canvasRevealScale = useTransform(canvasRevealProgress, [0, 1], [0.82, 1]);
+  const canvasRevealY = useTransform(canvasRevealProgress, [0, 1], ['18vh', '0vh']);
   const canvasRevealOpacity = useTransform(canvasRevealProgress, [0, 0.15], [0, 1]);
-  const canvasRevealRadius = useTransform(canvasRevealProgress, [0, 1], ['24px', '0px']);
+  const canvasRevealRadius = useTransform(canvasRevealProgress, [0, 1], ['18px', '0px']);
   const [canvasRevealValue, setCanvasRevealValue] = useState(0);
   const [isEnteringFromReveal, setIsEnteringFromReveal] = useState(false);
 
@@ -610,7 +610,7 @@ export default function App() {
         {shouldShowCanvasReveal && (
           <div key="canvas-reveal" className="fixed inset-0 z-[70] pointer-events-none overflow-hidden">
             <motion.div
-              className="w-full h-full flex flex-col bg-surface-1 text-text-primary overflow-hidden shadow-[0_30px_90px_rgba(0,0,0,0.35)] pointer-events-auto cursor-pointer"
+              className="noon-canvas-shell w-full h-full flex flex-col text-text-primary overflow-hidden shadow-[0_30px_90px_rgba(0,0,0,0.22)] pointer-events-auto cursor-pointer"
               style={{
                 scale: canvasRevealScale,
                 y: canvasRevealY,
@@ -634,7 +634,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={isEnteringFromReveal ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
-            className="fixed inset-0 z-[80] flex flex-col bg-surface-1 text-text-primary overflow-hidden"
+            className="noon-canvas-shell fixed inset-0 z-[80] flex flex-col text-text-primary overflow-hidden"
           >
             {isMobile ? (
               /* ── Mobile Views ── */

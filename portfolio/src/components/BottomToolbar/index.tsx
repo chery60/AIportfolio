@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hand, StickyNote, Minus, Plus, Maximize, Smartphone, Bot, ExternalLink, BoxSelect, MonitorPlay, Sparkles, Undo, Redo, ChevronDown, X, ArrowUp } from 'lucide-react';
 import type { Project } from '../../types';
+import { ToolbarButton } from '@/components/ui/executive';
 
 interface Props {
   project: Project;
@@ -70,14 +71,14 @@ export default function BottomToolbar({
     switch (project.id) {
       case 'beacon-ai':
         return (
-          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full text-sm font-[590] text-white transition-transform hover:scale-105 active:scale-95 shadow-md bg-[#5e6ad2] hover:bg-[#828fff]">
+          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-[11px] text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-sm bg-[var(--exec-blue)]">
             <Bot className="w-4 h-4" />
             Try Sandbox
           </button>
         );
       case 'flow-app':
         return (
-          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full text-sm font-[590] text-white transition-transform hover:scale-105 active:scale-95 shadow-md bg-[#5e6ad2] hover:bg-[#828fff]">
+          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-[11px] text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-sm bg-[var(--exec-blue)]">
             <Smartphone className="w-4 h-4" />
             View Prototype
           </button>
@@ -86,7 +87,7 @@ export default function BottomToolbar({
         return (
           <button 
             onClick={() => window.open('https://www.figma.com/proto/o3nHV47UkzxHDz7OMfDrn2/Kiosk?node-id=5470-288291&p=f&viewport=2438%2C-10732%2C0.21&t=gpdCCMT32mQ0KWFu-0&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=5480%3A352033&show-proto-sidebar=1', '_blank')}
-            className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full bg-surface-1 hover:bg-panel-border text-sm font-semibold text-text-primary transition-colors"
+            className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-[11px] bg-white/70 hover:bg-white text-sm font-semibold text-[var(--exec-ink)] border border-[var(--exec-line)] transition-colors"
           >
             View Live
             <ExternalLink className="w-4 h-4 text-text-secondary" />
@@ -94,7 +95,7 @@ export default function BottomToolbar({
         );
       default:
         return (
-          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-full bg-surface-1 hover:bg-panel-border text-sm font-semibold text-text-primary transition-colors">
+          <button className="flex items-center gap-1.5 px-4 h-9 ml-1 rounded-[11px] bg-white/70 hover:bg-white text-sm font-semibold text-[var(--exec-ink)] border border-[var(--exec-line)] transition-colors">
             View Live
             <ExternalLink className="w-4 h-4 text-text-secondary" />
           </button>
@@ -108,18 +109,18 @@ export default function BottomToolbar({
 
         {/* Floating AI Prompt Box */}
         {showAIPrompt && (
-          <div className="bg-white rounded-2xl shadow-2xl border border-panel-border p-4 w-[480px] mb-4 pointer-events-auto flex flex-col" style={{ backdropFilter: 'blur(12px)' }}>
-            <div className="mb-3 space-y-1.5 p-3 bg-surface-1 rounded-xl">
-              <div className="flex items-center gap-1.5 text-[10px] text-text-primary font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-black" /> Analyzing your prompt...
+          <div className="noon-panel-light rounded-[18px] p-4 w-[480px] mb-4 pointer-events-auto flex flex-col">
+            <div className="mb-3 space-y-1.5 p-3 bg-white/60 rounded-xl border border-[var(--exec-line)]">
+              <div className="flex items-center gap-1.5 text-[10px] text-[var(--exec-ink)] font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--exec-accent)]" /> Analyzing your prompt...
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-text-secondary">
+              <div className="flex items-center gap-1.5 text-[10px] text-[var(--exec-muted)]">
                 <div className="w-3 h-3 rounded-full border border-panel-border flex items-center justify-center"><div className="w-1.5 h-1.5 bg-text-secondary rounded-full" /></div> Looking for the best possible response...
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-text-secondary">
+              <div className="flex items-center gap-1.5 text-[10px] text-[var(--exec-muted)]">
                 <div className="w-3 h-3 rounded-full border border-panel-border" /> Refining the language for clarity...
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-text-secondary">
+              <div className="flex items-center gap-1.5 text-[10px] text-[var(--exec-muted)]">
                 <div className="w-3 h-3 rounded-full border border-panel-border" /> Almost ready...
               </div>
             </div>
@@ -129,7 +130,7 @@ export default function BottomToolbar({
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
               placeholder="Describe what you want to generate..."
-              className="w-full min-h-[80px] text-sm text-text-primary outline-none resize-none bg-transparent placeholder:text-text-secondary"
+              className="w-full min-h-[80px] text-sm text-[var(--exec-ink)] outline-none resize-none bg-transparent placeholder:text-[var(--exec-muted)]"
             />
 
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-panel-border">
@@ -137,7 +138,7 @@ export default function BottomToolbar({
                 {/* Empty left section to maintain space-between layout */}
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-xs font-semibold text-text-primary flex items-center gap-1 cursor-pointer">
+                <div className="text-xs font-semibold text-[var(--exec-ink)] flex items-center gap-1 cursor-pointer">
                   Alchemy 4.5 Pro <ChevronDown className="w-4 h-4" />
                 </div>
                 <button
@@ -152,7 +153,7 @@ export default function BottomToolbar({
         )}
 
         {/* Edit Mode Bottom Toolbar */}
-        <div className="flex items-center gap-2 bg-white rounded-full px-2 py-1.5 shadow-[0_8px_32px_rgb(0,0,0,0.12)] border border-panel-border pointer-events-auto h-14">
+        <div className="noon-toolbar-light flex items-center gap-2 rounded-full px-2 py-1.5 pointer-events-auto h-14">
 
           {/* Tools (Left to match View mode) */}
           <ToolBtn active={activeTool === 'pointer'} onClick={() => setActiveTool('pointer')} title="Pan Tool (Space + Drag)">
@@ -165,7 +166,7 @@ export default function BottomToolbar({
           {/* AI Magic Button */}
           <button
             onClick={() => setShowAIPrompt(!showAIPrompt)}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md ml-1 mr-1 ${showAIPrompt ? 'bg-brand text-white shadow-inner scale-95' : 'bg-brand text-white hover:bg-opacity-90 hover:scale-[1.05]'}`}
+            className={`w-9 h-9 rounded-[11px] flex items-center justify-center transition-all shadow-sm ml-1 mr-1 ${showAIPrompt ? 'bg-[var(--exec-accent)] text-white shadow-inner scale-95' : 'bg-[var(--exec-accent)] text-white hover:scale-[1.03]'}`}
             title="AI Capability"
           >
             <Sparkles className="w-4 h-4 text-white" />
@@ -180,13 +181,13 @@ export default function BottomToolbar({
           <div className="w-px h-6 bg-panel-border mx-1" />
 
           {/* Mode Toggle */}
-          <div className="flex bg-surface-2 p-1 rounded-full ml-1">
+          <div className="flex bg-white/50 border border-[var(--exec-line)] p-1 rounded-[13px] ml-1">
             <button
               onClick={() => {
                 onTogglePreview?.(false);
                 setShowAIPrompt(false);
               }}
-              className={`flex items-center gap-1.5 px-4 h-8 rounded-full text-sm font-semibold transition-all ${!isPreviewMode ? 'bg-white shadow-sm text-text-primary' : 'text-text-secondary hover:text-text-primary hover:bg-surface-1'
+              className={`flex items-center gap-1.5 px-4 h-8 rounded-[10px] text-sm font-semibold transition-all ${!isPreviewMode ? 'bg-white shadow-sm text-[var(--exec-ink)]' : 'text-[var(--exec-muted)] hover:text-[var(--exec-ink)] hover:bg-white/70'
                 }`}
             >
               <BoxSelect className="w-4 h-4" /> Edit
@@ -196,7 +197,7 @@ export default function BottomToolbar({
                 onTogglePreview?.(true);
                 setShowAIPrompt(false);
               }}
-              className={`flex items-center gap-1.5 px-4 h-8 rounded-full text-sm font-semibold transition-all ${isPreviewMode ? 'bg-white shadow-sm text-text-primary' : 'text-text-secondary hover:text-text-primary hover:bg-surface-1'
+              className={`flex items-center gap-1.5 px-4 h-8 rounded-[10px] text-sm font-semibold transition-all ${isPreviewMode ? 'bg-white shadow-sm text-[var(--exec-ink)]' : 'text-[var(--exec-muted)] hover:text-[var(--exec-ink)] hover:bg-white/70'
                 }`}
             >
               <MonitorPlay className="w-4 h-4" /> Preview
@@ -222,9 +223,9 @@ export default function BottomToolbar({
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="mb-3 pointer-events-auto w-[420px]"
           >
-            <div className="flex items-center gap-2 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.14)] border border-panel-border px-3 py-2">
+            <div className="noon-toolbar-light flex items-center gap-2 rounded-[16px] px-3 py-2">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <Sparkles className="w-4 h-4 text-brand flex-shrink-0" />
+                <Sparkles className="w-4 h-4 text-[var(--exec-accent)] flex-shrink-0" />
                 <input
                   ref={aiInputRef}
                   value={aiChatInput}
@@ -232,13 +233,13 @@ export default function BottomToolbar({
                   onKeyDown={handleAIKeyDown}
                   placeholder="Ask about this project…"
                   disabled={isAILoading}
-                  className="flex-1 text-sm text-text-primary placeholder:text-text-secondary bg-transparent outline-none disabled:opacity-50"
+                  className="flex-1 text-sm text-[var(--exec-ink)] placeholder:text-[var(--exec-muted)] bg-transparent outline-none disabled:opacity-50"
                 />
               </div>
               <button
                 onClick={handleAISend}
                 disabled={!aiChatInput.trim() || isAILoading}
-                className="w-8 h-8 flex items-center justify-center rounded-xl bg-brand text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
+                className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-[var(--exec-accent)] text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
               >
                 <ArrowUp className="w-4 h-4" />
               </button>
@@ -248,7 +249,7 @@ export default function BottomToolbar({
       </AnimatePresence>
 
       {/* ── View Mode Bottom Toolbar ── */}
-      <div className="flex items-center gap-1 bg-white rounded-full p-1.5 shadow-[0_8px_32px_rgb(0,0,0,0.12)] border border-panel-border pointer-events-auto h-14">
+      <div className="noon-toolbar-light flex items-center gap-1 rounded-full p-1.5 pointer-events-auto h-14">
 
         {/* Navigation & Interaction */}
         <ToolBtn active title="Pan Tool (Space + Drag)">
@@ -289,10 +290,10 @@ export default function BottomToolbar({
             <button
               onClick={() => setShowAIChatInput(prev => !prev)}
               title="Ask AI about this project"
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm ml-0.5 ${
+            className={`w-10 h-10 rounded-[11px] flex items-center justify-center transition-all shadow-sm ml-0.5 ${
                 showAIChatInput
-                  ? 'bg-brand text-white shadow-inner scale-95'
-                  : 'bg-brand text-white hover:opacity-90 hover:scale-[1.05]'
+                  ? 'bg-[var(--exec-accent)] text-white shadow-inner scale-95'
+                  : 'bg-[var(--exec-accent)] text-white hover:scale-[1.03]'
               }`}
             >
               <Sparkles className="w-[18px] h-[18px]" />
@@ -311,15 +312,13 @@ export default function BottomToolbar({
 
 function ToolBtn({ children, active, onClick, title }: { children: React.ReactNode; active?: boolean; onClick?: () => void; title?: string }) {
   return (
-    <button
+    <ToolbarButton
       onClick={onClick}
       title={title}
-      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${active
-        ? 'bg-surface-2 text-text-primary shadow-inner border border-panel-border'
-        : 'text-text-secondary hover:bg-surface-1 hover:text-text-primary'
-        }`}
+      active={active}
+      className="w-10 h-10 !rounded-full bg-black/[0.04] hover:bg-black/[0.08]"
     >
       {children}
-    </button>
+    </ToolbarButton>
   );
 }

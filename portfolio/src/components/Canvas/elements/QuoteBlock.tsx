@@ -1,16 +1,11 @@
 import type { QuoteBlockElement } from '../../../types';
+import { CanvasCardShell } from '@/components/ui/executive';
+import { hexToRgb } from '@/lib/executive';
 
 interface Props {
   element: QuoteBlockElement;
   isSelected: boolean;
   onClick: () => void;
-}
-
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '94, 106, 210';
 }
 
 export default function QuoteBlock({ element, isSelected, onClick }: Props) {
@@ -19,34 +14,35 @@ export default function QuoteBlock({ element, isSelected, onClick }: Props) {
   const rgb = hexToRgb(accent);
 
   return (
-    <div
+    <CanvasCardShell
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl p-5 flex flex-col justify-between bg-white border border-panel-border shadow-sm ${isSelected ? 'selected' : ''}`}
+      selected={isSelected}
+      accentColor={accent}
+      className="p-5 flex flex-col justify-between"
       style={{
         width,
         height,
-        borderLeft: `4px solid ${accent}`,
+        borderLeft: `3px solid ${accent}`,
       }}
     >
-      {/* Big quote mark */}
-      <div className="text-5xl leading-none font-serif mb-2 opacity-30" style={{ color: accent }}>"</div>
+      <div className="text-5xl leading-none mb-2 opacity-[0.28]" style={{ color: accent }}>"</div>
 
-      <p className="text-sm leading-relaxed italic flex-1 text-text-secondary">
+      <p className="text-[13px] leading-relaxed flex-1 text-[var(--exec-ink-soft)]">
         {data.quote}
       </p>
 
-      <div className="flex items-center gap-3 mt-4 pt-3" style={{ borderTop: `1px solid rgba(${rgb}, 0.12)` }}>
+      <div className="flex items-center gap-3 mt-5 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-          style={{ background: `rgba(${rgb}, 0.2)`, color: accent }}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          style={{ background: `rgba(${rgb}, 0.10)`, color: accent }}
         >
           {data.author[0]}
         </div>
         <div>
-          <p className="text-xs font-semibold text-text-primary">{data.author}</p>
-          {data.role && <p className="text-xs text-text-secondary">{data.role}</p>}
+          <p className="text-[12px] font-semibold text-[var(--exec-ink)]">{data.author}</p>
+          {data.role && <p className="text-[11px] text-[var(--exec-muted)] mt-0.5">{data.role}</p>}
         </div>
       </div>
-    </div>
+    </CanvasCardShell>
   );
 }

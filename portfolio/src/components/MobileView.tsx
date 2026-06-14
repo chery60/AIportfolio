@@ -65,10 +65,10 @@ export default function MobileView({ activeViewers }: Props) {
           {selectedProject ? (
             <motion.div
               key="detail"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              initial={{ opacity: 0, scale: 0.985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.985 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="h-full"
             >
               <MobileCanvasView

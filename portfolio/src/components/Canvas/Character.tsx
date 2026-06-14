@@ -196,10 +196,9 @@ export default function Character({
     targetX, targetY, color, elementBounds = [], message = null, canvasScale = 1, onClick,
 }: Props) {
     // ── Drop-entrance state ──────────────────────────────────────────────
-    // The character enters head-first (upside down, rotated 180°), falls
-    // with gravity, flips mid-air to land on its feet, then squishes.
-    const DROP_GRAVITY = 0.18;       // px / frame² — tuned for ~1.2s fall
-    const DROP_START_Y = -180;       // above viewport
+    // Premium entrance: a short settle-in, not a slapstick fall.
+    const DROP_GRAVITY = 0.12;
+    const DROP_START_Y = -36;
 
     const [initialPos] = useState(() => {
         let tx = targetX;
@@ -220,12 +219,12 @@ export default function Character({
     const targetRef = useRef({ x: initialPos.x, y: initialPos.y });
     const requestRef = useRef<number>(0);
     const boundsRef = useRef<ElementBounds[]>(elementBounds);
-    const lastTimeRef = useRef<number>(performance.now());
+    const lastTimeRef = useRef<number>(0);
 
     // Drop-phase tracking
     const dropPhaseRef = useRef<'falling' | 'landed' | 'done'>('falling');
     const dropVelocityRef = useRef(0);            // current downward velocity
-    const dropRotationRef = useRef(180);           // degrees: 180 = upside-down → 0 = upright
+    const dropRotationRef = useRef(0);
     const landingYRef = useRef(initialPos.y);      // where the character should land
     const totalDropDistance = useRef(initialPos.y - DROP_START_Y); // total fall distance
     const [isSquishing, setIsSquishing] = useState(false);
@@ -251,7 +250,6 @@ export default function Character({
     useEffect(() => { canvasScaleRef.current = canvasScale; }, [canvasScale]);
 
     const resetIdleTimer = useCallback(() => {
-        setIsIdleFidget(false);
         if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
         idleTimerRef.current = setTimeout(() => {
             setIsIdleFidget(true);
@@ -313,8 +311,7 @@ export default function Character({
                 ? 4 * fallProgress * fallProgress * fallProgress
                 : 1 - Math.pow(-2 * fallProgress + 2, 3) / 2;
 
-            // Rotate from 180° (head-first) → 0° (upright)
-            dropRotationRef.current = 180 * (1 - eased);
+            dropRotationRef.current = 0 * (1 - eased);
 
             // Reached (or passed) landing position?
             if (posRef.current.y >= landingYRef.current) {
@@ -537,7 +534,7 @@ export default function Character({
             title={interactive ? 'Ask Crew about this project' : undefined}
             className={`absolute w-[36px] h-[44px] -ml-[18px] -mt-[44px] z-[65] will-change-transform ${interactive ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
             style={{
-                transform: `translate(${Math.round(posRef.current.x)}px, ${Math.round(posRef.current.y)}px)`,
+                transform: `translate(${Math.round(initialPos.x)}px, ${DROP_START_Y}px)`,
                 transformOrigin: '18px 44px',
             }}
         >
@@ -550,13 +547,13 @@ export default function Character({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.8 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className="absolute bottom-full left-1/2 -ml-6 mb-4 origin-bottom-left w-max max-w-[180px] bg-white text-[#2A2B3D] border-2 border-white text-[11px] font-bold px-3 py-2 rounded-xl shadow-xl pointer-events-none z-[80]"
+                        className="absolute bottom-full left-1/2 -ml-6 mb-4 origin-bottom-left w-max max-w-[180px] bg-white/95 text-[var(--exec-ink)] border border-[var(--exec-line)] text-[11px] font-semibold px-3 py-2 rounded-[12px] shadow-[0_14px_34px_rgba(32,36,44,0.14)] pointer-events-none z-[80]"
                     >
                         <div className="relative z-10 whitespace-normal text-center leading-snug">
                             {message}
                         </div>
                         {/* Tail */}
-                        <div className="absolute -bottom-2 left-6 w-3 h-3 rotate-45 transform origin-center shadow-sm bg-white border-b-2 border-r-2 border-white" />
+                        <div className="absolute -bottom-1.5 left-6 w-3 h-3 rotate-45 transform origin-center bg-white border-b border-r border-[var(--exec-line)]" />
                     </motion.div>
                 )}
             </AnimatePresence>

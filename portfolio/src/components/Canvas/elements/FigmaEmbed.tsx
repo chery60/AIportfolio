@@ -1,17 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FigmaEmbedElement } from '../../../types';
+import { CanvasCardShell } from '@/components/ui/executive';
+import { hexToRgb } from '@/lib/executive';
 
 interface Props {
   element: FigmaEmbedElement;
   isSelected: boolean;
   onClick: () => void;
-}
-
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '124, 92, 252';
 }
 
 export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
@@ -40,32 +35,28 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
   }, []);
 
   return (
-    <div
+    <CanvasCardShell
       ref={containerRef}
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl overflow-hidden flex flex-col shadow-xl ${isSelected ? 'selected' : ''}`}
+      selected={isSelected}
+      accentColor={data.accentColor}
+      className="flex flex-col"
       style={{
         width,
         height,
-        background: '#1E1E2E',
-        border: `1px solid ${isSelected ? data.accentColor : 'rgba(255,255,255,0.07)'}`,
-        // Ensure this element always creates its own stacking context so that
-        // when the browser exits iframe fullscreen, it doesn't swallow parent UI layers.
         isolation: 'isolate',
         position: 'relative',
         zIndex: 1,
       }}
     >
-      {/* Title bar — mimics Figma's chrome */}
       <div
-        className="flex items-center justify-between px-4 py-2.5 flex-shrink-0"
+        className="flex items-center justify-between px-4 py-3 flex-shrink-0"
         style={{
-          background: '#2C2C3E',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: `linear-gradient(90deg, rgba(${rgb},0.06), rgba(255,255,255,0.58))`,
+          borderBottom: '1px solid var(--exec-line)',
         }}
       >
         <div className="flex items-center gap-3">
-          {/* Figma logo mark */}
           <svg width="16" height="22" viewBox="0 0 38 57" fill="none">
             <path d="M19 28.5A9.5 9.5 0 1 1 28.5 19H19v9.5z" fill="#1ABCFE" />
             <path d="M9.5 47.5A9.5 9.5 0 0 1 19 38v9.5H9.5z" fill="#0ACF83" />
@@ -74,19 +65,19 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
             <path d="M28.5 28.5a9.5 9.5 0 1 1-9.5-9.5 9.5 9.5 0 0 1 9.5 9.5z" fill="#A259FF" />
           </svg>
           <div>
-            <p className="text-[12px] font-semibold text-white leading-none">{data.title}</p>
+            <p className="text-[12px] font-semibold text-[var(--exec-ink)] leading-none">{data.title}</p>
             {data.description && (
-              <p className="text-[10px] text-white/40 mt-0.5 leading-none">{data.description}</p>
+              <p className="text-[10px] text-[var(--exec-muted)] mt-0.5 leading-none">{data.description}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="text-[10px] font-bold px-2.5 py-1 rounded-lg cursor-pointer hover:opacity-90 transition-opacity select-none"
+            className="text-[10px] font-bold px-2.5 py-1 rounded-full cursor-pointer hover:opacity-90 transition-opacity select-none"
             style={{
-              background: `linear-gradient(135deg, ${data.accentColor}, rgba(${rgb},0.7))`,
-              color: 'white',
-              boxShadow: `0 2px 12px rgba(${rgb},0.4)`,
+              background: `rgba(${rgb},0.10)`,
+              color: data.accentColor,
+              border: `1px solid rgba(${rgb},0.22)`,
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -96,35 +87,31 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
               window.open(originalUrl, '_blank', 'noopener,noreferrer');
             }}
           >
-            Open in Figma ↗
+            Open in Figma
           </div>
         </div>
       </div>
 
-      {/* Embed area */}
       <div className="relative flex-1 overflow-hidden">
         {!opened ? (
-          // Preview state — click to load embed
           <div
             className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer group"
             style={{
-              background: `radial-gradient(ellipse at 40% 40%, rgba(${rgb},0.10) 0%, #1E1E2E 65%)`,
+              background: `radial-gradient(ellipse at 40% 40%, rgba(${rgb},0.08) 0%, #f7f5f0 68%)`,
             }}
             onClick={(e) => {
               e.stopPropagation();
               setOpened(true);
             }}
           >
-            {/* Fake Figma canvas grid */}
             <div
-              className="absolute inset-0 opacity-[0.04]"
+              className="absolute inset-0 opacity-[0.13]"
               style={{
-                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px)',
+                backgroundImage: 'radial-gradient(circle, rgba(32,36,44,0.55) 1px, transparent 1px)',
                 backgroundSize: '24px 24px',
               }}
             />
 
-            {/* Floating preview cards */}
             <div className="relative mb-6">
               <div className="flex gap-3 mb-3">
                 {['#FF7262', '#A259FF', '#1ABCFE', '#0ACF83'].map((c, i) => (
@@ -132,7 +119,7 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
                     key={i}
                     className="rounded-lg shadow-lg"
                     style={{
-                      width: 48, height: 32,
+                      width: 56, height: 36,
                       background: c,
                       opacity: 0.85,
                       transform: `rotate(${[-2, 1, -1.5, 2][i]}deg) translateY(${[0, -4, 2, -2][i]}px)`,
@@ -154,12 +141,12 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
               </div>
             </div>
 
-            {/* Click to open */}
             <div
-              className="relative flex items-center gap-3 px-5 py-3 rounded-xl transition-all group-hover:scale-105"
+              className="relative flex items-center gap-3 px-5 py-3 rounded-xl transition-all group-hover:scale-[1.02]"
               style={{
-                background: `rgba(${rgb},0.15)`,
-                border: `1px solid rgba(${rgb},0.3)`,
+                background: `rgba(255,255,255,0.78)`,
+                border: `1px solid rgba(${rgb},0.22)`,
+                boxShadow: '0 12px 26px rgba(32,36,44,0.08)',
               }}
             >
               <svg width="18" height="18" viewBox="0 0 38 57" fill="none">
@@ -169,21 +156,20 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
                 <path d="M19 0h9.5a9.5 9.5 0 0 1 0 19H19V0z" fill="#F24E1E" />
                 <path d="M28.5 28.5a9.5 9.5 0 1 1-9.5-9.5 9.5 9.5 0 0 1 9.5 9.5z" fill="#A259FF" />
               </svg>
-              <span className="text-white/80 text-sm font-semibold">Click to open Figma embed</span>
+              <span className="text-[var(--exec-ink)] text-sm font-semibold">Click to open Figma embed</span>
             </div>
-            <p className="mt-3 text-white/30 text-[11px]">Interactive prototype · live Figma file</p>
+            <p className="mt-3 text-[var(--exec-muted)] text-[11px]">Interactive prototype / live Figma file</p>
           </div>
         ) : (
-          // Live Figma embed
           <>
             {!loaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#1E1E2E] z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-[var(--exec-card-subtle)] z-10">
                 <div className="flex flex-col items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
                     style={{ borderColor: `${data.accentColor} transparent transparent transparent` }}
                   />
-                  <p className="text-white/40 text-xs">Loading Figma file…</p>
+                  <p className="text-[var(--exec-muted)] text-xs">Loading Figma file...</p>
                 </div>
               </div>
             )}
@@ -197,27 +183,26 @@ export default function FigmaEmbed({ element, isSelected, onClick }: Props) {
         )}
       </div>
 
-      {/* Footer */}
       <div
         className="flex items-center justify-between px-4 py-2 flex-shrink-0"
         style={{
-          background: '#2C2C3E',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
+          background: 'rgba(255,255,255,0.58)',
+          borderTop: '1px solid var(--exec-line)',
         }}
       >
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-[#0ACF83]" />
-          <span className="text-[10px] text-white/30 font-mono">figma · live file</span>
+          <span className="text-[11px] text-[var(--exec-muted)] font-mono">figma / live file</span>
         </div>
         {opened && (
           <button
-            className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
+            className="text-[10px] text-[var(--exec-muted)] hover:text-[var(--exec-ink)] transition-colors"
             onClick={(e) => { e.stopPropagation(); setOpened(false); setLoaded(false); }}
           >
-            ✕ collapse
+            collapse
           </button>
         )}
       </div>
-    </div>
+    </CanvasCardShell>
   );
 }

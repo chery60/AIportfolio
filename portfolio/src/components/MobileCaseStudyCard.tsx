@@ -17,82 +17,59 @@ export default function MobileCaseStudyCard({ element }: Props) {
 
     return (
         <div
-            className="w-full rounded-2xl overflow-hidden"
+            className="w-full border-b border-[var(--exec-line)] py-4"
             style={{
-                background: 'linear-gradient(145deg, #161820, #111218)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                borderLeft: `2px solid rgba(${rgb}, 0.56)`,
+                paddingLeft: '14px',
             }}
         >
-            {/* Accent top bar */}
-            <div
-                className="h-1 w-full"
-                style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}60)` }}
-            />
+            <div className="mb-4">
+                <h2
+                    className="mb-1.5 text-[23px] font-semibold leading-[1.12] tracking-normal"
+                    style={{ color: 'var(--exec-ink)' }}
+                >
+                    {data.title}
+                </h2>
+                <p className="text-[12px] font-semibold leading-snug" style={{ color: data.accentColor }}>
+                    {data.subtitle}
+                </p>
+            </div>
 
-            <div className="p-5">
-                {/* Header */}
-                <div className="mb-4">
-                    <h2
-                        className="font-bold text-lg leading-tight mb-0.5"
-                        style={{ color: '#f7f8f8' }}
-                    >
-                        {data.title}
-                    </h2>
-                    <p className="text-xs font-semibold" style={{ color: data.accentColor }}>
-                        {data.subtitle}
-                    </p>
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
+            <div className="mb-4 overflow-x-auto mobile-no-scrollbar mobile-smooth-scroll-x">
+                <div className="flex w-max gap-2">
                     {data.tags.map(tag => (
                         <span
                             key={tag}
-                            className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                            style={{
-                                background: `rgba(${rgb}, 0.12)`,
-                                color: data.accentColor,
-                                border: `1px solid rgba(${rgb}, 0.22)`,
-                            }}
+                            className="text-[11px] font-medium"
+                            style={{ color: data.accentColor }}
                         >
                             {tag}
                         </span>
                     ))}
                 </div>
-
-                {/* Description */}
-                <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,255,0.78)' }}>
-                    {data.description}
-                </p>
-
-                {/* Metrics */}
-                {data.metrics && data.metrics.length > 0 && (
-                    <div
-                        className="flex gap-0 mt-5 pt-4 rounded-xl overflow-hidden"
-                        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
-                    >
-                        {data.metrics.map((m, i) => (
-                            <div
-                                key={m.label}
-                                className="flex-1 flex flex-col items-center text-center px-2"
-                                style={{
-                                    borderRight: i < data.metrics!.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-                                }}
-                            >
-                                <span
-                                    className="text-xl font-black leading-none mb-1"
-                                    style={{ color: data.accentColor }}
-                                >
-                                    {m.value}
-                                </span>
-                                <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'rgba(240,240,255,0.68)' }}>
-                                    {m.label}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
+
+            <p className="text-[14px] font-medium leading-[1.75]" style={{ color: 'var(--exec-ink-soft)' }}>
+                {data.description}
+            </p>
+
+            {data.metrics && data.metrics.length > 0 && (
+                <dl className="mt-5 divide-y divide-[var(--exec-line)] border-y border-[var(--exec-line)]">
+                    {data.metrics.map(m => (
+                        <div key={m.label} className="flex items-baseline justify-between gap-4 py-2.5">
+                            <dt
+                                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                                style={{ color: 'var(--exec-muted)' }}
+                            >
+                                {m.label}
+                            </dt>
+                            <dd className="text-right text-[15px] font-semibold" style={{ color: data.accentColor }}>
+                                {m.value}
+                            </dd>
+                        </div>
+                    ))}
+                </dl>
+            )}
         </div>
     );
 }

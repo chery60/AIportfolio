@@ -306,7 +306,7 @@ export default function Canvas({
   return (
     <div
       ref={containerRef}
-      className={`relative flex-1 overflow-hidden bg-[#F5F5F5] ${isGrabbing ? 'cursor-grabbing' : spaceDown.current ? 'cursor-grab' : 'cursor-default'}`}
+      className={`noon-canvas-shell relative flex-1 overflow-hidden ${isGrabbing ? 'cursor-grabbing' : spaceDown.current ? 'cursor-grab' : 'cursor-default'}`}
       onMouseDown={isPreviewOnly ? undefined : (e) => {
         handleMouseDown(e);
         handleCanvasMouseDown(e);
@@ -329,19 +329,24 @@ export default function Canvas({
       {isTransitioning && (
         <div
           className="absolute inset-0 z-50 pointer-events-none"
-          style={{ background: '#FFFFFF', opacity: isTransitioning ? 0.6 : 0, transition: 'opacity 0.4s ease' }}
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,252,247,0.72))',
+            opacity: isTransitioning ? 0.7 : 0,
+            transition: 'opacity 0.4s ease',
+            backdropFilter: 'blur(2px)',
+          }}
         />
       )}
 
       {/* Background patterns */}
       <div 
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="noon-dot-grid absolute inset-0 pointer-events-none opacity-100"
         style={{
-          backgroundImage: `radial-gradient(#9CA3AF 1px, transparent 1px)`,
-          backgroundSize: `${24 * transform.scale}px ${24 * transform.scale}px`,
-          backgroundPosition: `${transform.x}px ${transform.y}px`,
+          backgroundSize: `${22 * transform.scale}px ${22 * transform.scale}px, ${110 * transform.scale}px ${110 * transform.scale}px`,
+          backgroundPosition: `${transform.x}px ${transform.y}px, ${transform.x}px ${transform.y}px`,
         }}
       />
+      <div className="noon-canvas-vignette absolute inset-0 pointer-events-none" />
       
       {/* Ambient project glow */}
       <div
@@ -350,11 +355,11 @@ export default function Canvas({
           width: '600px',
           height: '600px',
           borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(${projectAccent(project)}, 0.04) 0%, transparent 70%)`,
+          background: `radial-gradient(circle, rgba(${projectAccent(project)}, 0.055) 0%, transparent 68%)`,
           left: '20%',
           top: '10%',
           transform: 'translate(-50%, -50%)',
-          filter: 'blur(60px)',
+          filter: 'blur(56px)',
         }}
       />
 
@@ -441,9 +446,9 @@ export default function Canvas({
       </div>
 
       {/* Keyboard hint */}
-      <div className="absolute top-4 left-4 flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
-        <span className="text-xs text-text-secondary">
-          Hold <kbd className="px-1 py-0.5 rounded bg-surface-2 text-text-primary text-[10px] font-mono shadow-sm border border-panel-border">Space</kbd> + drag to pan · Scroll to zoom
+      <div className="noon-hint-pill absolute top-5 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full px-3 py-1.5 opacity-80 hover:opacity-100 transition-all">
+        <span className="text-[11px] font-medium text-[#5f6369]">
+          Hold <kbd className="px-1.5 py-0.5 rounded-md bg-white text-[#191a1b] text-[10px] font-mono shadow-sm border border-[#dcd8d0]">Space</kbd> + drag to pan <span className="mx-1 text-[#b4aca1]">/</span> Scroll to zoom
         </span>
       </div>
 

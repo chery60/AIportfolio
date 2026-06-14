@@ -1,6 +1,5 @@
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { BlurFade } from './ui/blur-fade';
+import MobileProjectDeck from './MobileProjectDeck';
 import { PROJECTS } from '../data/projects';
 import type { Project } from '../types';
 
@@ -10,94 +9,37 @@ interface Props {
 
 export default function MobileProjectsTab({ onSelectProject }: Props) {
   return (
-    <div className="h-full overflow-y-scroll overflow-x-hidden bg-transparent min-h-0 mobile-smooth-scroll">
-      <div className="px-5 pt-4" style={{ paddingBottom: 'calc(13rem + env(safe-area-inset-bottom, 0px))' }}>
-
-        {/* Header — same padding as Chat tab (px-5 py-4) */}
+    <div className="h-full min-h-0 overflow-hidden bg-transparent">
+      <div className="flex h-full min-h-0 flex-col px-5 pt-4 pb-4">
         <BlurFade delay={0}>
-          <div className="py-4">
-            <h2 className="text-2xl font-bold text-[#ffffff] drop-shadow-[0_2px_16px_rgba(0,0,0,0.82)]">Case Studies</h2>
-            <p className="text-sm text-[#dbe3ed] font-medium mt-1 drop-shadow-[0_1px_12px_rgba(0,0,0,0.72)]">{PROJECTS.length} projects · Tap to explore</p>
-          </div>
+          <header className="shrink-0 py-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/58 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+              Portfolio
+            </p>
+            <h2 className="mt-1 text-[clamp(2rem,9vw,2.45rem)] font-black leading-none tracking-tight text-white drop-shadow-[0_3px_20px_rgba(0,0,0,0.7)]">
+              Case Studies
+            </h2>
+            <p className="mt-2 text-sm font-semibold text-white/74 drop-shadow-[0_2px_14px_rgba(0,0,0,0.62)]">
+              {PROJECTS.length} projects / swipe left or right
+            </p>
+          </header>
         </BlurFade>
 
-        {/* Project grid — masonry 2 columns */}
-        <div className="columns-2 gap-3 space-y-0 mt-2">
-          {PROJECTS.map((project, idx) => (
-            <BlurFade key={project.id} delay={idx * 0.07} inView>
-              <div className="break-inside-avoid mb-3">
-                <ProjectTile project={project} index={idx} onSelect={onSelectProject} />
-              </div>
-            </BlurFade>
-          ))}
-        </div>
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-start pt-3">
+          <BlurFade delay={0.05}>
+            <p className="mb-3 text-center text-[12px] font-black uppercase tracking-[0.12em] text-white/86 drop-shadow-[0_2px_14px_rgba(0,0,0,0.5)]">
+              Explore case studies
+            </p>
+          </BlurFade>
 
+          <BlurFade delay={0.08} className="flex min-h-0 w-full flex-1">
+            <MobileProjectDeck
+              projects={PROJECTS}
+              onOpenProject={onSelectProject}
+            />
+          </BlurFade>
+        </div>
       </div>
     </div>
-  );
-}
-
-// Alternate tall / short / tall / short… for masonry feel
-const ASPECT_RATIOS = ['3/4', '4/5', '2/3', '1/1', '3/4', '4/3'];
-
-function ProjectTile({ project, index, onSelect }: { project: Project; index: number; onSelect: (p: Project) => void }) {
-  const aspectRatio = ASPECT_RATIOS[index % ASPECT_RATIOS.length];
-  return (
-    <motion.button
-      onClick={() => onSelect(project)}
-      whileTap={{ scale: 0.96 }}
-      className="relative w-full rounded-2xl overflow-hidden border border-white/[0.16] text-left shadow-[0_18px_44px_rgba(0,0,0,0.42)]"
-      style={{ aspectRatio }}
-    >
-      {/* Gradient background */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(135deg, ${project.gradientFrom}, ${project.gradientTo})`,
-          opacity: 0.85,
-        }}
-      />
-
-      {/* Dark overlay for text legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/48 to-black/12" />
-
-      {/* Index badge */}
-      <div className="absolute top-3 left-3">
-        <span
-          className="text-[10px] font-bold text-white bg-black/40 border border-white/[0.14] backdrop-blur-sm rounded-full px-2 py-0.5"
-        >
-          {String(index + 1).padStart(2, '0')}
-        </span>
-      </div>
-
-      {/* Arrow */}
-      <div className="absolute top-3 right-3">
-        <div className="w-6 h-6 rounded-full bg-black/40 border border-white/[0.14] backdrop-blur-sm flex items-center justify-center">
-          <ArrowRight className="w-3 h-3 text-white/90" />
-        </div>
-      </div>
-
-      {/* Bottom content */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col gap-1">
-        <span
-          className="text-[9px] font-bold tracking-widest uppercase text-white/90"
-        >
-          {project.category}
-        </span>
-        <h3 className="text-sm font-bold text-white leading-tight line-clamp-2">
-          {project.title}
-        </h3>
-        <div className="flex flex-wrap gap-1 mt-0.5">
-          {project.tags.slice(0, 2).map((tag) => (
-            <span
-              key={tag}
-              className="text-[9px] font-medium text-white/80 bg-black/30 border border-white/[0.1] rounded-full px-1.5 py-0.5"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    </motion.button>
   );
 }

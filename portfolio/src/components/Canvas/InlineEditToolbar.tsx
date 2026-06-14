@@ -2,6 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { Trash2, Pencil, Check, X, Sparkles } from 'lucide-react';
 import type { CanvasElement } from '../../types';
 
+type EditableElementData = CanvasElement['data'] & {
+  aiDescription?: string;
+  accentColor?: string;
+  color?: string;
+} & Record<string, unknown>;
+
 const ACCENT_COLORS = [
   '#C74B18', '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
   '#6366F1', '#5e6ad2', '#7170ff', '#828fff', '#22D3EE',
@@ -25,28 +31,34 @@ interface Props {
 
 /** Get the primary text field name & value for an element type */
 function getPrimaryTextField(element: CanvasElement): { key: string; value: string } | null {
+  const data = element.data as EditableElementData;
+  const textValue = (key: string) => {
+    const value = data[key];
+    return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+  };
+
   switch (element.type) {
-    case 'text-block':      return { key: 'content', value: (element.data as any).content ?? '' };
-    case 'sticky-note':     return { key: 'content', value: (element.data as any).content ?? '' };
-    case 'section-label':   return { key: 'title', value: (element.data as any).title ?? '' };
-    case 'quote-block':     return { key: 'quote', value: (element.data as any).quote ?? '' };
-    case 'metric-card':     return { key: 'value', value: (element.data as any).value ?? '' };
-    case 'process-step':    return { key: 'title', value: (element.data as any).title ?? '' };
-    case 'case-study-card': return { key: 'title', value: (element.data as any).title ?? '' };
-    case 'user-flow-step':  return { key: 'label', value: (element.data as any).label ?? '' };
-    case 'data-dimension':  return { key: 'title', value: (element.data as any).title ?? '' };
-    case 'video-embed':     return { key: 'title', value: (element.data as any).title ?? '' };
-    case 'figma-embed':     return { key: 'title', value: (element.data as any).title ?? '' };
-    case 'tag-cluster':     return { key: 'title', value: (element.data as any).title ?? '' };
+    case 'text-block':      return { key: 'content', value: textValue('content') };
+    case 'sticky-note':     return { key: 'content', value: textValue('content') };
+    case 'section-label':   return { key: 'title', value: textValue('title') };
+    case 'quote-block':     return { key: 'quote', value: textValue('quote') };
+    case 'metric-card':     return { key: 'value', value: textValue('value') };
+    case 'process-step':    return { key: 'title', value: textValue('title') };
+    case 'case-study-card': return { key: 'title', value: textValue('title') };
+    case 'user-flow-step':  return { key: 'label', value: textValue('label') };
+    case 'data-dimension':  return { key: 'title', value: textValue('title') };
+    case 'video-embed':     return { key: 'title', value: textValue('title') };
+    case 'figma-embed':     return { key: 'title', value: textValue('title') };
+    case 'tag-cluster':     return { key: 'title', value: textValue('title') };
     default:                return null;
   }
 }
 
 /** Get current accent/color value for color swatch highlighting */
 function getElementColor(element: CanvasElement): string | null {
-  const d = element.data as any;
-  if (element.type === 'sticky-note') return d.color ?? null;
-  return d.accentColor ?? d.color ?? null;
+  const data = element.data as EditableElementData;
+  const color = element.type === 'sticky-note' ? data.color : data.accentColor ?? data.color;
+  return typeof color === 'string' ? color : null;
 }
 
 export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDelete }: Props) {
@@ -103,7 +115,8 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
   };
 
   const handleStartEditAi = () => {
-    setAiValue((element.data as any).aiDescription ?? '');
+    const data = element.data as EditableElementData;
+    setAiValue(data.aiDescription ?? '');
     setIsEditingAi(true);
     setIsEditingText(false);
     setShowColors(false);
@@ -112,8 +125,8 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
   const handleConfirmEditAi = () => {
     const updated = {
       ...element,
-      data: { ...element.data, aiDescription: aiValue } as any,
-    } as CanvasElement;
+      data: { ...element.data, aiDescription: aiValue },
+    } as unknown as CanvasElement;
     onUpdate(updated);
     setIsEditingAi(false);
   };
@@ -147,11 +160,11 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
     if (isStickyNote) {
       updated = { ...element, data: { ...element.data, color } } as CanvasElement;
     } else {
-      const d = element.data as any;
-      if ('accentColor' in d) {
-        updated = { ...element, data: { ...d, accentColor: color } } as CanvasElement;
-      } else if ('color' in d) {
-        updated = { ...element, data: { ...d, color } } as CanvasElement;
+      const data = element.data as EditableElementData;
+      if ('accentColor' in data) {
+        updated = { ...element, data: { ...data, accentColor: color } } as CanvasElement;
+      } else if ('color' in data) {
+        updated = { ...element, data: { ...data, color } } as CanvasElement;
       } else {
         return;
       }
@@ -178,24 +191,21 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
     >
       {/* Text edit popover */}
       {isEditingText && textField && (
-        <div
-          className="mb-2 bg-white rounded-xl shadow-2xl border border-panel-border p-3 w-[280px]"
-          style={{ backdropFilter: 'blur(12px)' }}
-        >
+        <div className="noon-panel-light mb-2 rounded-[14px] p-3 w-[280px]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-[var(--exec-muted)] uppercase tracking-wider">
               Edit {textField.key.replace(/([A-Z])/g, ' $1').trim()}
             </span>
             <div className="flex gap-1">
               <button
                 onClick={handleCancelEdit}
-                className="w-6 h-6 rounded-md flex items-center justify-center text-text-secondary hover:text-red-500 hover:bg-red-50 transition-colors"
+                className="w-6 h-6 rounded-[8px] flex items-center justify-center text-[var(--exec-muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={handleConfirmEdit}
-                className="w-6 h-6 rounded-md flex items-center justify-center text-white bg-accent-purple hover:bg-opacity-90 transition-colors"
+                className="w-6 h-6 rounded-[8px] flex items-center justify-center text-white bg-[var(--exec-accent)] transition-colors"
               >
                 <Check className="w-3.5 h-3.5" />
               </button>
@@ -206,34 +216,31 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-surface-1 border border-panel-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple resize-none"
+            className="exec-input px-3 py-2 text-xs resize-none"
             rows={3}
             placeholder={`Enter ${textField.key}...`}
           />
-          <p className="text-[9px] text-text-secondary mt-1.5">⌘↵ to save · Esc to cancel</p>
+          <p className="text-[9px] text-[var(--exec-muted)] mt-1.5">Command + Enter to save / Esc to cancel</p>
         </div>
       )}
 
       {/* AI Context Edit popover */}
       {isEditingAi && (
-        <div
-          className="mb-2 bg-white rounded-xl shadow-2xl border border-panel-border p-3 w-[280px]"
-          style={{ backdropFilter: 'blur(12px)' }}
-        >
+        <div className="noon-panel-light mb-2 rounded-[14px] p-3 w-[280px]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-accent-purple" /> AI Description
+            <span className="text-[10px] font-bold text-[var(--exec-muted)] uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-[var(--exec-accent)]" /> AI Description
             </span>
             <div className="flex gap-1">
               <button
                 onClick={handleCancelEditAi}
-                className="w-6 h-6 rounded-md flex items-center justify-center text-text-secondary hover:text-red-500 hover:bg-red-50 transition-colors"
+                className="w-6 h-6 rounded-[8px] flex items-center justify-center text-[var(--exec-muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={handleConfirmEditAi}
-                className="w-6 h-6 rounded-md flex items-center justify-center text-white bg-accent-purple hover:bg-opacity-90 transition-colors"
+                className="w-6 h-6 rounded-[8px] flex items-center justify-center text-white bg-[var(--exec-accent)] transition-colors"
               >
                 <Check className="w-3.5 h-3.5" />
               </button>
@@ -244,18 +251,18 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
             value={aiValue}
             onChange={(e) => setAiValue(e.target.value)}
             onKeyDown={handleAiKeyDown}
-            className="w-full bg-surface-1 border border-panel-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple resize-none"
+            className="exec-input px-3 py-2 text-xs resize-none"
             rows={4}
             placeholder="Why was this component placed? The guide avatar will narrate this..."
           />
-          <p className="text-[9px] text-text-secondary mt-1.5">⌘↵ to save · Esc to cancel</p>
+          <p className="text-[9px] text-[var(--exec-muted)] mt-1.5">Command + Enter to save / Esc to cancel</p>
         </div>
       )}
 
       {/* Color picker popover */}
       {showColors && (
-        <div className="mb-2 bg-white rounded-xl shadow-2xl border border-panel-border p-3">
-          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2 block">
+        <div className="noon-panel-light mb-2 rounded-[14px] p-3">
+          <span className="text-[10px] font-bold text-[var(--exec-muted)] uppercase tracking-wider mb-2 block">
             {isStickyNote ? 'Note Color' : 'Accent Color'}
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -264,7 +271,7 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
                   <button
                     key={c.value}
                     onClick={() => handleColorChange(c.value)}
-                    className={`w-7 h-7 rounded-lg border-2 transition-transform hover:scale-110 ${
+                    className={`w-7 h-7 rounded-[9px] border-2 transition-transform hover:scale-105 ${
                       currentColor === c.value ? 'border-text-primary scale-110' : 'border-transparent'
                     }`}
                     style={{ backgroundColor: c.bg }}
@@ -275,7 +282,7 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
                   <button
                     key={c}
                     onClick={() => handleColorChange(c)}
-                    className={`w-7 h-7 rounded-lg border-2 transition-transform hover:scale-110 ${
+                    className={`w-7 h-7 rounded-[9px] border-2 transition-transform hover:scale-105 ${
                       currentColor === c ? 'border-text-primary scale-110' : 'border-transparent'
                     }`}
                     style={{ backgroundColor: c }}
@@ -287,15 +294,15 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
       )}
 
       {/* Main toolbar bar */}
-      <div className="flex items-center gap-1 bg-white rounded-full px-1.5 py-1 shadow-2xl border border-panel-border">
+      <div className="noon-toolbar-light flex items-center gap-1 rounded-[14px] px-1.5 py-1">
         {/* Edit text button */}
         {textField && (
           <button
             onClick={handleStartEdit}
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+            className={`w-7 h-7 rounded-[9px] flex items-center justify-center transition-all ${
               isEditingText
-                ? 'bg-accent-purple text-white'
-                : 'text-text-secondary hover:text-text-primary hover:bg-surface-1'
+                ? 'bg-[var(--exec-accent)] text-white'
+                : 'text-[var(--exec-muted)] hover:text-[var(--exec-ink)] hover:bg-white/60'
             }`}
             title="Edit text"
           >
@@ -307,8 +314,8 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
         {currentColor != null && (
           <button
             onClick={() => { setShowColors(!showColors); setIsEditingText(false); setIsEditingAi(false); }}
-            className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all hover:scale-110 ${
-              showColors ? 'border-text-primary' : 'border-panel-border'
+            className={`w-7 h-7 rounded-[9px] flex items-center justify-center border-2 transition-all hover:scale-105 ${
+              showColors ? 'border-[var(--exec-ink)]' : 'border-[var(--exec-line)]'
             }`}
             style={{
               backgroundColor: isStickyNote
@@ -322,10 +329,10 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
         {/* AI Description Button */}
         <button
           onClick={handleStartEditAi}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+          className={`w-7 h-7 rounded-[9px] flex items-center justify-center transition-all ${
             isEditingAi
-              ? 'bg-accent-purple text-white shadow-inner'
-              : 'text-text-secondary hover:text-text-primary hover:bg-surface-1 hover:text-accent-purple'
+              ? 'bg-[var(--exec-accent)] text-white shadow-inner'
+              : 'text-[var(--exec-muted)] hover:text-[var(--exec-ink)] hover:bg-white/60 hover:text-[var(--exec-accent)]'
           }`}
           title="Add AI description context for Guide"
         >
@@ -333,12 +340,12 @@ export default function InlineEditToolbar({ element, canvasScale, onUpdate, onDe
         </button>
 
         {/* Divider */}
-        <div className="w-px h-4 bg-panel-border mx-0.5" />
+        <div className="w-px h-4 bg-[var(--exec-line)] mx-0.5" />
 
         {/* Delete button */}
         <button
           onClick={() => onDelete(element.id)}
-          className="w-7 h-7 rounded-full flex items-center justify-center text-text-secondary hover:text-red-500 hover:bg-red-50 transition-colors"
+          className="w-7 h-7 rounded-[9px] flex items-center justify-center text-[var(--exec-muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
           title="Delete element"
         >
           <Trash2 className="w-3.5 h-3.5" />

@@ -84,7 +84,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
 
   if (isCollapsed) {
     return (
-      <div className="bg-white border border-panel-border shadow-2xl shadow-black/5 rounded-2xl flex relative pointer-events-auto transition-all h-[44px]">
+      <div className="noon-panel-light rounded-[16px] flex relative pointer-events-auto transition-all h-[44px]">
         {showPassword ? (
           <form
             onSubmit={handlePasswordSubmit}
@@ -96,7 +96,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(false); }}
               placeholder="Password..."
-              className={`w-36 bg-white border ${error ? 'border-red-500' : 'border-panel-border focus:border-accent-purple'} rounded-md px-2 py-1 text-xs outline-none focus:ring-1`}
+              className={`w-36 exec-input ${error ? 'border-red-500' : ''} px-2 py-1 text-xs`}
               autoFocus
             />
             <button type="submit" className="hidden" />
@@ -119,9 +119,9 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
             {showMainMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowMainMenu(false)} />
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-panel-border shadow-2xl rounded-xl z-50 overflow-hidden py-1">
+                <div className="noon-panel-light absolute top-full left-0 mt-2 w-48 rounded-[14px] z-50 overflow-hidden py-1">
                   <button
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-text-primary hover:bg-surface-1 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--exec-ink)] hover:bg-white/60 transition-colors"
                     onClick={() => {
                       setShowMainMenu(false);
                       handleEditClick();
@@ -164,15 +164,15 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
             {showProjectMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowProjectMenu(false)} />
-                <div className="absolute top-full left-12 mt-2 w-64 bg-white border border-panel-border shadow-2xl rounded-xl z-50 overflow-hidden">
+                <div className="noon-panel-light absolute top-full left-12 mt-2 w-64 rounded-[14px] z-50 overflow-hidden">
                   <div className="max-h-[60vh] overflow-y-auto py-2">
                     <div className="px-3 py-1.5 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-text-primary">Projects</span>
+                      <span className="text-xs font-semibold text-[var(--exec-ink)]">Projects</span>
                     </div>
                     {REGULAR_PROJECTS.map((project, idx) => (
                       <button
                         key={project.id}
-                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-surface-1 transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-white/60 transition-colors"
                         onClick={() => {
                           onSelectProject(project);
                           setShowProjectMenu(false);
@@ -188,21 +188,21 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                         >
                           {idx + 1}
                         </div>
-                        <span className={`text-sm truncate ${selectedProject.id === project.id ? 'font-medium text-text-primary' : 'text-text-secondary'}`}>
+                        <span className={`text-sm truncate ${selectedProject.id === project.id ? 'font-medium text-[var(--exec-ink)]' : 'text-[var(--exec-muted)]'}`}>
                           {project.title}
                         </span>
                       </button>
                     ))}
 
-                    <div className="h-px bg-panel-border my-2" />
+                    <div className="h-px bg-[var(--exec-line)] my-2" />
 
                     <div className="px-3 py-1.5 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-text-primary">Vibe Coded</span>
+                      <span className="text-xs font-semibold text-[var(--exec-ink)]">Vibe Coded</span>
                     </div>
                     {VIBE_CODED_PROJECTS.map((project) => (
                       <button
                         key={project.id}
-                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-surface-1 transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left hover:bg-white/60 transition-colors"
                         onClick={() => {
                           onSelectProject(project);
                           setShowProjectMenu(false);
@@ -217,7 +217,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                         >
                           <Zap className="w-3 h-3" />
                         </div>
-                        <span className={`text-sm truncate ${selectedProject.id === project.id ? 'font-medium text-text-primary' : 'text-text-secondary'}`}>
+                        <span className={`text-sm truncate ${selectedProject.id === project.id ? 'font-medium text-[var(--exec-ink)]' : 'text-[var(--exec-muted)]'}`}>
                           {project.title}
                         </span>
                       </button>
@@ -240,7 +240,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
 
   return (
     <div
-      className="flex flex-col h-full bg-white border border-panel-border shadow-2xl shadow-black/5 rounded-2xl flex-shrink-0 pointer-events-auto transition-all overflow-hidden"
+      className="noon-panel-light flex flex-col h-full rounded-[18px] flex-shrink-0 pointer-events-auto transition-all overflow-hidden"
       style={{ width: '260px' }}
     >
       {/* Top Header */}
@@ -261,19 +261,19 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
             <p className="text-xs text-text-secondary mt-0.5">Product Designer</p>
           </div>
         </div>
-        <button onClick={() => setIsCollapsed(true)} className="text-text-secondary hover:text-text-primary mt-1 p-1.5 hover:bg-surface-1 rounded-md transition-colors">
+        <button onClick={() => setIsCollapsed(true)} className="text-[var(--exec-muted)] hover:text-[var(--exec-ink)] mt-1 p-1.5 hover:bg-white/60 rounded-md transition-colors">
           <PanelLeft className="w-5 h-5" />
         </button>
       </div>
 
       {/* Segment Control */}
-      <div className="px-4 pb-4 border-b border-panel-border">
-        <div className="flex bg-surface-1 p-1 rounded-lg">
+      <div className="px-4 pb-4 border-b border-[var(--exec-line)]">
+        <div className="flex bg-white/45 border border-[var(--exec-line)] p-1 rounded-[12px]">
           <button
             onClick={() => setActiveTab('projects')}
             className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${activeTab === 'projects'
-              ? 'bg-white shadow-sm text-text-primary'
-              : 'text-text-secondary hover:text-text-primary'
+              ? 'bg-white shadow-sm text-[var(--exec-ink)]'
+              : 'text-[var(--exec-muted)] hover:text-[var(--exec-ink)]'
               }`}
           >
             Projects
@@ -281,8 +281,8 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
           <button
             onClick={() => setActiveTab('vibe-tools')}
             className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'vibe-tools'
-              ? 'bg-white shadow-sm text-text-primary'
-              : 'text-text-secondary hover:text-text-primary'
+              ? 'bg-white shadow-sm text-[var(--exec-ink)]'
+              : 'text-[var(--exec-muted)] hover:text-[var(--exec-ink)]'
               }`}
           >
             <Zap className="w-3 h-3" />
@@ -303,8 +303,8 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                   key={project.id}
                   onClick={() => onSelectProject(project)}
                   className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer transition-all ${isActive
-                    ? 'bg-surface-2 shadow-sm border border-panel-border'
-                    : 'hover:bg-surface-1 border border-transparent'
+                    ? 'bg-white/75 shadow-sm border border-[var(--exec-line)]'
+                    : 'hover:bg-white/52 border border-transparent'
                     }`}
                 >
                   <div
@@ -318,10 +318,10 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                     {idx + 1}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className={`text-xs font-semibold truncate ${isActive ? 'text-text-primary' : 'text-text-secondary'}`}>
+                    <p className={`text-xs font-semibold truncate ${isActive ? 'text-[var(--exec-ink)]' : 'text-[var(--exec-muted)]'}`}>
                       {project.title}
                     </p>
-                    <p className="text-[10px] truncate text-text-secondary opacity-80 mt-0.5">
+                    <p className="text-[10px] truncate text-[var(--exec-muted)] opacity-80 mt-0.5">
                       {project.category}
                     </p>
                   </div>
@@ -352,8 +352,8 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                     key={project.id}
                     onClick={() => onSelectProject(project)}
                     className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer transition-all group ${isActive
-                      ? 'bg-surface-2 shadow-sm border border-panel-border'
-                      : 'hover:bg-surface-1 border border-transparent hover:border-panel-border'
+                    ? 'bg-white/75 shadow-sm border border-[var(--exec-line)]'
+                      : 'hover:bg-white/52 border border-transparent hover:border-[var(--exec-line)]'
                     }`}
                   >
                     <div
@@ -366,10 +366,10 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                       <Zap className="w-3.5 h-3.5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-xs font-semibold truncate ${isActive ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-primary'} transition-colors`}>
+                      <p className={`text-xs font-semibold truncate ${isActive ? 'text-[var(--exec-ink)]' : 'text-[var(--exec-muted)] group-hover:text-[var(--exec-ink)]'} transition-colors`}>
                         {project.title}
                       </p>
-                      <p className="text-[10px] truncate text-text-secondary opacity-70 mt-0.5">
+                      <p className="text-[10px] truncate text-[var(--exec-muted)] opacity-70 mt-0.5">
                         {project.category}
                       </p>
                     </div>
@@ -379,7 +379,7 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                   </div>
                 );
               })}
-              <div className="mt-4 px-2.5 py-3 rounded-lg border border-dashed border-panel-border flex items-center gap-2 opacity-60">
+              <div className="mt-4 px-2.5 py-3 rounded-[10px] border border-dashed border-[var(--exec-line)] flex items-center gap-2 opacity-60">
                 <Zap className="w-3.5 h-3.5 text-accent-purple flex-shrink-0" />
                 <p className="text-[10px] text-text-secondary">More tools coming soon…</p>
               </div>
@@ -389,11 +389,11 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
       </div>
 
       {/* Bottom — Edit Button */}
-      <div className="p-4 border-t border-panel-border">
+      <div className="p-4 border-t border-[var(--exec-line)]">
         {showPassword ? (
-          <form onSubmit={handlePasswordSubmit} className="bg-surface-1 p-3 rounded-lg border border-panel-border">
+          <form onSubmit={handlePasswordSubmit} className="bg-white/58 p-3 rounded-[12px] border border-[var(--exec-line)]">
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--exec-ink)]">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Enter Password</span>
               </div>
@@ -406,19 +406,19 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(false); }}
               placeholder="Password..."
-              className={`w-full bg-white border ${error ? 'border-red-500 focus:ring-red-500' : 'border-panel-border focus:border-accent-purple focus:ring-accent-purple'} rounded-md px-2.5 py-1.5 text-xs outline-none focus:ring-1`}
+              className={`exec-input w-full ${error ? 'border-red-500' : ''} px-2.5 py-1.5 text-xs`}
               autoFocus
             />
             {error && <p className="text-[10px] text-red-500 mt-1">Incorrect password</p>}
-            <button type="submit" className="w-full mt-2 py-1.5 rounded-md bg-accent-purple text-white text-xs font-semibold hover:bg-opacity-90 transition-colors">
+            <button type="submit" className="w-full mt-2 py-1.5 rounded-[9px] bg-[var(--exec-accent)] text-white text-xs font-semibold hover:bg-opacity-90 transition-colors">
               Unlock Editor
             </button>
           </form>
         ) : (
           <button
             className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border transition-all group ${isEditing
-              ? 'bg-accent-purple/10 border-accent-purple text-accent-purple hover:bg-accent-purple/20'
-              : 'border-panel-border bg-surface-1 hover:bg-surface-2 hover:border-accent-purple/40'
+              ? 'bg-[rgba(var(--exec-accent-rgb),0.10)] border-[var(--exec-accent)] text-[var(--exec-accent)] hover:bg-[rgba(var(--exec-accent-rgb),0.15)]'
+              : 'border-[var(--exec-line)] bg-white/52 hover:bg-white hover:border-[rgba(var(--exec-accent-rgb),0.28)]'
               }`}
             onClick={handleEditClick}
           >
@@ -431,15 +431,15 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
                 </>
               ) : (
                 <>
-                  <Pencil className="w-3.5 h-3.5 text-text-secondary group-hover:text-accent-purple transition-colors" />
-                  <span className="text-xs font-semibold text-text-secondary group-hover:text-text-primary transition-colors">
+                  <Pencil className="w-3.5 h-3.5 text-[var(--exec-muted)] group-hover:text-[var(--exec-accent)] transition-colors" />
+                  <span className="text-xs font-semibold text-[var(--exec-muted)] group-hover:text-[var(--exec-ink)] transition-colors">
                     Edit
                   </span>
                 </>
               )}
             </div>
             {!isEditing && (
-              <span className="text-[10px] text-text-secondary font-medium px-1.5 py-0.5 border border-panel-border rounded bg-white shadow-sm font-mono">
+              <span className="text-[10px] text-[var(--exec-muted)] font-medium px-1.5 py-0.5 border border-[var(--exec-line)] rounded bg-white shadow-sm font-mono">
                 ⌘E
               </span>
             )}
@@ -449,16 +449,16 @@ export default function LeftPanel({ selectedProject, onSelectProject, isEditing 
         {/* Exit button — back to landing */}
         {onExit && (
           <button
-            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-panel-border bg-surface-1 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all group mt-2"
+            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-[10px] border border-[var(--exec-line)] bg-white/52 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all group mt-2"
             onClick={onExit}
           >
             <div className="flex items-center gap-2">
               <LogOut className="w-3.5 h-3.5 text-text-secondary group-hover:text-red-500 transition-colors" />
-              <span className="text-xs font-semibold text-text-secondary group-hover:text-red-600 transition-colors">
+              <span className="text-xs font-semibold text-[var(--exec-muted)] group-hover:text-red-600 transition-colors">
                 Exit
               </span>
             </div>
-            <span className="text-[10px] text-text-secondary font-medium px-1.5 py-0.5 border border-panel-border rounded bg-white shadow-sm font-mono">
+            <span className="text-[10px] text-[var(--exec-muted)] font-medium px-1.5 py-0.5 border border-[var(--exec-line)] rounded bg-white shadow-sm font-mono">
               Esc
             </span>
           </button>

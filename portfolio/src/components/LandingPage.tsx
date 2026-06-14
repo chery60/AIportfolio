@@ -799,21 +799,6 @@ export default function LandingPage({
                         PORTFOLIO.V2
                     </span>
                 </div>
-                <div className="absolute top-6 right-6 z-10 pointer-events-none flex items-center gap-2.5 mt-[-6px] mr-[-6px]">
-                    <span
-                        className={`inline-block h-2 w-2 shrink-0 rounded-full animate-pulse ${
-                            isSabotaged ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-emerald-400'
-                        }`}
-                        aria-hidden
-                    />
-                    <span
-                        className={`text-[11px] font-mono tracking-widest uppercase ${
-                            isSabotaged ? 'text-red-500' : 'text-[#d4d4d8]'
-                        }`}
-                    >
-                        {isSabotaged ? 'System sabotaged' : 'Available for hire'}
-                    </span>
-                </div>
 
                 {/* ── Layout — two-column desktop, single-column mobile ── */}
                 <div className={`relative z-10 flex items-stretch w-full h-screen ${isMobile ? 'flex-col' : ''}`}>

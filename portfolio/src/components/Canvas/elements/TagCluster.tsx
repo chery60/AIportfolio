@@ -1,4 +1,6 @@
 import type { TagClusterElement } from '../../../types';
+import { CanvasCardShell } from '@/components/ui/executive';
+import { hexToRgb } from '@/lib/executive';
 
 interface Props {
   element: TagClusterElement;
@@ -6,26 +8,20 @@ interface Props {
   onClick: () => void;
 }
 
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '124, 92, 252';
-}
-
 export default function TagCluster({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
 
   return (
-    <div
+    <CanvasCardShell
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl p-4 bg-white border border-panel-border shadow-sm ${isSelected ? 'selected' : ''}`}
+      selected={isSelected}
+      className="p-5"
       style={{
         width,
         height,
       }}
     >
-      <p className="text-xs font-semibold tracking-widest uppercase mb-3 text-text-secondary">
+      <p className="exec-eyebrow mb-4">
         {data.title}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -34,11 +30,11 @@ export default function TagCluster({ element, isSelected, onClick }: Props) {
           return (
             <span
               key={tag.label}
-              className="text-xs px-2.5 py-1 rounded-lg font-medium"
+              className="exec-chip"
               style={{
-                background: `rgba(${rgb}, 0.12)`,
+                background: `rgba(${rgb}, 0.075)`,
                 color: tag.color,
-                border: `1px solid rgba(${rgb}, 0.25)`,
+                borderColor: `rgba(${rgb}, 0.22)`,
               }}
             >
               {tag.label}
@@ -46,6 +42,6 @@ export default function TagCluster({ element, isSelected, onClick }: Props) {
           );
         })}
       </div>
-    </div>
+    </CanvasCardShell>
   );
 }

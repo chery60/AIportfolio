@@ -1,4 +1,5 @@
 import type { StickyNoteElement } from '../../../types';
+import { CanvasCardShell } from '@/components/ui/executive';
 
 interface Props {
   element: StickyNoteElement;
@@ -7,11 +8,11 @@ interface Props {
 }
 
 const COLORS = {
-  yellow: { bg: '#2A2410', border: '#FBBF24', text: '#FDE68A', pin: '#FBBF24' },
-  purple: { bg: '#161527', border: '#5e6ad2', text: '#C4B5FD', pin: '#5e6ad2' },
-  pink:   { bg: '#1a1320', border: '#7170ff', text: '#b4b3ff', pin: '#7170ff' },
-  cyan:   { bg: '#0F2028', border: '#22D3EE', text: '#A5F3FC', pin: '#22D3EE' },
-  green:  { bg: '#0D2218', border: '#34D399', text: '#6EE7B7', pin: '#34D399' },
+  yellow: { bg: '#fff8df', border: '#a56716', text: '#4d3f20', pin: '#a56716' },
+  purple: { bg: '#f2f1fb', border: '#5e6ad2', text: '#34345f', pin: '#5e6ad2' },
+  pink:   { bg: '#f7eef4', border: '#b85a7b', text: '#513241', pin: '#b85a7b' },
+  cyan:   { bg: '#eef8f8', border: '#2b7f8b', text: '#264d54', pin: '#2b7f8b' },
+  green:  { bg: '#edf7f2', border: '#14785f', text: '#244d3f', pin: '#14785f' },
 };
 
 export default function StickyNote({ element, isSelected, onClick }: Props) {
@@ -20,36 +21,36 @@ export default function StickyNote({ element, isSelected, onClick }: Props) {
   const rotation = data.rotation ?? 0;
 
   return (
-    <div
+    <CanvasCardShell
       onClick={onClick}
-      className={`canvas-element-base rounded-xl p-4 ${isSelected ? 'selected' : ''}`}
+      selected={isSelected}
+      accentColor={colors.border}
+      className="p-4"
       style={{
         width,
         height,
         background: colors.bg,
-        border: `1px solid ${colors.border}44`,
+        border: `1.5px solid ${colors.border}45`,
         transform: `rotate(${rotation}deg)`,
-        boxShadow: `3px 4px 0 rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3)`,
+        boxShadow: `0 2px 8px rgba(32,36,44,0.07), 0 12px 32px rgba(32,36,44,0.10), inset 0 1px 0 rgba(255,255,255,0.82)`,
       }}
     >
-      {/* Pin */}
       <div
-        className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full shadow-md"
-        style={{ background: colors.pin, boxShadow: `0 0 6px ${colors.pin}66` }}
+        className="absolute -top-2 left-1/2 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-2 border-white shadow-sm"
+        style={{ background: colors.pin }}
       />
 
-      {/* Accent bar */}
       <div
-        className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-60"
+        className="absolute top-0 left-0 right-0 h-[2px] opacity-70"
         style={{ background: `linear-gradient(90deg, ${colors.border}, transparent)` }}
       />
 
       <p
-        className="text-xs leading-relaxed whitespace-pre-line font-medium"
+        className="text-[12px] leading-relaxed whitespace-pre-line font-medium"
         style={{ color: colors.text }}
       >
         {data.content}
       </p>
-    </div>
+    </CanvasCardShell>
   );
 }

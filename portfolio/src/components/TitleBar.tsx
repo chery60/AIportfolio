@@ -50,22 +50,8 @@ export default function TitleBar({ currentProject }: Props) {
 
       {/* Right: actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <StatusDot label="Available for work" />
-        <div className="h-4 w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
         <span className="text-xs" style={{ color: '#62666d' }}>Portfolio · 2024</span>
       </div>
-    </div>
-  );
-}
-
-function StatusDot({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="relative flex h-2 w-2">
-        <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-40" />
-        <div className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
-      </div>
-      <span className="text-xs" style={{ color: '#8a8f98' }}>{label}</span>
     </div>
   );
 }

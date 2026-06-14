@@ -1,26 +1,28 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Heart, MessageSquare, Send, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Project, CanvasElement } from '../types';
+import { ArrowLeft, List, Heart, MessageSquare, Send, ExternalLink } from 'lucide-react';
+import type {
+    Project,
+    CanvasElement,
+    StickyNoteElement,
+    MetricCardElement,
+    ProcessStepElement,
+    QuoteBlockElement,
+    UserFlowStepElement,
+    TagClusterElement,
+    VideoEmbedElement,
+    FigmaEmbedElement,
+    DataDimensionElement,
+} from '../types';
 import type { ActiveViewer } from '../hooks/useRealtimeSession';
-import { PROJECTS } from '../data/projects';
 import { useReactions } from '../hooks/useReactions';
 import MobileProjectSwitcher from './MobileProjectSwitcher';
 import MobileEngagementSheet from './MobileEngagementSheet';
 import MobileCaseStudyCard from './MobileCaseStudyCard';
+import { hexToRgb } from '@/lib/executive';
 
-// Import canvas element components directly
-import StickyNote from './Canvas/elements/StickyNote';
-import MetricCard from './Canvas/elements/MetricCard';
-import ProcessStep from './Canvas/elements/ProcessStep';
-import QuoteBlock from './Canvas/elements/QuoteBlock';
-import UserFlowStep from './Canvas/elements/UserFlowStep';
-import TagCluster from './Canvas/elements/TagCluster';
 import Storyboard from './Canvas/elements/Storyboard';
-import VideoEmbed from './Canvas/elements/VideoEmbed';
-import FigmaEmbed from './Canvas/elements/FigmaEmbed';
 import FlowDiagram from './Canvas/elements/FlowDiagram';
-import DataDimension from './Canvas/elements/DataDimension';
 import MobileGameZone from './Game/MobileGameZone';
 
 interface Props {
@@ -108,7 +110,7 @@ function getLayoutForType(type: CanvasElement['type']): LayoutMode {
             return 'grid-2';
         case 'process-step':
         case 'user-flow-step':
-            return 'horizontal-scroll';
+            return 'full-width';
         default:
             return 'full-width';
     }
@@ -119,6 +121,251 @@ const NATIVE_MOBILE_TYPES = new Set<CanvasElement['type']>(['case-study-card', '
 
 // Elements that need the scale-transform path (fixed canvas layout)
 const SCALE_TYPES = new Set<CanvasElement['type']>(['flow-diagram', 'storyboard']);
+
+function useMeasuredWidth(fallback = 360) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [width, setWidth] = useState(fallback);
+
+    useEffect(() => {
+        const node = ref.current;
+        if (!node) return;
+
+        const update = () => {
+            const nextWidth = Math.round(node.getBoundingClientRect().width);
+            if (nextWidth > 0) setWidth(nextWidth);
+        };
+
+        update();
+
+        if (typeof ResizeObserver !== 'undefined') {
+            const observer = new ResizeObserver(update);
+            observer.observe(node);
+            return () => observer.disconnect();
+        }
+
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
+
+    return { ref, width };
+}
+
+function MobileStickyNote({ element }: { element: StickyNoteElement }) {
+    const colors = {
+        yellow: { bg: 'rgba(212,146,10,0.07)', border: '#d4920a', text: '#4d3f20' },
+        purple: { bg: 'rgba(94,106,210,0.07)', border: '#5e6ad2', text: '#34345f' },
+        pink: { bg: 'rgba(184,90,123,0.07)', border: '#b85a7b', text: '#513241' },
+        cyan: { bg: 'rgba(43,127,139,0.07)', border: '#2b7f8b', text: '#264d54' },
+        green: { bg: 'rgba(20,120,95,0.07)', border: '#14785f', text: '#244d3f' },
+    }[element.data.color];
+
+    return (
+        <div
+            className="py-3 pl-4 pr-1"
+            style={{
+                background: colors.bg,
+                borderLeft: `2px solid ${colors.border}`,
+            }}
+        >
+            <p className="whitespace-pre-line text-[14px] leading-[1.7]" style={{ color: colors.text }}>
+                {element.data.content}
+            </p>
+        </div>
+    );
+}
+
+function MobileMetricCard({ element }: { element: MetricCardElement }) {
+    const { data } = element;
+    const rgb = hexToRgb(data.accentColor);
+
+    return (
+        <div
+            className="flex items-start justify-between gap-4 border-b border-[var(--exec-line)] py-3.5"
+            style={{ borderLeft: `2px solid rgba(${rgb},0.52)`, paddingLeft: '12px' }}
+        >
+            <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold leading-snug text-[var(--exec-ink)]">{data.label}</p>
+                {data.change && <p className="mt-1 text-[12px] leading-relaxed text-[var(--exec-muted)]">{data.change}</p>}
+            </div>
+            <p className="max-w-[42%] text-right text-[22px] font-semibold leading-none tracking-normal" style={{ color: data.accentColor }}>
+                {data.value}
+            </p>
+        </div>
+    );
+}
+
+function MobileStepCard({ element }: { element: ProcessStepElement | UserFlowStepElement }) {
+    const data = element.data;
+    const color = 'color' in data ? data.color : '#5e6ad2';
+    const title = 'title' in data ? data.title : data.label;
+    const description = data.description;
+    const stepNumber = data.stepNumber;
+
+    return (
+        <div className="flex gap-3 border-b border-[var(--exec-line)] py-3.5 last:border-b-0">
+            {stepNumber && (
+                <span
+                    className="mt-0.5 w-7 shrink-0 text-[12px] font-semibold tabular-nums"
+                    style={{ color }}
+                >
+                    {String(stepNumber).padStart(2, '0')}
+                </span>
+            )}
+            <div className="min-w-0 flex-1">
+                <p className="text-[15px] font-semibold leading-snug text-[var(--exec-ink)]">{title}</p>
+                {description && (
+                    <p className="mt-1 text-[13px] leading-relaxed text-[var(--exec-muted)]">{description}</p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function MobileQuoteBlock({ element }: { element: QuoteBlockElement }) {
+    const { data } = element;
+    const accent = data.accentColor ?? '#5e6ad2';
+
+    return (
+        <figure
+            className="py-3 pl-4"
+            style={{ borderLeft: `2px solid ${accent}` }}
+        >
+            <blockquote className="text-[16px] font-medium leading-[1.65] text-[var(--exec-ink-soft)]">
+                {data.quote}
+            </blockquote>
+            <figcaption className="mt-3 text-[12px] font-semibold leading-relaxed text-[var(--exec-muted)]">
+                {data.author}
+                {data.role && <span className="font-medium"> / {data.role}</span>}
+            </figcaption>
+        </figure>
+    );
+}
+
+function MobileTagCluster({ element }: { element: TagClusterElement }) {
+    return (
+        <div className="border-b border-[var(--exec-line)] py-3.5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--exec-muted)]">{element.data.title}</p>
+            <div className="flex flex-wrap gap-x-2 gap-y-1.5">
+                {element.data.tags.map(tag => {
+                    return (
+                        <span
+                            key={tag.label}
+                            className="text-[12px] font-medium"
+                            style={{ color: tag.color }}
+                        >
+                            {tag.label}
+                        </span>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function MobileDataDimension({ element }: { element: DataDimensionElement }) {
+    const { data } = element;
+    const rgb = hexToRgb(data.accentColor);
+
+    return (
+        <div
+            className="border-b border-[var(--exec-line)] py-3.5"
+            style={{ borderLeft: `2px solid rgba(${rgb},0.52)`, paddingLeft: '12px' }}
+        >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: data.accentColor }}>
+                {data.dimension}
+            </p>
+            <p className="mt-2 text-[14px] font-semibold leading-relaxed text-[var(--exec-ink)]">{data.title}</p>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+                {[{ label: 'Min', value: data.min }, { label: 'Max', value: data.max }, { label: 'Typical', value: data.typical }].map(item => (
+                    <div key={item.label} className="min-w-0">
+                        <p className="truncate text-[16px] font-semibold" style={{ color: data.accentColor }}>{item.value}</p>
+                        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--exec-muted)]">{item.label}</p>
+                    </div>
+                ))}
+            </div>
+            {data.note && <p className="mt-3 text-[11px] font-medium leading-snug text-[var(--exec-muted)]">{data.note}</p>}
+        </div>
+    );
+}
+
+function MobileVideoEmbed({ element }: { element: VideoEmbedElement }) {
+    const { data } = element;
+    const [playing, setPlaying] = useState(false);
+    const rgb = hexToRgb(data.accentColor);
+    const isYouTube = data.videoUrl.includes('youtube.com') || data.videoUrl.includes('youtu.be');
+    const resolvedVideoUrl = isYouTube
+        ? `${data.videoUrl}${data.videoUrl.includes('?') ? '&' : '?'}autoplay=1&rel=0&modestbranding=1`
+        : data.videoUrl.startsWith('/')
+            ? `${import.meta.env.BASE_URL}${data.videoUrl.slice(1)}`
+            : data.videoUrl;
+
+    return (
+        <div className="overflow-hidden rounded-lg border border-[var(--exec-line)] bg-white">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--exec-line)] px-4 py-3" style={{ background: `rgba(${rgb},0.04)` }}>
+                <div className="min-w-0">
+                    <p className="truncate text-[13px] font-semibold text-[var(--exec-ink)]">{data.title}</p>
+                    {data.description && <p className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-[var(--exec-muted)]">{data.description}</p>}
+                </div>
+                <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: data.accentColor }}>Video</span>
+            </div>
+            <div className="relative aspect-video bg-[#111318]">
+                {!playing ? (
+                    <button
+                        type="button"
+                        onClick={() => setPlaying(true)}
+                        className="absolute inset-0 flex flex-col items-center justify-center"
+                        style={{ background: `linear-gradient(145deg, rgba(${rgb},0.18), rgba(17,19,24,0.96))` }}
+                    >
+                        <span className="flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_18px_38px_rgba(0,0,0,0.3)]" style={{ background: data.accentColor }}>
+                            ▶
+                        </span>
+                    </button>
+                ) : isYouTube ? (
+                    <iframe className="absolute inset-0 h-full w-full" src={resolvedVideoUrl} title={data.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                ) : (
+                    <video className="absolute inset-0 h-full w-full object-cover" src={resolvedVideoUrl} controls autoPlay />
+                )}
+            </div>
+        </div>
+    );
+}
+
+function MobileFigmaEmbed({ element }: { element: FigmaEmbedElement }) {
+    const { data } = element;
+    const [opened, setOpened] = useState(false);
+    const rgb = hexToRgb(data.accentColor);
+    const originalUrl = data.figmaUrl.match(/url=([^&]+)/)?.[1];
+
+    return (
+        <div className="overflow-hidden rounded-lg border border-[var(--exec-line)] bg-white">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--exec-line)] px-4 py-3" style={{ background: `rgba(${rgb},0.04)` }}>
+                <div className="min-w-0">
+                    <p className="truncate text-[13px] font-semibold text-[var(--exec-ink)]">{data.title}</p>
+                    {data.description && <p className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-[var(--exec-muted)]">{data.description}</p>}
+                </div>
+                <button
+                    type="button"
+                    className="flex shrink-0 items-center gap-1 text-[11px] font-semibold"
+                    style={{ color: data.accentColor }}
+                    onClick={() => window.open(originalUrl ? decodeURIComponent(originalUrl) : data.figmaUrl, '_blank', 'noopener,noreferrer')}
+                >
+                    Open <ExternalLink className="h-3 w-3" />
+                </button>
+            </div>
+            <div className="relative aspect-[4/3] bg-[var(--exec-card-subtle)]">
+                {!opened ? (
+                    <button type="button" onClick={() => setOpened(true)} className="absolute inset-0 flex items-center justify-center">
+                        <span className="rounded-md border border-[var(--exec-line)] bg-white/86 px-5 py-3 text-sm font-semibold text-[var(--exec-ink)]">
+                            Open Figma embed
+                        </span>
+                    </button>
+                ) : (
+                    <iframe className="absolute inset-0 h-full w-full border-0" src={data.figmaUrl} title={data.title} />
+                )}
+            </div>
+        </div>
+    );
+}
 
 interface ElementGroup {
     layout: LayoutMode;
@@ -151,27 +398,27 @@ function MobileElement({ element }: { element: CanvasElement }) {
         case 'case-study-card':
             return <MobileCaseStudyCard element={element} />;
         case 'sticky-note':
-            return <StickyNote element={element} {...commonProps} />;
+            return <MobileStickyNote element={element} />;
         case 'metric-card':
-            return <MetricCard element={element} {...commonProps} />;
+            return <MobileMetricCard element={element} />;
         case 'process-step':
-            return <ProcessStep element={element} {...commonProps} />;
+            return <MobileStepCard element={element} />;
         case 'quote-block':
-            return <QuoteBlock element={element} {...commonProps} />;
+            return <MobileQuoteBlock element={element} />;
         case 'user-flow-step':
-            return <UserFlowStep element={element} {...commonProps} />;
+            return <MobileStepCard element={element} />;
         case 'tag-cluster':
-            return <TagCluster element={element} {...commonProps} />;
+            return <MobileTagCluster element={element} />;
         case 'storyboard':
             return <Storyboard element={element} {...commonProps} />;
         case 'video-embed':
-            return <VideoEmbed element={element} {...commonProps} />;
+            return <MobileVideoEmbed element={element} />;
         case 'figma-embed':
-            return <FigmaEmbed element={element} {...commonProps} />;
+            return <MobileFigmaEmbed element={element} />;
         case 'flow-diagram':
             return <FlowDiagram element={element} {...commonProps} />;
         case 'data-dimension':
-            return <DataDimension element={element} {...commonProps} />;
+            return <MobileDataDimension element={element} />;
         case 'game-zone':
             return <MobileGameZone element={element} />;
         default:
@@ -185,18 +432,10 @@ function MobileSectionDivider({ element }: { element: CanvasElement }) {
     const { data } = element as { data: { title: string; color: string } };
 
     return (
-        <div className="flex items-center gap-3 py-1">
-            <div
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: data.color }}
-            />
-            <span
-                className="text-[10px] font-bold tracking-widest uppercase flex-shrink-0"
-                style={{ color: data.color }}
-            >
+        <div className="border-b border-[var(--exec-line)] pb-2">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.16em]" style={{ color: data.color }}>
                 {data.title}
-            </span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            </h2>
         </div>
     );
 }
@@ -204,64 +443,37 @@ function MobileSectionDivider({ element }: { element: CanvasElement }) {
 // ── Project hero header ──────────────────────────────────────────────
 function MobileProjectHero({ project }: { project: Project }) {
     return (
-        <div
-            className="relative px-5 pt-7 pb-6 overflow-hidden"
-            style={{
-                background: `linear-gradient(160deg, ${project.accentColor}28 0%, ${project.accentColor}0a 55%, transparent 100%)`,
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-            }}
-        >
-            {/* Decorative glow blob */}
-            <div
-                className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none"
-                style={{
-                    background: `radial-gradient(circle, ${project.accentColor}20 0%, transparent 70%)`,
-                    transform: 'translate(30%, -30%)',
-                }}
-            />
+        <div className="border-b border-[var(--exec-line)] px-5 pb-7 pt-7">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: project.accentColor }}>
+                {project.category} · {project.year}
+            </p>
 
-            {/* Category + Year badge */}
-            <div className="flex items-center gap-2 mb-3">
-                <span
-                    className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
-                    style={{
-                        background: `${project.accentColor}20`,
-                        color: project.accentColor,
-                        border: `1px solid ${project.accentColor}35`,
-                    }}
-                >
-                    {project.category}
-                </span>
-                <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.72)' }}>
-                    {project.year}
-                </span>
-            </div>
-
-            {/* Title */}
-            <h1 className="text-2xl font-black leading-tight mb-2" style={{ color: '#f7f8f8' }}>
+            <h1
+                className="mb-3 text-[34px] font-semibold leading-[1.05] tracking-normal"
+                style={{ color: 'var(--exec-ink)' }}
+            >
                 {project.title}
             </h1>
 
-            {/* Description */}
-            <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(240,240,255,0.78)' }}>
+            <p className="mb-5 text-[15px] leading-[1.65]" style={{ color: 'var(--exec-muted)' }}>
                 {project.description}
             </p>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1.5">
-                {project.tags.map(tag => (
-                    <span
-                        key={tag}
-                        className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                        style={{
-                            background: 'rgba(255,255,255,0.07)',
-                            color: 'rgba(240,240,255,0.86)',
-                            border: '1px solid rgba(255,255,255,0.14)',
-                        }}
-                    >
-                        {tag}
-                    </span>
-                ))}
+            <div className="-mx-5 overflow-x-auto px-5 mobile-no-scrollbar mobile-smooth-scroll-x">
+                <div className="flex w-max gap-2">
+                    {project.tags.map(tag => (
+                        <span
+                            key={tag}
+                            className="border-b pb-0.5 text-[12px] font-medium"
+                            style={{
+                                color: 'var(--exec-ink-soft)',
+                                borderColor: 'var(--exec-line-strong)',
+                            }}
+                        >
+                            {tag}
+                        </span>
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -274,117 +486,53 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
     const [showProjectSwitcher, setShowProjectSwitcher] = useState(false);
     const [showEngagement, setShowEngagement] = useState(false);
     const { reactions } = useReactions(project.id);
+    const { ref: contentRef, width: contentWidth } = useMeasuredWidth();
 
     const sections = useMemo(() => groupIntoSections(project.canvasElements), [project.canvasElements]);
 
-    const currentIdx = PROJECTS.findIndex(p => p.id === project.id);
-    const handlePrevProject = useCallback(() => {
-        if (currentIdx > 0) onSelectProject(PROJECTS[currentIdx - 1]);
-    }, [currentIdx, onSelectProject]);
-    const handleNextProject = useCallback(() => {
-        if (currentIdx < PROJECTS.length - 1) onSelectProject(PROJECTS[currentIdx + 1]);
-    }, [currentIdx, onSelectProject]);
-
     const totalReactions = Object.values(reactions).reduce((a, b) => a + b, 0);
+    const containerWidth = Math.max(280, contentWidth - 40);
 
     return (
-        <div className="fixed inset-0 flex flex-col" style={{ background: '#08090a', color: '#f7f8f8' }}>
+        <div className="fixed inset-0 flex flex-col" style={{ background: 'var(--exec-bg-warm)', color: 'var(--exec-ink)' }}>
             {/* ── Top Navigation Bar ─────────────────────────────── */}
             <div
-                className="flex items-center justify-between px-4 pb-3 z-30 flex-shrink-0"
+                className="z-30 flex flex-shrink-0 items-center justify-between px-3 pb-2.5"
                 style={{
-                    paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
-                    background: 'rgba(10,11,15,0.85)',
+                    paddingTop: 'calc(0.45rem + env(safe-area-inset-top, 0px))',
+                    background: 'rgba(251,250,247,0.9)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
-                    borderBottom: '1px solid rgba(255,255,255,0.07)',
+                    borderBottom: '1px solid var(--exec-line)',
                 }}
             >
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex min-w-0 items-center gap-2">
                     <button
+                        type="button"
                         onClick={onBack}
-                        className="w-9 h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
-                        style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(240,240,255,0.86)' }}
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-[var(--exec-ink)] transition-colors active:bg-black/[0.04]"
+                        aria-label="Back to projects"
                     >
                         <ArrowLeft className="w-4 h-4" />
                     </button>
                     <div className="min-w-0">
-                        <p className="text-sm font-bold truncate max-w-[150px]" style={{ color: '#f7f8f8' }}>
+                        <p className="max-w-[190px] truncate text-[13px] font-semibold" style={{ color: 'var(--exec-ink)' }}>
                             {project.title}
                         </p>
-                        <p className="text-[10px] font-medium" style={{ color: 'rgba(240,240,255,0.72)' }}>
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em]" style={{ color: 'var(--exec-muted)' }}>
                             {project.category} · {project.year}
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-1">
-                    {/* Viewers Avatars */}
-                    {activeViewers.length > 0 && (
-                        <div
-                            className="flex -space-x-1.5 mr-1 cursor-pointer"
-                            onClick={() => setShowEngagement(true)}
-                        >
-                            {activeViewers.slice(0, 3).map((v, i) => (
-                                <div
-                                    key={v.id}
-                                    className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm"
-                                    style={{
-                                        backgroundColor: v.color,
-                                        border: '2px solid #08090a',
-                                        zIndex: 10 - i,
-                                    }}
-                                >
-                                    {v.initials}
-                                </div>
-                            ))}
-                            {activeViewers.length > 3 && (
-                                <div
-                                    className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shadow-sm"
-                                    style={{
-                                        background: 'rgba(255,255,255,0.10)',
-                                        border: '2px solid #08090a',
-                                        color: 'rgba(240,240,255,0.84)',
-                                        zIndex: 0,
-                                    }}
-                                >
-                                    +{activeViewers.length - 3}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Navigation arrows */}
-                    <button
-                        onClick={handlePrevProject}
-                        disabled={currentIdx <= 0}
-                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-25"
-                        style={{ color: 'rgba(240,240,255,0.76)' }}
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <span className="text-[10px] font-mono px-0.5" style={{ color: 'rgba(240,240,255,0.72)' }}>
-                        {currentIdx + 1}/{PROJECTS.length}
-                    </span>
-                    <button
-                        onClick={handleNextProject}
-                        disabled={currentIdx >= PROJECTS.length - 1}
-                        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-25"
-                        style={{ color: 'rgba(240,240,255,0.76)' }}
-                    >
-                        <ChevronRight className="w-4 h-4" />
-                    </button>
-
-                    <div className="w-px h-4 mx-0.5" style={{ background: 'rgba(255,255,255,0.10)' }} />
-
-                    <button
-                        onClick={() => setShowProjectSwitcher(true)}
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                        style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(240,240,255,0.82)' }}
-                    >
-                        <MoreVertical className="w-4 h-4" />
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => setShowProjectSwitcher(true)}
+                    className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--exec-ink)] transition-colors active:bg-black/[0.04]"
+                    aria-label="Switch project"
+                >
+                    <List className="w-4 h-4" />
+                </button>
             </div>
 
             {/* ── Main Scrollable Content ─────────────────────────── */}
@@ -393,7 +541,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                 <MobileProjectHero project={project} />
 
                 {/* Sections */}
-                <div className="px-4 pb-36 pt-2">
+                <div ref={contentRef} className="px-5 pb-10 pt-2">
                     {sections.map((section, sIdx) => (
                         <motion.div
                             key={sIdx}
@@ -401,39 +549,37 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: '-40px' }}
                             transition={{ duration: 0.35, delay: 0.03 * Math.min(sIdx, 4) }}
-                            className="mb-6"
+                            className="mb-5"
                         >
                             {/* Section label as inline divider */}
                             {section.label && (
-                                <div className="mb-4 pt-4">
+                                <div className="mb-2 pt-7">
                                     <MobileSectionDivider element={section.label} />
                                 </div>
                             )}
 
                             {/* Grouped elements */}
                             {groupConsecutiveElements(section.elements).map((group, gIdx) => (
-                                <div key={gIdx} className="mb-4">
+                                <div key={gIdx} className="mb-2">
                                     {group.layout === 'grid-2' ? (
-                                        // ── 2-column grid (sticky-note, metric-card, data-dimension)
-                                        // mobile-el class resets canvas-element-base position:absolute → relative
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1">
                                             {group.elements.map(el => (
-                                                <div key={el.id} className="mobile-el overflow-hidden" style={{ borderRadius: 8 }}>
+                                                <div key={el.id}>
                                                     <MobileElement element={el} />
                                                 </div>
                                             ))}
                                         </div>
                                     ) : group.layout === 'horizontal-scroll' ? (
                                         // ── Horizontal snap scroll (process-step, user-flow-step)
-                                        <div className="overflow-x-auto mobile-snap-x mobile-no-scrollbar -mx-4">
-                                            <div className="flex gap-3 pb-1 pl-4 pr-4" style={{ width: 'max-content' }}>
+                                        <div className="-mx-5 overflow-x-auto mobile-snap-x mobile-no-scrollbar">
+                                            <div className="flex gap-3 pb-1 pl-5 pr-5" style={{ width: 'max-content' }}>
                                                 {group.elements.map(el => {
-                                                    const cardW = Math.min(Math.max(el.width, 200), window.innerWidth * 0.75);
+                                                    const cardW = Math.min(Math.max(el.width, 236), containerWidth * 0.82);
                                                     return (
                                                         <div
                                                             key={el.id}
-                                                            className="mobile-scroll-el mobile-snap-item flex-shrink-0 overflow-hidden"
-                                                            style={{ width: cardW, borderRadius: 8 }}
+                                                            className="mobile-snap-item flex-shrink-0"
+                                                            style={{ width: cardW }}
                                                         >
                                                             <MobileElement element={{ ...el, width: cardW }} />
                                                         </div>
@@ -444,39 +590,54 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                     ) : (
                                         // ── Full-width elements
                                         group.elements.map(el => {
-                                            const containerWidth = window.innerWidth - 32;
-
                                             // Native mobile components (MobileCaseStudyCard, MobileGameZone)
                                             // — always fluid, never scaled
                                             if (NATIVE_MOBILE_TYPES.has(el.type)) {
                                                 return (
-                                                    <div key={el.id} className="mb-4" style={{ borderRadius: 8, overflow: 'hidden' }}>
+                                                    <div key={el.id} className="mb-3">
                                                         <MobileElement element={{ ...el, width: containerWidth }} />
                                                     </div>
                                                 );
                                             }
 
                                             // Scale elements (flow-diagram, storyboard)
-                                            // — preserve internal layout via CSS scale
+                                            // — preserve internal layout, but keep a readable minimum scale with horizontal overflow
                                             if (SCALE_TYPES.has(el.type)) {
-                                                const scaleFactor = containerWidth / el.width;
+                                                const scaleFactor = Math.max(0.48, Math.min(1, containerWidth / el.width));
                                                 const visualHeight = el.height * scaleFactor;
+                                                const data = el.data as { title?: string; boardType?: string };
                                                 return (
                                                     <div
                                                         key={el.id}
-                                                        className="mb-4 overflow-hidden"
-                                                        style={{ width: containerWidth, height: visualHeight, borderRadius: 8 }}
+                                                        className="mb-4 overflow-hidden rounded-lg border border-[var(--exec-line)] bg-white"
+                                                        style={{ width: containerWidth }}
                                                     >
-                                                        <div
-                                                            className="mobile-scale-el"
-                                                            style={{
-                                                                width: el.width,
-                                                                height: el.height,
-                                                                transform: `scale(${scaleFactor})`,
-                                                                transformOrigin: 'top left',
-                                                            }}
-                                                        >
-                                                            <MobileElement element={el} />
+                                                        {(data.title || data.boardType) && (
+                                                            <div className="border-b border-[var(--exec-line)] px-4 py-3">
+                                                                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--exec-muted)]">
+                                                                    {data.title ?? data.boardType}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        <div className="overflow-x-auto mobile-no-scrollbar mobile-smooth-scroll-x">
+                                                            <div
+                                                                className="mobile-scale-el"
+                                                                style={{
+                                                                    width: el.width * scaleFactor,
+                                                                    height: visualHeight,
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    style={{
+                                                                        width: el.width,
+                                                                        height: el.height,
+                                                                        transform: `scale(${scaleFactor})`,
+                                                                        transformOrigin: 'top left',
+                                                                    }}
+                                                                >
+                                                                    <MobileElement element={el} />
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 );
@@ -487,8 +648,7 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                                             return (
                                                 <div
                                                     key={el.id}
-                                                    className="mobile-el mb-4 overflow-hidden"
-                                                    style={{ borderRadius: 8 }}
+                                                    className="mb-3"
                                                 >
                                                     <MobileElement element={{ ...el, width: containerWidth }} />
                                                 </div>
@@ -502,62 +662,58 @@ export default function MobileCanvasView({ project, onSelectProject, onBack, act
                 </div>
             </div>
 
-            {/* ── Right-side Engagement Bar ───────────────────────── */}
-            <div className="fixed bottom-20 right-3 z-30 flex flex-col items-center gap-1 pointer-events-auto">
+            {/* ── Bottom Engagement Bar ──────────────────────────── */}
+            <div
+                className="z-30 flex flex-shrink-0 justify-center border-t border-[var(--exec-line)] px-4 pb-3 pt-2 mobile-safe-bottom"
+                style={{
+                    background: 'rgba(251,250,247,0.94)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                }}
+            >
                 <div
-                    className="flex flex-col items-center gap-4 px-2.5 py-4 rounded-2xl"
-                    style={{
-                        background: 'rgba(0,0,0,0.55)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.10)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                    }}
+                    className="grid w-full max-w-[360px] grid-cols-3"
+                >
+                    {/* Like — icon + count horizontal */}
+                    <button
+                        type="button"
+                        onClick={() => setShowEngagement(true)}
+                        className="flex items-center justify-center gap-1.5 rounded-md px-3 py-2.5 transition-colors active:bg-black/[0.04]"
                     >
-                    {/* Like */}
-                    <div className="flex flex-col items-center gap-1">
-                        <button
-                            onClick={() => setShowEngagement(true)}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}
+                        <Heart
+                            className="h-4 w-4 flex-shrink-0"
+                            style={{
+                                color: totalReactions > 0 ? 'var(--exec-red)' : 'var(--exec-muted)',
+                                fill: totalReactions > 0 ? 'var(--exec-red)' : 'none',
+                            }}
+                        />
+                        <span
+                            className="text-[12px] font-black tabular-nums"
+                            style={{ color: totalReactions > 0 ? 'var(--exec-red)' : 'var(--exec-muted)' }}
                         >
-                            <Heart
-                                className="w-5 h-5"
-                                style={{ color: totalReactions > 0 ? '#ef4444' : 'rgba(240,240,255,0.7)', fill: totalReactions > 0 ? '#ef4444' : 'none' }}
-                            />
-                        </button>
-                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.78)' }}>
                             {totalReactions > 0 ? totalReactions : 'Like'}
                         </span>
-                    </div>
+                    </button>
 
-                    {/* Comment */}
-                    <div className="flex flex-col items-center gap-1">
-                        <button
-                            onClick={() => setShowEngagement(true)}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}
-                        >
-                            <MessageSquare className="w-5 h-5" style={{ color: 'rgba(240,240,255,0.7)', transform: 'scaleX(-1)' }} />
-                        </button>
-                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.78)' }}>
-                            Note
-                        </span>
-                    </div>
+                    {/* Note — icon stacked above label */}
+                    <button
+                        type="button"
+                        onClick={() => setShowEngagement(true)}
+                        className="flex items-center justify-center gap-1.5 rounded-md py-2 transition-colors active:bg-black/[0.04]"
+                    >
+                        <MessageSquare className="h-4 w-4" style={{ color: 'var(--exec-muted)', transform: 'scaleX(-1)' }} />
+                        <span className="text-[12px] font-semibold" style={{ color: 'var(--exec-muted)' }}>Note</span>
+                    </button>
 
-                    {/* Share */}
-                    <div className="flex flex-col items-center gap-1">
-                        <button
-                            onClick={() => setShowEngagement(true)}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}
-                        >
-                            <Send className="w-4.5 h-4.5" style={{ color: 'rgba(240,240,255,0.7)' }} />
-                        </button>
-                        <span className="text-[10px] font-semibold" style={{ color: 'rgba(240,240,255,0.78)' }}>
-                            Share
-                        </span>
-                    </div>
+                    {/* Share — icon stacked above label */}
+                    <button
+                        type="button"
+                        onClick={() => setShowEngagement(true)}
+                        className="flex items-center justify-center gap-1.5 rounded-md py-2 transition-colors active:bg-black/[0.04]"
+                    >
+                        <Send className="h-4 w-4" style={{ color: 'var(--exec-muted)' }} />
+                        <span className="text-[12px] font-semibold" style={{ color: 'var(--exec-muted)' }}>Share</span>
+                    </button>
                 </div>
             </div>
 

@@ -82,13 +82,13 @@ export default function EditToolbar({ project }: EditToolbarProps) {
 
     return (
         <div
-            className="flex flex-col h-full bg-white border border-panel-border shadow-2xl shadow-black/5 rounded-2xl flex-shrink-0 relative pointer-events-auto transition-all overflow-hidden"
+            className="noon-panel-light flex flex-col h-full rounded-[18px] flex-shrink-0 relative pointer-events-auto transition-all overflow-hidden"
             style={{ width: '280px' }}
         >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-panel-border bg-white sticky top-0 z-10">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--exec-line)] bg-white/60 sticky top-0 z-10 backdrop-blur-md">
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-accent-purple" />
-                    <span className="text-xs font-semibold text-text-primary">Creator Tools</span>
+                    <div className="w-2 h-2 rounded-full bg-[var(--exec-accent)]" />
+                    <span className="text-xs font-semibold text-[var(--exec-ink)]">Creator Tools</span>
                 </div>
             </div>
 
@@ -96,14 +96,14 @@ export default function EditToolbar({ project }: EditToolbarProps) {
 
                 {/* ── PROJECT COMPONENTS — dynamically detected ── */}
                 {projectComponents.length > 0 && (
-                    <div className="p-4 border-b border-panel-border">
+                    <div className="p-4 border-b border-[var(--exec-line)]">
                         <div className="flex items-center justify-between mb-1">
                             <SectionTitle>PROJECT COMPONENTS</SectionTitle>
-                            <span className="text-[9px] font-bold text-text-secondary bg-surface-2 px-1.5 py-0.5 rounded-full">
+                            <span className="exec-count-pill">
                                 {projectComponents.length} types
                             </span>
                         </div>
-                        <p className="text-[10px] text-text-secondary leading-relaxed mb-3">
+                        <p className="text-[10px] text-[var(--exec-muted)] leading-relaxed mb-3">
                             Components used in this project. Drag to add a new instance.
                         </p>
                         <div className="grid grid-cols-2 gap-2">
@@ -114,7 +114,7 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                                         key={comp.type}
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, comp.type)}
-                                        className="group relative flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02] hover:shadow-sm"
+                                        className="group relative flex flex-col items-center justify-center p-3 bg-white/58 hover:bg-white rounded-[12px] border border-transparent hover:border-[var(--exec-line)] cursor-grab active:cursor-grabbing transition-all hover:scale-[1.01] hover:shadow-sm"
                                     >
                                         {/* Count badge */}
                                         <span
@@ -129,10 +129,10 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                                         >
                                             <Icon className="w-4 h-4" />
                                         </div>
-                                        <span className="text-[10px] font-semibold text-text-primary text-center leading-tight">
+                                        <span className="text-[10px] font-semibold text-[var(--exec-ink)] text-center leading-tight">
                                             {comp.label}
                                         </span>
-                                        <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
+                                        <span className="text-[9px] text-[var(--exec-muted)] mt-0.5">Drag to add</span>
                                     </div>
                                 );
                             })}
@@ -141,7 +141,7 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                 )}
 
                 {/* ── GENERIC COMPONENTS — always available ── */}
-                <div className="p-4 border-b border-panel-border">
+                <div className="p-4 border-b border-[var(--exec-line)]">
                     <SectionTitle>GENERIC COMPONENTS</SectionTitle>
                     <div className="grid grid-cols-2 gap-2 mt-3">
                         {GENERIC_ELEMENTS.map((type) => {
@@ -152,7 +152,7 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                                     key={type}
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, type)}
-                                    className="flex flex-col items-center justify-center p-3 bg-surface-1 hover:bg-surface-2 rounded-xl border border-transparent hover:border-panel-border cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02]"
+                                    className="flex flex-col items-center justify-center p-3 bg-white/58 hover:bg-white rounded-[12px] border border-transparent hover:border-[var(--exec-line)] cursor-grab active:cursor-grabbing transition-all hover:scale-[1.01] hover:shadow-sm"
                                 >
                                     <div
                                         className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 shadow-sm"
@@ -160,10 +160,10 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                                     >
                                         <Icon className="w-4 h-4" />
                                     </div>
-                                    <span className="text-[10px] font-semibold text-text-primary text-center">
+                                    <span className="text-[10px] font-semibold text-[var(--exec-ink)] text-center">
                                         {el.label}
                                     </span>
-                                    <span className="text-[9px] text-text-secondary mt-0.5">Drag to add</span>
+                                    <span className="text-[9px] text-[var(--exec-muted)] mt-0.5">Drag to add</span>
                                 </div>
                             );
                         })}
@@ -171,10 +171,10 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                 </div>
 
                 {/* AI Integration Section */}
-                <div className="p-4 border-b border-panel-border">
+                <div className="p-4 border-b border-[var(--exec-line)]">
                     <SectionTitle>AI INTEGRATION</SectionTitle>
                     <div className="mt-3 space-y-2">
-                        <p className="text-[10px] text-text-secondary leading-relaxed mb-2">
+                        <p className="text-[10px] text-[var(--exec-muted)] leading-relaxed mb-2">
                             Enter your API key to enable AI-powered layout generation and content suggestions.
                         </p>
                         <div className="relative">
@@ -186,12 +186,12 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                                 placeholder="sk-..."
                                 value={apiKey}
                                 onChange={(e) => setApiKey(e.target.value)}
-                                className="w-full bg-surface-1 border border-panel-border rounded-md pl-8 pr-3 py-2 text-xs text-text-primary outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-all"
+                                className="exec-input pl-8 pr-3 py-2 text-xs"
                             />
                         </div>
                         <button
                             onClick={handleSaveToken}
-                            className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 rounded-md bg-white border border-panel-border hover:bg-surface-1 text-xs font-semibold text-text-primary transition-colors"
+                            className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 rounded-[9px] bg-white border border-[var(--exec-line)] hover:bg-white/70 text-xs font-semibold text-[var(--exec-ink)] transition-colors"
                         >
                             {showSavedMsg ? (
                                 <>
@@ -210,12 +210,12 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                     <div className="flex items-center justify-between mb-2">
                         <SectionTitle>MANAGE COMMENTS</SectionTitle>
                         {comments.length > 0 && (
-                            <span className="text-[9px] font-bold text-text-secondary bg-surface-2 px-1.5 py-0.5 rounded-full">
+                            <span className="exec-count-pill">
                                 {comments.length}
                             </span>
                         )}
                     </div>
-                    <p className="text-[10px] text-text-secondary leading-relaxed mb-3">
+                    <p className="text-[10px] text-[var(--exec-muted)] leading-relaxed mb-3">
                         Review and moderate visitor comments. Delete any you don't want shown.
                     </p>
 
@@ -229,18 +229,18 @@ export default function EditToolbar({ project }: EditToolbarProps) {
                         </div>
                     ) : comments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
-                            <div className="w-10 h-10 bg-surface-1 rounded-xl flex items-center justify-center mb-3 border border-panel-border">
-                                <MessageSquareDashed className="w-5 h-5 text-text-secondary" />
+                            <div className="w-10 h-10 bg-white/58 rounded-xl flex items-center justify-center mb-3 border border-[var(--exec-line)]">
+                                <MessageSquareDashed className="w-5 h-5 text-[var(--exec-muted)]" />
                             </div>
-                            <p className="text-xs font-semibold text-text-primary mb-1">No comments yet</p>
-                            <p className="text-[10px] text-text-secondary leading-relaxed max-w-[160px]">
+                            <p className="text-xs font-semibold text-[var(--exec-ink)] mb-1">No comments yet</p>
+                            <p className="text-[10px] text-[var(--exec-muted)] leading-relaxed max-w-[160px]">
                                 Visitor comments for this project will appear here.
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-2">
                             {comments.map(c => (
-                                <div key={c.id} className="bg-surface-1 p-2.5 rounded-lg border border-transparent relative group hover:border-panel-border transition-all">
+                                <div key={c.id} className="bg-white/58 p-2.5 rounded-[10px] border border-transparent relative group hover:border-[var(--exec-line)] transition-all">
                                     <div className="flex items-center justify-between mb-1.5">
                                         <div className="flex items-center gap-1.5 min-w-0">
                                             <div
@@ -280,5 +280,5 @@ export default function EditToolbar({ project }: EditToolbarProps) {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-    return <h3 className="text-[10px] font-bold tracking-widest text-text-secondary uppercase">{children}</h3>;
+    return <h3 className="noon-section-kicker text-[10px] font-bold">{children}</h3>;
 }

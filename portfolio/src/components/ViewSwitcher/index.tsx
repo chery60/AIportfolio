@@ -19,7 +19,7 @@ export default function ViewSwitcher({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="pointer-events-auto inline-flex rounded-full border border-panel-border bg-white/95 p-1 shadow-[0_8px_32px_rgb(0,0,0,0.12)] backdrop-blur-sm"
+      className="noon-toolbar-light pointer-events-auto inline-flex rounded-full p-1"
       role="tablist"
       aria-label="Canvas view mode"
     >
@@ -29,10 +29,10 @@ export default function ViewSwitcher({
         aria-selected={viewMode === 'top'}
         title="Top board view"
         onClick={() => onChange('top')}
-        className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors ${
+        className={`flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-xs font-semibold transition-colors ${
           viewMode === 'top'
-            ? 'bg-surface-2 text-text-primary shadow-inner'
-            : 'text-text-secondary hover:bg-surface-1 hover:text-text-primary'
+            ? 'bg-[rgba(var(--exec-accent-rgb),0.10)] text-[var(--exec-accent)] shadow-inner'
+            : 'text-[var(--exec-muted)] hover:bg-white hover:text-[var(--exec-ink)]'
         }`}
       >
         <Eye className="w-4 h-4" />
@@ -49,10 +49,10 @@ export default function ViewSwitcher({
             : 'Third-person walk-through'
         }
         onClick={() => !thirdPersonLocked && onChange('third-person')}
-        className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors ${
+        className={`flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-xs font-semibold transition-colors ${
           viewMode === 'third-person'
-            ? 'bg-surface-2 text-text-primary shadow-inner'
-            : 'text-text-secondary hover:bg-surface-1 hover:text-text-primary'
+            ? 'bg-[rgba(var(--exec-accent-rgb),0.10)] text-[var(--exec-accent)] shadow-inner'
+            : 'text-[var(--exec-muted)] hover:bg-white hover:text-[var(--exec-ink)]'
         } ${thirdPersonLocked ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}`}
       >
         <Footprints className="w-4 h-4" />

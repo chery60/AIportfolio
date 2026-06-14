@@ -102,7 +102,14 @@ export default function CanvasElementRenderer({
 
   return (
     <div
-      style={{ position: 'absolute', left: element.x, top: element.y, zIndex: element.zIndex ?? 1 }}
+      style={{
+        position: 'absolute',
+        left: element.x,
+        top: element.y,
+        width: element.width,
+        height: element.height,
+        zIndex: element.zIndex ?? 1,
+      }}
       onClick={e => { e.stopPropagation(); onClick(); }}
       draggable={isEditing}
       onDragStart={handleDragStart}
@@ -127,7 +134,12 @@ export default function CanvasElementRenderer({
       )}
 
       {isEditing && isSelected && (
-        <div className="absolute inset-0 border-2 border-accent-purple pointer-events-none z-20 rounded-lg shadow-lg" />
+        <div className="noon-selection-box">
+          <span className="noon-selection-handle tl" />
+          <span className="noon-selection-handle tr" />
+          <span className="noon-selection-handle bl" />
+          <span className="noon-selection-handle br" />
+        </div>
       )}
     </div>
   );

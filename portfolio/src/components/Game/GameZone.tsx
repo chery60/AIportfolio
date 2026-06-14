@@ -71,17 +71,17 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
       onClick={e => { e.stopPropagation(); onClick(); }}
       onMouseDown={e => e.stopPropagation()}
       onWheel={e => e.stopPropagation()}
-      className="relative rounded-2xl overflow-hidden select-none"
+      className="relative rounded-[18px] overflow-hidden select-none"
       style={{
         width: element.width,
         height: element.height,
-        background: 'linear-gradient(135deg, #08090a 0%, #0f1011 100%)',
+        background: 'linear-gradient(135deg, #121417 0%, #0f1011 100%)',
         border: isSelected
           ? `2px solid ${data.accentColor}`
           : '2px solid rgba(255,255,255,0.08)',
         boxShadow: isSelected
-          ? `0 0 0 3px ${data.accentColor}40, 0 24px 60px rgba(0,0,0,0.5)`
-          : '0 24px 60px rgba(0,0,0,0.4)',
+          ? `0 0 0 3px ${data.accentColor}30, 0 24px 60px rgba(0,0,0,0.38)`
+          : '0 24px 60px rgba(0,0,0,0.32)',
       }}
     >
       {/* Header bar */}
@@ -91,15 +91,15 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
       >
         <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
+            className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[10px] font-bold uppercase tracking-wider"
             style={{ background: `${data.accentColor}25`, border: `1px solid ${data.accentColor}40` }}
           >
-            🎮
+            OS
           </div>
           <div>
             <p className="text-sm font-bold text-white">{data.title}</p>
             <p className="text-[10px] text-white/30 font-mono uppercase tracking-wider">
-              Crewmate Dash · 1 Player at a Time
+              Interactive extra / one player at a time
             </p>
           </div>
         </div>
@@ -143,32 +143,32 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
               >
                 {/* Game title */}
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-2xl font-black text-white tracking-tight leading-none">
-                    🎮 Crewmate Dash
+                  <span className="text-2xl font-semibold text-white tracking-normal leading-none">
+                    Design Runner
                   </span>
                   <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: data.accentColor }}>
-                    Design Survival Runner
+                    Portfolio interaction
                   </span>
                 </div>
                 {/* Rules */}
                 <div className="flex items-center justify-center gap-6">
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-xl">⎵</span>
+                    <span className="text-xl font-mono text-white/70">SPC</span>
                     <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Space / Tap<br />to Jump</span>
                   </div>
                   <div className="w-px h-10 bg-white/10" />
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-xl">⬆️</span>
+                    <span className="text-xl font-mono text-white/70">2X</span>
                     <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Double<br />Jump</span>
                   </div>
                   <div className="w-px h-10 bg-white/10" />
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-xl">🚫</span>
+                    <span className="text-xl font-mono text-white/70">!</span>
                     <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Dodge<br />Obstacles</span>
                   </div>
                   <div className="w-px h-10 bg-white/10" />
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-xl">★</span>
+                    <span className="text-xl font-mono text-white/70">+</span>
                     <span className="text-[9px] text-white/40 font-semibold uppercase tracking-wider text-center">Collect<br />Coins</span>
                   </div>
                 </div>
@@ -223,7 +223,7 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
                     boxShadow: `0 4px 20px ${data.accentColor}50`,
                   }}
                 >
-                  {myName ? `🚀 Play Again as ${myName}` : '🚀 Start Game'}
+                  {myName ? `Play again as ${myName}` : 'Start game'}
                 </button>
 
                 {/* Controls hint */}
@@ -375,4 +375,3 @@ export default function GameZone({ element, isSelected, onClick, localColor }: P
     </div>
   );
 }
-

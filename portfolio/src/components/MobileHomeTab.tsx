@@ -50,17 +50,8 @@ export default function MobileHomeTab() {
 
         <div className="flex-shrink-0" style={{ minHeight: 'clamp(48px, 8vh, 76px)' }} aria-hidden="true" />
 
-        {/* Available for Work badge */}
-        <ScrollReveal delay={0} yOffset={16} blur="6px">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#d7dcff] bg-[#11143a]/90 px-3 py-1.5 rounded-full border border-[#aeb7ff]/30 shadow-[0_10px_30px_rgba(0,0,0,0.36)] backdrop-blur-xl">
-              Available for Work
-            </span>
-          </div>
-        </ScrollReveal>
-
         {/* Stack */}
-        <ScrollReveal delay={0.05} yOffset={20} blur="8px">
+        <ScrollReveal delay={0} yOffset={20} blur="8px">
           <div style={{ height: 'clamp(146px, 38vw, 172px)' }}>
             <div style={{ width: 'clamp(146px, 38vw, 172px)', height: 'clamp(146px, 38vw, 172px)' }}>
               <Stack

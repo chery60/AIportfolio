@@ -1,4 +1,6 @@
 import type { ProcessStepElement } from '../../../types';
+import { CanvasCardShell } from '@/components/ui/executive';
+import { hexToRgb } from '@/lib/executive';
 
 interface Props {
   element: ProcessStepElement;
@@ -6,55 +8,48 @@ interface Props {
   onClick: () => void;
 }
 
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '124, 92, 252';
-}
-
 export default function ProcessStep({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
   const rgb = hexToRgb(data.color);
 
   return (
-    <div
+    <CanvasCardShell
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl p-5 flex flex-col bg-white border border-panel-border shadow-sm ${isSelected ? 'selected' : ''}`}
+      selected={isSelected}
+      accentColor={data.color}
+      className="p-5 flex flex-col"
       style={{
         width,
         height,
       }}
     >
-      {/* Step number */}
-      <div className="flex items-center gap-2.5 mb-3">
+      <div className="flex items-center gap-3 mb-4">
         <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+          className="w-8 h-8 rounded-[11px] flex items-center justify-center text-sm font-bold flex-shrink-0"
           style={{
-            background: `rgba(${rgb}, 0.15)`,
+            background: `rgba(${rgb}, 0.09)`,
             color: data.color,
-            border: `1px solid rgba(${rgb}, 0.3)`,
+            border: `1px solid rgba(${rgb}, 0.22)`,
           }}
         >
           {data.stepNumber}
         </div>
-        <h4 className="text-sm font-semibold text-text-primary leading-tight">{data.title}</h4>
+        <h4 className="exec-title text-sm">{data.title}</h4>
       </div>
 
-      <p className="text-xs leading-relaxed text-text-secondary">
+      <p className="exec-copy">
         {data.description}
       </p>
 
-      {/* Bottom accent line */}
       <div
         className="mt-auto pt-3"
-        style={{ borderTop: `1px solid rgba(${rgb}, 0.12)` }}
+        style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}
       >
         <div
-          className="h-0.5 rounded-full"
-          style={{ background: `linear-gradient(90deg, ${data.color}66, transparent)`, width: '60%' }}
+          className="h-[2px] rounded-full"
+          style={{ background: `linear-gradient(90deg, ${data.color}90, transparent)`, width: '62%' }}
         />
       </div>
-    </div>
+    </CanvasCardShell>
   );
 }

@@ -8,6 +8,7 @@ import type { ActiveViewer } from '../../hooks/useRealtimeSession';
 import { ShimmerButton } from '../ui/shimmer-button';
 import { AnimatedList } from '../ui/animated-list';
 import { useWebHaptics } from 'web-haptics/react';
+import { SectionHeader } from '@/components/ui/executive';
 
 interface Props {
   project: Project;
@@ -99,14 +100,14 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
 
   return (
     <div
-      className="flex flex-col h-full bg-white border border-panel-border shadow-2xl shadow-black/5 rounded-2xl flex-shrink-0 relative pointer-events-auto transition-all overflow-hidden"
+      className="noon-panel-light flex flex-col h-full rounded-[18px] flex-shrink-0 relative pointer-events-auto transition-all overflow-hidden"
       style={{ width: '280px' }}
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-panel-border bg-white sticky top-0 z-10 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--exec-line)] bg-white/60 sticky top-0 z-10 flex-shrink-0 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-xs font-semibold text-text-primary">Engagement</span>
+          <div className="w-2 h-2 rounded-full bg-[var(--exec-green)]" />
+          <span className="text-xs font-semibold text-[var(--exec-ink)]">Engagement</span>
         </div>
       </div>
 
@@ -117,7 +118,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
         <div className="overflow-y-auto flex-shrink-0" style={{ maxHeight: '340px' }}>
 
           {/* Viewing Now */}
-          <div className="p-4 border-b border-panel-border">
+          <div className="p-4 border-b border-[var(--exec-line)]">
             <SectionTitle>VIEWING NOW</SectionTitle>
             <div className="flex items-center gap-2 mb-3 mt-2">
               <div className="flex -space-x-1.5">
@@ -128,7 +129,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                       key={v.id}
                       title={isMe ? 'You' : `${v.name} — click to follow`}
                       onClick={() => !isMe && onViewerClick?.(v)}
-                      className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold text-white shadow-sm transition-transform ${isMe ? 'cursor-default' : 'cursor-pointer hover:scale-110'}`}
+                    className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold text-white shadow-sm transition-transform ${isMe ? 'cursor-default' : 'cursor-pointer hover:scale-105'}`}
                       style={{ backgroundColor: v.color }}
                     >
                       {v.initials}
@@ -136,7 +137,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                   );
                 })}
               </div>
-              <span className="text-xs text-text-secondary font-medium pl-1">
+              <span className="text-xs text-[var(--exec-muted)] font-medium pl-1">
                 {activeViewers.length} {activeViewers.length === 1 ? 'viewing right now' : 'viewing right now'}
               </span>
             </div>
@@ -150,17 +151,17 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                     key={v.id}
                     onClick={() => !isMe && onViewerClick?.(v)}
                     title={isMe ? 'This is you' : 'Click to follow'}
-                    className={`flex items-center gap-2 bg-surface-1 px-2.5 py-1.5 rounded-md border border-transparent transition-all ${isMe ? 'cursor-default' : 'cursor-pointer hover:bg-surface-2 hover:border-panel-border'}`}
+                    className={`flex items-center gap-2 bg-white/58 px-2.5 py-1.5 rounded-[10px] border border-transparent transition-all ${isMe ? 'cursor-default' : 'cursor-pointer hover:bg-white hover:border-[var(--exec-line)] hover:shadow-sm'}`}
                   >
                     <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm flex-shrink-0" style={{ backgroundColor: v.color }}>
                       {v.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-text-primary truncate leading-tight">
+                      <p className="text-xs font-semibold text-[var(--exec-ink)] truncate leading-tight">
                         {isMe ? 'You' : v.name}
                       </p>
                       {!isMe && (
-                        <p className="text-[10px] text-text-secondary truncate leading-tight mt-0.5">{v.location}</p>
+                        <p className="text-[10px] text-[var(--exec-muted)] truncate leading-tight mt-0.5">{v.location}</p>
                       )}
                     </div>
                     {viewerProject && (
@@ -181,17 +182,17 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
           </div>
 
           {/* Share Love */}
-          <div className="p-4 border-b border-panel-border">
-            <SectionTitle>SHARE LOVE</SectionTitle>
+          <div className="p-4 border-b border-[var(--exec-line)]">
+            <SectionTitle>REACT</SectionTitle>
             <div className="grid grid-cols-4 gap-2 mt-2">
               {Object.entries(reactions).map(([emoji, count]) => (
                 <button
                   key={emoji}
                   onClick={() => handleReaction(emoji)}
-                  className="flex flex-col items-center justify-center py-2 bg-surface-1 hover:bg-surface-2 rounded-lg border border-transparent hover:border-panel-border transition-all hover:scale-105 active:scale-95"
+                  className="flex flex-col items-center justify-center py-2 bg-white/58 hover:bg-white rounded-[10px] border border-transparent hover:border-[var(--exec-line)] transition-all hover:scale-[1.02] active:scale-95 hover:shadow-sm"
                 >
-                  <span className="text-lg mb-0.5">{emoji}</span>
-                  <span className="text-[10px] font-bold text-text-secondary">{count}</span>
+                  <span className="text-base mb-0.5 saturate-[0.75] opacity-85">{emoji}</span>
+                  <span className="text-[10px] font-bold text-[var(--exec-muted)]">{count}</span>
                 </button>
               ))}
             </div>
@@ -199,14 +200,14 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
         </div>
 
         {/* ── COMMENTS SECTION — fills remaining space with internal scroll ── */}
-        <div className="flex-1 flex flex-col min-h-0 border-b border-panel-border">
+        <div className="flex-1 flex flex-col min-h-0 border-b border-[var(--exec-line)]">
 
           {/* Comment section header — sticky */}
           <div className="px-4 pt-4 pb-2 flex-shrink-0">
             <div className="flex items-center justify-between">
               <SectionTitle>COMMENTS</SectionTitle>
               {comments.length > 0 && (
-                <span className="text-[9px] font-bold text-text-secondary bg-surface-2 px-1.5 py-0.5 rounded-full">
+                <span className="exec-count-pill">
                   {comments.length}
                 </span>
               )}
@@ -224,16 +225,16 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
           >
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-5 h-5 text-text-secondary animate-spin" />
+                <Loader2 className="w-5 h-5 text-[var(--exec-muted)] animate-spin" />
               </div>
             ) : comments.length === 0 ? (
               /* Empty state */
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-10 h-10 bg-surface-1 rounded-xl flex items-center justify-center mb-3 border border-panel-border">
-                  <MessageSquareDashed className="w-5 h-5 text-text-secondary" />
+                  <div className="w-10 h-10 bg-white/70 rounded-xl flex items-center justify-center mb-3 border border-[var(--exec-line)]">
+                  <MessageSquareDashed className="w-5 h-5 text-[var(--exec-muted)]" />
                 </div>
-                <p className="text-xs font-semibold text-text-primary mb-1">No comments yet</p>
-                <p className="text-[10px] text-text-secondary leading-relaxed max-w-[160px]">
+                <p className="text-xs font-semibold text-[var(--exec-ink)] mb-1">No comments yet</p>
+                <p className="text-[10px] text-[var(--exec-muted)] leading-relaxed max-w-[160px]">
                   Be the first to leave a thought below!
                 </p>
               </div>
@@ -241,7 +242,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
               <div className="pb-2 pt-1">
                 <AnimatedList className="gap-2.5">
                   {comments.map(c => (
-                    <div key={c.id} className="bg-surface-1 p-2.5 rounded-lg border border-transparent relative group w-full">
+                    <div key={c.id} className="bg-white/58 p-2.5 rounded-[10px] border border-transparent relative group w-full hover:border-[var(--exec-line)] hover:shadow-sm transition-all">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5">
                         <div
@@ -250,10 +251,10 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                         >
                           {c.initials}
                         </div>
-                        <span className="text-xs font-semibold text-text-primary truncate">{c.author}</span>
+                        <span className="text-xs font-semibold text-[var(--exec-ink)] truncate">{c.author}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-[9px] text-text-secondary font-medium bg-surface-2 px-1 rounded">
+                        <span className="text-[9px] text-[var(--exec-muted)] font-medium bg-white/70 px-1 rounded">
                           {timeAgo(c.created_at)}
                         </span>
                         {isEditMode && (
@@ -271,7 +272,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-text-secondary leading-relaxed pl-5">{c.content}</p>
+                    <p className="text-xs text-[var(--exec-muted)] leading-relaxed pl-5">{c.content}</p>
                   </div>
                   ))}
                 </AnimatedList>
@@ -280,7 +281,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
           </div>
 
           {/* Sticky chat box — always visible at bottom of comment section */}
-          <div className="px-4 pb-4 pt-2 flex-shrink-0 bg-white border-t border-panel-border">
+          <div className="px-4 pb-4 pt-2 flex-shrink-0 bg-white/62 border-t border-[var(--exec-line)] backdrop-blur-md">
             {/* Name input */}
             <input
               type="text"
@@ -288,7 +289,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
               onChange={e => setAuthorName(e.target.value)}
               placeholder="Your name"
               maxLength={50}
-              className="w-full bg-white border border-panel-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple placeholder-text-secondary shadow-sm mb-1.5"
+              className="exec-input px-3 py-2 text-xs placeholder:text-[var(--exec-muted)] shadow-sm mb-1.5"
             />
             {/* Message textarea + send button */}
             <div className="relative">
@@ -298,13 +299,13 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
                 onKeyDown={handleKeyDown}
                 placeholder="Leave a comment… (⌘↵ to send)"
                 maxLength={500}
-                className="w-full bg-white border border-panel-border rounded-lg pl-3 pr-10 py-2.5 text-xs text-text-primary outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple resize-none placeholder-text-secondary shadow-sm"
+                className="exec-input pl-3 pr-10 py-2.5 text-xs resize-none placeholder:text-[var(--exec-muted)] shadow-sm"
                 rows={2}
               />
               <button
                 onClick={handlePostComment}
                 disabled={!canPost}
-                className={`absolute right-2 bottom-2 p-1.5 rounded-md transition-colors ${canPost ? 'bg-accent-purple text-white hover:bg-opacity-90' : 'bg-surface-2 text-text-secondary cursor-not-allowed'}`}
+                className={`absolute right-2 bottom-2 p-1.5 rounded-[8px] transition-colors ${canPost ? 'bg-[var(--exec-accent)] text-white' : 'bg-white/70 text-[var(--exec-muted)] cursor-not-allowed'}`}
               >
                 {posting
                   ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -319,7 +320,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
         <div className="overflow-y-auto flex-shrink-0">
 
           {/* Share */}
-          <div className="p-4 border-b border-panel-border">
+          <div className="p-4 border-b border-[var(--exec-line)]">
             <SectionTitle>SHARE</SectionTitle>
             <div className="space-y-1.5 mt-2">
               <ShareButton icon={<Link2 className="w-3.5 h-3.5" />} label="Copy link" onClick={() => {
@@ -341,7 +342,7 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
               <ShimmerButton
                 onClick={() => { trigger('light'); setContactState('form'); }}
                 className="w-full mt-3 py-2.5 rounded-lg transition-transform hover:scale-[1.02] shadow-md !px-0"
-                background="#5e6ad2"
+                background="var(--exec-blue)"
               >
                 <span className="flex items-center justify-center gap-2 text-xs font-bold text-white relative z-10 w-full">
                   <MessageSquare className="w-4 h-4" />
@@ -351,22 +352,22 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
             )}
 
             {(contactState === 'form' || contactState === 'sending') && (
-              <div className="mt-3 space-y-2.5 bg-surface-1 p-3 rounded-xl border border-panel-border shadow-sm">
-                <input value={contactName} onChange={e => setContactName(e.target.value)} type="text" placeholder="Your name" className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple" />
-                <input value={contactEmail} onChange={e => setContactEmail(e.target.value)} type="email" placeholder="Email address" className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple" />
-                <textarea value={contactMessage} onChange={e => setContactMessage(e.target.value)} placeholder="What's on your mind?" rows={3} className="w-full bg-white border border-panel-border rounded-md px-3 py-2 text-xs outline-none focus:border-accent-purple resize-none" />
+              <div className="mt-3 space-y-2.5 bg-white/58 p-3 rounded-xl border border-[var(--exec-line)] shadow-sm">
+                <input value={contactName} onChange={e => setContactName(e.target.value)} type="text" placeholder="Your name" className="exec-input px-3 py-2 text-xs" />
+                <input value={contactEmail} onChange={e => setContactEmail(e.target.value)} type="email" placeholder="Email address" className="exec-input px-3 py-2 text-xs" />
+                <textarea value={contactMessage} onChange={e => setContactMessage(e.target.value)} placeholder="What's on your mind?" rows={3} className="exec-input px-3 py-2 text-xs resize-none" />
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => setContactState('idle')}
-                    className="flex-1 py-2 rounded-md bg-white border border-panel-border text-xs font-semibold text-text-primary hover:bg-surface-1 transition-colors"
+                    className="flex-1 py-2 rounded-[9px] bg-white border border-[var(--exec-line)] text-xs font-semibold text-[var(--exec-ink)] hover:bg-white/70 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => { trigger('success'); handleSendContact(); }}
                     disabled={!contactName.trim() || !contactMessage.trim() || contactState === 'sending'}
-                    className="flex-1 py-2 rounded-md text-white text-xs font-semibold flex flex-col justify-center items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#5e6ad2' }}
+                    className="flex-1 py-2 rounded-[9px] text-white text-xs font-semibold flex flex-col justify-center items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: 'var(--exec-blue)' }}
                   >
                     {contactState === 'sending' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send'}
                   </button>
@@ -390,14 +391,14 @@ export default function RightPanel({ project, isEditMode = false, activeViewers 
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-[10px] font-bold tracking-widest text-text-secondary uppercase">{children}</h3>;
+  return <SectionHeader>{children}</SectionHeader>;
 }
 
 function ShareButton({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md bg-surface-1 hover:bg-surface-2 border border-transparent hover:border-panel-border transition-all text-text-primary text-xs font-medium"
+      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] bg-white/58 hover:bg-white border border-transparent hover:border-[var(--exec-line)] hover:shadow-sm transition-all text-[var(--exec-ink)] text-xs font-semibold"
     >
       <div className="text-text-secondary">{icon}</div>
       {label}

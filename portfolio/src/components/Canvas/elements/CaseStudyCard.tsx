@@ -1,5 +1,6 @@
 import type { CaseStudyCardElement } from '../../../types';
-import { MagicCard } from '@/components/ui/magic-card';
+import { CanvasCardShell } from '@/components/ui/executive';
+import { hexToRgb } from '@/lib/executive';
 
 interface Props {
   element: CaseStudyCardElement;
@@ -10,42 +11,39 @@ interface Props {
 export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
   const { data, width, height } = element;
 
+  const rgb = hexToRgb(data.accentColor);
+
   return (
-    <MagicCard
+    <CanvasCardShell
       onClick={onClick}
-      className={`canvas-element-base rounded-2xl overflow-hidden bg-white border border-panel-border shadow-sm cursor-pointer ${isSelected ? 'selected' : ''}`}
-      gradientColor={data.accentColor ? `${data.accentColor}33` : '#5e6ad233'}
+      selected={isSelected}
+      accentColor={data.accentColor}
+      className="cursor-pointer"
       style={{
         width,
         height,
       }}
     >
-      {/* Accent top bar */}
-      <div
-        className="h-1.5 w-full relative z-10"
-        style={{ background: `linear-gradient(90deg, ${data.accentColor}, ${data.accentColor}88)` }}
-      />
+      <div className="exec-card-accent" />
 
-      <div className="p-5 h-full flex flex-col relative z-10 bg-white">
-        {/* Header */}
-        <div className="mb-3">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h2 className="text-text-primary font-semibold text-lg leading-tight">{data.title}</h2>
-              <p className="text-xs mt-0.5" style={{ color: data.accentColor }}>{data.subtitle}</p>
+      <div className="exec-card-body h-[calc(100%-3px)] flex flex-col bg-white/[0.72]">
+        <div className="mb-4">
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div className="min-w-0">
+              <p className="exec-eyebrow mb-2" style={{ color: data.accentColor }}>{data.subtitle}</p>
+              <h2 className="exec-title text-[18px]">{data.title}</h2>
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1.5 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2.5 mb-1">
             {data.tags.map(tag => (
               <span
                 key={tag}
-                className="text-xs px-2 py-0.5 rounded-md font-medium"
+                className="exec-chip"
                 style={{
-                  background: `rgba(${hexToRgb(data.accentColor)}, 0.12)`,
+                  background: `rgba(${rgb}, 0.075)`,
                   color: data.accentColor,
-                  border: `1px solid rgba(${hexToRgb(data.accentColor)}, 0.2)`,
+                  borderColor: `rgba(${rgb}, 0.22)`,
                 }}
               >
                 {tag}
@@ -54,30 +52,21 @@ export default function CaseStudyCard({ element, isSelected, onClick }: Props) {
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-xs leading-relaxed text-text-secondary flex-1 mb-4">
+        <p className="exec-copy flex-1 mb-5">
           {data.description}
         </p>
 
-        {/* Metrics */}
         {data.metrics && (
-          <div className="flex gap-4 pt-3 border-t border-panel-border">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[rgba(0,0,0,0.08)]">
             {data.metrics.map(m => (
-              <div key={m.label}>
-                <div className="text-base font-bold" style={{ color: data.accentColor }}>{m.value}</div>
-                <div className="text-xs" style={{ color: '#8a8f98' }}>{m.label}</div>
+              <div key={m.label} className="min-w-0">
+                <div className="text-[16px] font-bold leading-none" style={{ color: data.accentColor }}>{m.value}</div>
+                <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--exec-faint)] truncate">{m.label}</div>
               </div>
             ))}
           </div>
         )}
       </div>
-    </MagicCard>
+    </CanvasCardShell>
   );
-}
-
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '94, 106, 210';
 }
