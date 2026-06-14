@@ -87,13 +87,13 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
   const activeProject = deck[0];
   const visibleCards = deck.slice(0, Math.min(deck.length, 4));
 
-  // Swipe LEFT → current card to back of stack (next project)
-  const sendTopToBack = () => {
+  // Swipe either direction → current card to back of stack (next project)
+  const sendTopToBack = (direction: 'left' | 'right') => {
     if (!activeProject || committingId) return;
     const swipedProject = activeProject;
     suppressNextClickRef.current = true;
     setCommittingId(swipedProject.id);
-    x.set(-480);
+    x.set(direction === 'left' ? -480 : 480);
 
     window.setTimeout(() => {
       setRotatedIds(current => {
@@ -109,13 +109,9 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
     }, COMMIT_DELAY_MS);
   };
 
-  // Swipe RIGHT → undo last swipe (previous project returns to front)
-  const bringFromBack = () => {
-    if (committingId) return;
-    setRotatedIds(current => current.slice(0, -1));
-    suppressNextClickRef.current = false;
-    dragDistanceRef.current = 0;
-    isDraggingRef.current = false;
+  const handleCardClick = () => {
+    if (!activeProject || committingId || isDraggingRef.current || suppressNextClickRef.current) return;
+    onOpenProject(activeProject);
   };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -136,9 +132,9 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
     }
 
     if (info.offset.x > 0) {
-      bringFromBack();   // swipe right → previous card
+      sendTopToBack('right');  // swipe right → next card
     } else {
-      sendTopToBack();   // swipe left → next card
+      sendTopToBack('left');   // swipe left → next card
     }
   };
 
@@ -167,6 +163,7 @@ export default function MobileProjectDeck({ projects, onOpenProject }: Props) {
                   suppressNextClickRef.current = false;
                 }}
                 onDragEnd={isActive ? handleDragEnd : undefined}
+                onClick={isActive ? handleCardClick : undefined}
                 className="absolute inset-0 touch-pan-y overflow-visible rounded-[28px] outline-none cursor-grab active:cursor-grabbing"
                 style={{
                   x: isActive ? x : 0,
