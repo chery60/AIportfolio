@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import type { Project, CanvasElement, SceneViewMode } from '../../types';
-import type { ActiveViewer } from '../../hooks/useRealtimeSession';
+import type { ActiveViewer, CursorPosition } from '../../hooks/useRealtimeSession';
 import ExplorerScene, { type ViewMode3D } from './ExplorerScene';
 import PresentationScene from './PresentationScene';
 import { DEFAULT_CAMERA_FOV, EYE_HEIGHT } from './constants';
@@ -22,7 +22,7 @@ export interface PortfolioCanvas3DProps {
   setCharacterWorldPosition: (x: number, y: number) => void;
   characterColor: string;
   activeViewers: ActiveViewer[];
-  cursors: Record<string, { x: number; y: number; projectId: string }>;
+  cursors: Record<string, CursorPosition>;
   localIdentity: ActiveViewer | null;
   broadcastCursor?: (x: number, y: number) => void;
   galleryLayout?: GalleryLayoutType;

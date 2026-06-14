@@ -31,6 +31,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
     const [posting, setPosting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const commentsListRef = useRef<HTMLDivElement>(null);
+    const projectViewers = activeViewers.filter(viewer => viewer.projectId === project.id);
 
     const handlePostComment = async () => {
         const trimmedName = authorName.trim();
@@ -171,7 +172,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                                             className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
                                             style={{ background: SURFACE, color: TEXT_SECONDARY }}
                                         >
-                                            {activeViewers.length}
+                                            {projectViewers.length}
                                         </span>
                                     )}
                                 </button>
@@ -313,7 +314,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                                 <div className="px-5 py-4">
                                     <div className="flex items-center gap-2 mb-4">
                                         <div className="flex -space-x-2">
-                                            {activeViewers.slice(0, 5).map(v => (
+                                            {projectViewers.slice(0, 5).map(v => (
                                                 <div
                                                     key={v.id}
                                                     className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm"
@@ -327,11 +328,11 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                                             ))}
                                         </div>
                                         <span className="text-xs font-medium" style={{ color: TEXT_SECONDARY }}>
-                                            {activeViewers.length} viewing right now
+                                            {projectViewers.length} viewing right now
                                         </span>
                                     </div>
                                     <div className="space-y-2">
-                                        {activeViewers.map(v => (
+                                        {projectViewers.map(v => (
                                             <div
                                                 key={v.id}
                                                 className="flex items-center gap-3 px-3 py-2.5 rounded-2xl"
@@ -357,7 +358,7 @@ export default function MobileEngagementSheet({ isOpen, onClose, project, active
                                                 />
                                             </div>
                                         ))}
-                                        {activeViewers.length === 0 && (
+                                        {projectViewers.length === 0 && (
                                             <div className="py-8 text-center">
                                                 <p className="text-xs" style={{ color: TEXT_MUTED }}>No active viewers right now</p>
                                             </div>

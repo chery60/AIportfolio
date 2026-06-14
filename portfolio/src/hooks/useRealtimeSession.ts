@@ -14,14 +14,80 @@ export interface ActiveViewer {
     color: string;
     location: string;
     projectId: string;
+    x: number;
+    y: number;
+    lastSeenAt: number;
+}
+
+export interface CursorPosition {
+    x: number;
+    y: number;
+    projectId: string;
+    lastSeenAt: number;
+}
+
+function finiteNumber(value: unknown): number {
+    if (value === null || value === undefined || value === '') return Number.NaN;
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : Number.NaN;
+}
+
+function hasUsablePosition(position: Pick<CursorPosition, 'x' | 'y'>): boolean {
+    return Number.isFinite(position.x) && Number.isFinite(position.y);
+}
+
+export function resolveViewerPosition(
+    viewer: ActiveViewer,
+    cursor: CursorPosition | undefined,
+    fallback: Pick<CursorPosition, 'x' | 'y'>
+): CursorPosition {
+    if (cursor && cursor.projectId === viewer.projectId && hasUsablePosition(cursor)) {
+        return cursor;
+    }
+
+    if (hasUsablePosition(viewer)) {
+        return {
+            x: viewer.x,
+            y: viewer.y,
+            projectId: viewer.projectId,
+            lastSeenAt: viewer.lastSeenAt,
+        };
+    }
+
+    return {
+        x: fallback.x,
+        y: fallback.y,
+        projectId: viewer.projectId,
+        lastSeenAt: viewer.lastSeenAt,
+    };
 }
 
 export function useRealtimeSession(projectId: string) {
     const [activeViewers, setActiveViewers] = useState<ActiveViewer[]>([]);
-    const [cursors, setCursors] = useState<Record<string, { x: number, y: number, projectId: string }>>({});
+    const [cursors, setCursors] = useState<Record<string, CursorPosition>>({});
     const [localIdentity, setLocalIdentity] = useState<ActiveViewer | null>(null);
     const channelRef = useRef<RealtimeChannel | null>(null);
     const identityRef = useRef<ActiveViewer | null>(null);
+    const lastPresenceTrackTimeRef = useRef(0);
+
+    const trackLocalPresence = useCallback((updates: Partial<Pick<ActiveViewer, 'projectId' | 'x' | 'y'>>, force = false) => {
+        if (!channelRef.current || !identityRef.current) return;
+
+        const now = Date.now();
+        const updated: ActiveViewer = {
+            ...identityRef.current,
+            ...updates,
+            lastSeenAt: now,
+        };
+
+        identityRef.current = updated;
+        setLocalIdentity(updated);
+
+        if (force || now - lastPresenceTrackTimeRef.current > 1000) {
+            lastPresenceTrackTimeRef.current = now;
+            channelRef.current.track(updated).catch(() => { });
+        }
+    }, []);
 
     useEffect(() => {
         if (!supabase) return;
@@ -39,6 +105,9 @@ export function useRealtimeSession(projectId: string) {
             color,
             location,
             projectId,
+            x: Number.NaN,
+            y: Number.NaN,
+            lastSeenAt: Date.now(),
         };
 
         setLocalIdentity(identity);
@@ -59,16 +128,61 @@ export function useRealtimeSession(projectId: string) {
                 const viewers: ActiveViewer[] = [];
                 for (const key in state) {
                     if (state[key] && state[key].length > 0) {
-                        viewers.push(state[key][0]);
+                        const viewer = state[key][0];
+                        viewers.push({
+                            ...viewer,
+                            x: finiteNumber(viewer.x),
+                            y: finiteNumber(viewer.y),
+                            lastSeenAt: viewer.lastSeenAt ?? Date.now(),
+                        });
                     }
                 }
                 setActiveViewers(viewers);
+                setCursors((prev) => {
+                    const activeIds = new Set(viewers.map((viewer) => viewer.id));
+                    const next: Record<string, CursorPosition> = {};
+
+                    for (const viewer of viewers) {
+                        const existing = prev[viewer.id];
+                        const existingMatchesProject = existing?.projectId === viewer.projectId;
+
+                        if (existingMatchesProject && existing.lastSeenAt >= viewer.lastSeenAt) {
+                            next[viewer.id] = existing;
+                        } else if (hasUsablePosition(viewer)) {
+                            next[viewer.id] = {
+                                x: viewer.x,
+                                y: viewer.y,
+                                projectId: viewer.projectId,
+                                lastSeenAt: viewer.lastSeenAt,
+                            };
+                        } else if (existingMatchesProject) {
+                            next[viewer.id] = existing;
+                        } else {
+                            next[viewer.id] = {
+                                x: Number.NaN,
+                                y: Number.NaN,
+                                projectId: viewer.projectId,
+                                lastSeenAt: viewer.lastSeenAt,
+                            };
+                        }
+                    }
+
+                    for (const [id, cursor] of Object.entries(prev)) {
+                        if (activeIds.has(id)) next[id] = next[id] ?? cursor;
+                    }
+
+                    return next;
+                });
             })
             .on('broadcast', { event: 'cursor' }, ({ payload }) => {
                 if (!payload || !payload.id) return;
+                const x = Number(payload.x);
+                const y = Number(payload.y);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+                const lastSeenAt = Number(payload.lastSeenAt) || Date.now();
                 setCursors((prev) => ({
                     ...prev,
-                    [payload.id]: { x: payload.x, y: payload.y, projectId: payload.projectId ?? '' }
+                    [payload.id]: { x, y, projectId: payload.projectId ?? '', lastSeenAt }
                 }));
             })
             .subscribe(async (status) => {
@@ -87,12 +201,8 @@ export function useRealtimeSession(projectId: string) {
 
     // Re-track presence whenever projectId changes so other viewers see the updated project
     useEffect(() => {
-        if (!channelRef.current || !identityRef.current) return;
-        const updated: ActiveViewer = { ...identityRef.current, projectId };
-        identityRef.current = updated;
-        setLocalIdentity(updated);
-        channelRef.current.track(updated).catch(() => { });
-    }, [projectId]);
+        trackLocalPresence({ projectId }, true);
+    }, [projectId, trackLocalPresence]);
 
     const lastSendTimeRef = useRef(0);
 
@@ -100,15 +210,22 @@ export function useRealtimeSession(projectId: string) {
         if (!channelRef.current || !identityRef.current) return;
 
         const now = Date.now();
+        trackLocalPresence({ x, y }, false);
+
         if (now - lastSendTimeRef.current > 50) {
             lastSendTimeRef.current = now;
             channelRef.current.send({
                 type: 'broadcast',
                 event: 'cursor',
-                payload: { id: identityRef.current.id, x, y, projectId: identityRef.current.projectId }
+                payload: { id: identityRef.current.id, x, y, projectId: identityRef.current.projectId, lastSeenAt: now }
             }).catch(() => { });
         }
-    }, []);
+    }, [trackLocalPresence]);
 
-    return { activeViewers, cursors, localIdentity, broadcastCursor };
+    const updatePresencePosition = useCallback((x: number, y: number) => {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        trackLocalPresence({ x, y }, true);
+    }, [trackLocalPresence]);
+
+    return { activeViewers, cursors, localIdentity, broadcastCursor, updatePresencePosition };
 }

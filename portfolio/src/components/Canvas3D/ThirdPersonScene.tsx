@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Project, CanvasElement } from '../../types';
-import type { ActiveViewer } from '../../hooks/useRealtimeSession';
+import { resolveViewerPosition, type ActiveViewer, type CursorPosition } from '../../hooks/useRealtimeSession';
 import type { CanvasControlsRef } from '../Canvas';
 import Environment3D from './Environment3D';
 import Character3D from './Character3D';
@@ -26,7 +26,7 @@ export interface ThirdPersonSceneProps {
   onTransformChange: (scale: number) => void;
   registerCanvasControls: (api: CanvasControlsRef) => void;
   activeViewers: ActiveViewer[];
-  cursors: Record<string, { x: number; y: number; projectId: string }>;
+  cursors: Record<string, CursorPosition>;
   localIdentity: ActiveViewer | null;
   initialCameraFov?: number;
 }
@@ -230,8 +230,8 @@ export default function ThirdPersonScene({
 
       {activeViewers.map((viewer) => {
         if (localIdentity && viewer.id === localIdentity.id) return null;
-        const pos = cursors[viewer.id];
-        if (!pos || (pos.projectId && pos.projectId !== project.id)) return null;
+        if (viewer.projectId !== project.id) return null;
+        const pos = resolveViewerPosition(viewer, cursors[viewer.id], { x: 0, y: 0 });
         return (
           <VisitorFeet
             key={viewer.id}

@@ -14,7 +14,7 @@ import MobileCanvasView from './components/MobileCanvasView';
 import MobileProjectList from './components/MobileProjectList';
 import MobileView from './components/MobileView';
 import { supabase } from './lib/supabase';
-import { useRealtimeSession } from './hooks/useRealtimeSession';
+import { resolveViewerPosition, useRealtimeSession } from './hooks/useRealtimeSession';
 import { useIsMobile } from './hooks/useIsMobile';
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { useCharacterChat } from './hooks/useCharacterChat';
@@ -42,7 +42,8 @@ export default function App() {
   const [pendingAction, setPendingAction] = useState<{ type: 'switch-project'; project: Project } | { type: 'exit-edit' } | { type: 'exit-canvas' } | null>(null);
   const canvasControls = useRef<CanvasControlsRef>(defaultControls);
   const editSnapshotRef = useRef<CanvasElement[] | null>(null);
-  const { activeViewers, cursors, localIdentity, broadcastCursor } = useRealtimeSession(selectedProject.id);
+  const { activeViewers, cursors, localIdentity, broadcastCursor, updatePresencePosition } = useRealtimeSession(selectedProject.id);
+  const projectViewers = activeViewers.filter(viewer => viewer.projectId === selectedProject.id);
   const pendingNavRef = useRef<{ x: number, y: number } | null>(null);
   const isMobile = useIsMobile();
   const previewCanvasControls = useRef<CanvasControlsRef>(defaultControls);
@@ -245,15 +246,14 @@ export default function App() {
 
   // Navigate to a viewer's project and position (Figma-style click-to-follow)
   const handleViewerClick = useCallback((viewer: import('./hooks/useRealtimeSession').ActiveViewer) => {
-    const pos = cursors[viewer.id];
-    if (pos) {
-      pendingNavRef.current = { x: pos.x, y: pos.y };
-    }
+    const center = canvasControls.current.getCenterPos();
+    const pos = resolveViewerPosition(viewer, cursors[viewer.id], center);
+    pendingNavRef.current = { x: pos.x, y: pos.y };
     const target = PROJECTS.find(p => p.id === viewer.projectId);
     if (target && target.id !== selectedProject.id) {
       setSelectedProject(target);
       setSelectedElementId(null);
-    } else if (pos) {
+    } else {
       // Same project — navigate immediately
       canvasControls.current.navigateTo(pos.x, pos.y);
       pendingNavRef.current = null;
@@ -507,10 +507,11 @@ export default function App() {
               onAddElement={handleAddElement}
               onUpdateElementPosition={handleUpdateElementPosition}
               onCanvasClick={handleCanvasClick}
-              activeViewers={activeViewers}
+              activeViewers={isRevealPreview ? [] : activeViewers}
               cursors={cursors}
               localIdentity={localIdentity}
               broadcastCursor={isRevealPreview ? undefined : broadcastCursor}
+              updatePresencePosition={isRevealPreview ? undefined : updatePresencePosition}
               onCharacterClick={undefined}
               characterChatBubble={chat.characterBubble}
               isPreviewOnly={isRevealPreview}
@@ -547,7 +548,7 @@ export default function App() {
               <RightPanel
                 project={selectedProject}
                 selectedElement={selectedElement}
-                activeViewers={activeViewers}
+                activeViewers={projectViewers}
                 onViewerClick={isRevealPreview ? undefined : handleViewerClick}
                 localIdentity={localIdentity}
               />

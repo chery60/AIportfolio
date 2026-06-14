@@ -4,7 +4,7 @@ import { useCanvas } from '../../hooks/useCanvas';
 import CanvasElementRenderer from './CanvasElement';
 import Character from './Character';
 import { useAvatarGuide } from '../../hooks/useAvatarGuide';
-import type { ActiveViewer } from '../../hooks/useRealtimeSession';
+import { resolveViewerPosition, type ActiveViewer, type CursorPosition } from '../../hooks/useRealtimeSession';
 import { MousePointer2 } from 'lucide-react';
 
 interface Props {
@@ -21,9 +21,10 @@ interface Props {
   onUpdateElement?: (element: import('../../types').CanvasElement) => void;
   onCanvasClick?: (x: number, y: number) => void;
   activeViewers?: ActiveViewer[];
-  cursors?: Record<string, { x: number, y: number, projectId: string }>;
+  cursors?: Record<string, CursorPosition>;
   localIdentity?: ActiveViewer | null;
   broadcastCursor?: (x: number, y: number) => void;
+  updatePresencePosition?: (x: number, y: number) => void;
   onCharacterClick?: () => void;
   characterChatBubble?: string | null;
   isPreviewOnly?: boolean;
@@ -56,6 +57,7 @@ export default function Canvas({
   cursors = {},
   localIdentity = null,
   broadcastCursor,
+  updatePresencePosition,
   onCharacterClick,
   characterChatBubble = null,
   isPreviewOnly = false,
@@ -123,6 +125,16 @@ export default function Canvas({
     setDefaultTransform(project.defaultView);
     return () => clearTimeout(t);
   }, [project.id, project.defaultView, setDefaultTransform]);
+
+  useEffect(() => {
+    if (!updatePresencePosition || isPreviewOnly) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const centerX = (rect.width / 2 - project.defaultView.x) / project.defaultView.scale;
+    const centerY = (rect.height / 2 - project.defaultView.y) / project.defaultView.scale;
+    updatePresencePosition(centerX, centerY);
+  }, [containerRef, isPreviewOnly, project.defaultView, project.id, updatePresencePosition]);
 
   const [isPlayingGame, setIsPlayingGame] = useState(false);
   useEffect(() => {
@@ -303,6 +315,20 @@ export default function Canvas({
     onAddElement(newElement);
   };
 
+  const fallbackViewerPosition = () => {
+    if (containerRef.current) {
+      return {
+        x: (containerRef.current.clientWidth / 2 - transform.x) / transform.scale,
+        y: (containerRef.current.clientHeight / 2 - transform.y) / transform.scale,
+      };
+    }
+
+    return {
+      x: project.canvasElements[0]?.x ?? 0,
+      y: project.canvasElements[0]?.y ?? 0,
+    };
+  };
+
   return (
     <div
       ref={containerRef}
@@ -385,17 +411,15 @@ export default function Canvas({
           />
         )}
 
-        {/* Remote Characters and Cursors (Other Visitors) */}
-        {activeViewers.map((viewer) => {
+        {/* Remote Characters (Other Visitors) */}
+        {!isEditing && activeViewers.map((viewer) => {
           if (localIdentity && viewer.id === localIdentity.id) return null;
-          const pos = cursors[viewer.id];
-          if (!pos) return null;
-          // Only show characters who are on the same project
-          if (pos.projectId && pos.projectId !== project.id) return null;
+          if (viewer.projectId !== project.id) return null;
+
+          const pos = resolveViewerPosition(viewer, cursors[viewer.id], fallbackViewerPosition());
 
           return (
             <div key={viewer.id}>
-              {/* Walking Character */}
               <Character
                 targetX={pos.x}
                 targetY={pos.y}
@@ -403,23 +427,22 @@ export default function Canvas({
                 elementBounds={elementBounds}
               />
 
-              {/* Instant screen cursor for immediate feedback */}
+              {/* Screen-stable cursor and name tag */}
               <div
-                className="absolute top-0 left-0 transition-all duration-75 ease-linear will-change-transform z-[100] pointer-events-none"
+                className="absolute top-0 left-0 transition-all duration-100 ease-linear will-change-transform z-[100] pointer-events-none"
                 style={{
-                  transform: `translate(${pos.x}px, ${pos.y}px) scale(${1 / transform.scale})`,
+                  transform: `translate(${pos.x + 12}px, ${pos.y - 68}px) scale(${1 / transform.scale})`,
                   transformOrigin: '0 0'
                 }}
               >
                 <MousePointer2
-                  className="w-5 h-5"
+                  className="absolute -left-2 top-3 w-4 h-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.22)] opacity-85"
                   fill={viewer.color}
-                  color={viewer.color}
-                  strokeWidth={1.5}
-                  stroke="white"
+                  color="white"
+                  strokeWidth={1.75}
                 />
                 <div
-                  className="mt-1 ml-4 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md whitespace-nowrap w-max"
+                  className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-[0_8px_18px_rgba(25,26,27,0.16)] whitespace-nowrap w-max border border-white/80"
                   style={{ backgroundColor: viewer.color }}
                 >
                   {viewer.name}
